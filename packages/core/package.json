@@ -1,0 +1,39 @@
+{
+  "name": "@graph-state/core",
+  "private": false,
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "source": "./src/index.ts"
+    },
+    "./package.json": "./package.json",
+    "./plugins": {
+      "types": "./dist/plugins/index.d.ts",
+      "import": "./dist/plugins/index.js",
+      "require": "./dist/plugins/index.cjs",
+      "source": "./src/plugins/index.ts"
+    }
+  },
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "vitest",
+    "publish": "npm publish",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "tsup": "^7.2.0",
+    "use-sync-external-store": "^1.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
