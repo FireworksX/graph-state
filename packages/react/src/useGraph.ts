@@ -3,15 +3,15 @@ import { useSyncExternalStore } from 'use-sync-external-store'
 import { Field, GraphState } from '@graph-state/core'
 
 
-export const useGraph = <TState = any, TSelector = any>(
+export const useGraph = <TState = any>(
   graphState: GraphState,
   field: Field,
-): TSelector => {
+): TState => {
   const nextValue = useRef<TState>(graphState.resolve(field) as any as TState)
 
 
   const subscribe = useCallback(
-    onChange => {
+    (onChange: any) => {
       if (field) {
         nextValue.current = graphState.resolve(field) as any as TState
         onChange()

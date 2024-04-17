@@ -6,7 +6,7 @@ export const useGraphFields = (graphState: GraphState, type: Entity['_type']): s
   const nextValue = useRef<string[]>(graphState.inspectFields(type))
 
   const subscribe = useCallback(
-    onChange => {
+    (onChange: any) => {
       if (type) {
         nextValue.current = graphState.inspectFields(type)
         onChange()

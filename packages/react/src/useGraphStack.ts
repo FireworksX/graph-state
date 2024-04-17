@@ -9,7 +9,7 @@ export const useGraphStack = <TState extends unknown[]>(graphState: GraphState, 
   const nextValues = useRef<TState>(getValues(fields) as any as TState)
 
   const subscribe = useCallback(
-    onChange => {
+    (onChange: any) => {
       if (fields) {
         const notifyAll = () => {
           nextValues.current = getValues(fields) as any as TState
