@@ -1,6 +1,9 @@
 import { Entity, Field } from 'src'
-import { get, isHTMLNode, isObject, iterator, set } from '@adstore/utils'
 import { createLinkRefs } from './createLinkRefs'
+import {isHTMLNode, isObject} from "./utils/checker";
+import {iterator} from "./utils/iterator";
+import {get} from "./utils/get";
+import {set} from "src/utils/set";
 
 type AnyObject = Record<string, unknown>
 
@@ -19,8 +22,6 @@ export interface GraphState extends Entity {
   invalidate(field: Field): void
   subscribe<TInput extends Entity | string>(input: TInput, callback: (data: any) => void): () => void
   inspectFields(type: string): string[]
-  keyOfEntity(entity?: Entity | null): string | null
-  entityOfKey(key?: string | null): Entity | null
   resolveParents(field: Field): unknown[]
 }
 
@@ -237,8 +238,6 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const graphState: GraphState = {
     _type: 'State' as const,
     _id: id,
-    links, // TODO Remove
-    linkRefs,
     mutate,
     subscribe,
     resolve,
