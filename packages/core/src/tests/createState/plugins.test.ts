@@ -1,6 +1,6 @@
+import {describe, expect, it, vi } from 'vitest';
 import { createState } from 'src'
-import { vi } from 'vitest'
-import { Plugin } from '../../createState'
+import { Plugin } from 'src/createState'
 
 export const pluginsTest = () => {
   describe('plugins', () => {

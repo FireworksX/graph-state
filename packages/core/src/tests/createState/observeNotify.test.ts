@@ -1,5 +1,5 @@
-import { vi } from 'vitest'
-import { createState } from 'src'
+import {describe, expect, it, vi } from 'vitest';
+import {createState, keyOfEntity} from 'src'
 import { avatarLayer, headerLayer, rootLayer } from '../helpers'
 
 export const observeNotifyTest = () => {
@@ -42,7 +42,7 @@ export const observeNotifyTest = () => {
       const statex = createState()
       const root = {
         ...rootLayer,
-        children: [statex.keyOfEntity(headerLayer)]
+        children: [keyOfEntity(headerLayer)]
       }
       statex.mutate(root)
 
@@ -181,7 +181,7 @@ export const observeNotifyTest = () => {
       expect(spy).toHaveBeenCalledWith({
         ...header,
         display: 'none',
-        ref: statex.keyOfEntity(rootLayer)
+        ref: keyOfEntity(rootLayer)
       })
     })
 

@@ -1,6 +1,7 @@
-import { createState } from 'src'
+import {describe, expect, it } from 'vitest';
+import {createState, keyOfEntity} from 'src'
 import { avatarLayer, headerLayer, sizeVariable } from '../helpers'
-import { isHTMLNode } from '@adstore/utils'
+import {isHTMLNode} from "src/utils/checker";
 
 export const buildLinksTest = () => {
   const statex = createState()
@@ -21,16 +22,16 @@ export const buildLinksTest = () => {
 
       expect(statex.buildLinks(avatar)).toStrictEqual({
         ...avatarLayer,
-        width: statex.keyOfEntity(sizeVariable),
-        height: statex.keyOfEntity(sizeVariable)
+        width: keyOfEntity(sizeVariable),
+        height: keyOfEntity(sizeVariable)
       })
     })
 
     it('should build nested links', () => {
       const avatar = {
         ...avatarLayer,
-        width: statex.keyOfEntity(sizeVariable),
-        height: statex.keyOfEntity(sizeVariable)
+        width: keyOfEntity(sizeVariable),
+        height: keyOfEntity(sizeVariable)
       }
 
       const header = {
@@ -41,8 +42,8 @@ export const buildLinksTest = () => {
 
       expect(statex.buildLinks(header)).toStrictEqual({
         ...headerLayer,
-        width: statex.keyOfEntity(sizeVariable),
-        children: [statex.keyOfEntity(avatarLayer)]
+        width: keyOfEntity(sizeVariable),
+        children: [keyOfEntity(avatarLayer)]
       })
     })
 

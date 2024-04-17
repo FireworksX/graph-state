@@ -1,30 +1,40 @@
-import { createLinkRefs } from './createLinkRefs'
+import { describe, it, expect } from 'vitest'
+import { createLinkRefs } from 'src/createLinkRefs'
 
 describe('CreateLinkRefs', () => {
-  const linkRefs = createLinkRefs()
 
   it('should add new ref', () => {
+    const linkRefs = createLinkRefs()
+
     linkRefs.addRefs('target', 'one')
-    expect(linkRefs.getRef('target')).toStrictEqual(['one'])
+    expect(linkRefs.getLinkedRefs('target')).toStrictEqual(['one'])
   })
 
   it('should push new ref', () => {
+    const linkRefs = createLinkRefs()
+
+    linkRefs.addRefs('target', 'one')
     linkRefs.addRefs('target', 'two')
-    expect(linkRefs.getRef('target')).toStrictEqual(['one', 'two'])
+    expect(linkRefs.getLinkedRefs('target')).toStrictEqual(['one', 'two'])
   })
 
   it('should skip duplicates while adding new', () => {
+    const linkRefs = createLinkRefs()
+
+    linkRefs.addRefs('target', 'one')
+    linkRefs.addRefs('target', 'one')
     linkRefs.addRefs('target', 'two')
-    expect(linkRefs.getRef('target')).toStrictEqual(['one', 'two'])
+    expect(linkRefs.getLinkedRefs('target')).toStrictEqual(['one', 'two'])
   })
 
-  it('should add linked ref', () => {
+
+  it('should return nested refs', () => {
+    const linkRefs = createLinkRefs()
+
+    linkRefs.addRefs('target', 'one')
     linkRefs.addRefs('target2', 'target')
-    expect(linkRefs.getRef('target2')).toStrictEqual(['target'])
-  })
 
-  it('should return all refs by key', () => {
-    expect(linkRefs.getLinkedRefs('target2')).toStrictEqual(['target', 'one', 'two'])
+    expect(linkRefs.getLinkedRefs('target2')).toStrictEqual(['target', 'one'])
   })
 
   it('should invalidate depend links', () => {
@@ -35,7 +45,8 @@ describe('CreateLinkRefs', () => {
 
     refs.invalidateRef('dep1')
 
-    console.log(refs, refs.getRef('target'))
-    // expect(linkRefs.getLinkedRefs('target2')).toStrictEqual(['target', 'one', 'two'])
+    console.log(refs);
+
+    expect(refs.getLinkedRefs('target2')).toStrictEqual(['dep2'])
   })
 })

@@ -25,7 +25,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "test": "vitest",
+    "test": "vitest --run --config ./vitest.config.ts",
     "publish": "npm publish",
     "preview": "vite preview"
   },

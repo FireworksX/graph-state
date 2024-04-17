@@ -1,4 +1,5 @@
-import { createState } from 'src'
+import {describe, expect, it } from 'vitest';
+import {createState, keyOfEntity} from 'src'
 import { avatarLayer, headerLayer, rootLayer, sizeVariable } from '../helpers'
 
 export const inspectFieldsTest = () => {
@@ -8,11 +9,11 @@ export const inspectFieldsTest = () => {
 
   describe('inspectFields', () => {
     it('should return all layers', () => {
-      expect(statex.inspectFields('Layer')).toStrictEqual([rootLayer, headerLayer, avatarLayer].map(statex.keyOfEntity))
+      expect(statex.inspectFields('Layer')).toStrictEqual([rootLayer, headerLayer, avatarLayer].map(keyOfEntity))
     })
 
     it('should return all variables', () => {
-      expect(statex.inspectFields('Variable')).toStrictEqual([sizeVariable].map(statex.keyOfEntity))
+      expect(statex.inspectFields('Variable')).toStrictEqual([sizeVariable].map(keyOfEntity))
     })
 
     it('invalid entityType', () => {

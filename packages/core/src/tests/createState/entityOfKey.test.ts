@@ -1,4 +1,5 @@
-import { createState } from 'src'
+import {describe, expect, it } from 'vitest';
+import {createState, entityOfKey} from 'src'
 import { rootLayer } from '../helpers'
 
 export const entityOfKeyTest = () => {
@@ -6,24 +7,24 @@ export const entityOfKeyTest = () => {
 
   describe('entityOfKey', () => {
     it('should return entity', () => {
-      expect(statex.entityOfKey('Layer:root')).toStrictEqual(rootLayer)
+      expect(entityOfKey('Layer:root')).toStrictEqual(rootLayer)
     })
 
     it('should skip parsing', () => {
-      expect(statex.entityOfKey(rootLayer)).toStrictEqual(rootLayer)
+      expect(entityOfKey(rootLayer)).toStrictEqual(rootLayer)
     })
 
     it('should work with long key', () => {
-      expect(statex.entityOfKey('Layer:Frame:10.11:Test')).toStrictEqual({
+      expect(entityOfKey('Layer:Frame:10.11:Test')).toStrictEqual({
         _type: 'Layer',
         _id: 'Frame:10.11:Test'
       })
     })
 
     it('invalid entityType', () => {
-      expect(statex.entityOfKey(10)).toStrictEqual(null)
-      expect(statex.entityOfKey()).toStrictEqual(null)
-      expect(statex.entityOfKey(undefined)).toStrictEqual(null)
+      expect(entityOfKey(10)).toStrictEqual(null)
+      expect(entityOfKey()).toStrictEqual(null)
+      expect(entityOfKey(undefined)).toStrictEqual(null)
     })
   })
 }
