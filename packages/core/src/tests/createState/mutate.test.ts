@@ -1,6 +1,7 @@
-import { createState } from 'src'
+import {describe, expect, it } from 'vitest';
+import {createState, keyOfEntity} from 'src'
 import { avatarLayer, headerLayer, rootLayer } from '../helpers'
-import { isHTMLNode } from '@adstore/utils'
+import { isHTMLNode } from 'src/utils/checker'
 
 export const mutateTest = () => {
   describe('mutate', () => {
@@ -27,10 +28,10 @@ export const mutateTest = () => {
       })
 
       expect(statex.resolve(headerLayer).overflow).toBe('hidden')
-      expect(statex.resolve(headerLayer).image).toBe(statex.keyOfEntity(avatarLayer))
+      expect(statex.resolve(headerLayer).image).toBe(keyOfEntity(avatarLayer))
 
       statex.mutate('Layer:header', prev => {
-        expect(prev).toStrictEqual({ ...headerLayer, overflow: 'hidden', image: statex.keyOfEntity(avatarLayer) })
+        expect(prev).toStrictEqual({ ...headerLayer, overflow: 'hidden', image: keyOfEntity(avatarLayer) })
 
         return {
           overflow: `${prev.overflow}+auto`
@@ -91,7 +92,7 @@ export const mutateTest = () => {
       })
 
       expect(statex.resolve(headerLayer).children).toHaveLength(1)
-      expect(statex.resolve(headerLayer).children).toStrictEqual([statex.keyOfEntity(avatarLayer)])
+      expect(statex.resolve(headerLayer).children).toStrictEqual([keyOfEntity(avatarLayer)])
 
       statex.mutate({
         ...headerLayer,
@@ -100,8 +101,8 @@ export const mutateTest = () => {
 
       expect(statex.resolve(headerLayer).children).toHaveLength(2)
       expect(statex.resolve(headerLayer).children).toStrictEqual([
-        statex.keyOfEntity(avatarLayer),
-        statex.keyOfEntity(rootLayer)
+        keyOfEntity(avatarLayer),
+        keyOfEntity(rootLayer)
       ])
     })
 

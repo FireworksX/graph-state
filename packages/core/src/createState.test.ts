@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { inspectFieldsTest } from './tests/createState/inspectFields.test'
 import { resolveTest } from './tests/createState/resolve.test'
 import { buildLinksTest } from './tests/createState/buildLinks.test'

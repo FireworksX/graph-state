@@ -38,6 +38,7 @@ export const createLinkRefs = () => {
       )
     })
     parentRefs.delete(key)
+
   }
 
   return {
