@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.1.2
+
+### Patch Changes
+
+- 063d5cb: 11
+
 ## 0.1.1
 
 ### Patch Changes

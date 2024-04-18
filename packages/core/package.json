@@ -1,7 +1,7 @@
 {
   "name": "@graph-state/core",
   "private": false,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "files": [
     "dist"
@@ -26,6 +26,7 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "test": "vitest --run --config ./vitest.config.ts",
+    "lint": "echo 'lint'",
     "publish": "npm publish",
     "preview": "vite preview"
   },

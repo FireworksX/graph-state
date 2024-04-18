@@ -1,5 +1,13 @@
 # @graph-state/react
 
+## 0.1.2
+
+### Patch Changes
+
+- 063d5cb: 11
+- Updated dependencies [063d5cb]
+  - @graph-state/core@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

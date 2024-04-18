@@ -1,6 +1,6 @@
 ---
-"@graph-state/core": patch
 "@graph-state/react": patch
+"@graph-state/core": patch
 ---
 
-11
+fff
