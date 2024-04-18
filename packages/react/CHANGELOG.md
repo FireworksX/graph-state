@@ -1,5 +1,13 @@
 # @graph-state/react
 
+## 0.1.3
+
+### Patch Changes
+
+- 34c3395: 11
+- Updated dependencies [34c3395]
+  - @graph-state/core@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
