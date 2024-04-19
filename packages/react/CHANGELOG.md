@@ -1,5 +1,22 @@
 # @graph-state/react
 
+## 0.1.5
+
+### Patch Changes
+
+- fd
+- Updated dependencies
+  - @graph-state/core@0.1.7
+
+## 0.1.4
+
+### Patch Changes
+
+- 05838cc: ddd
+- Updated dependencies
+- Updated dependencies [05838cc]
+  - @graph-state/core@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes

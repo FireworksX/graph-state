@@ -13,6 +13,7 @@ dist-ssr
 *.local
 
 # Editor directories and files
+.turbo
 .vscode/*
 !.vscode/extensions.json
 .idea

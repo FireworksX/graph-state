@@ -1,7 +1,7 @@
 {
   "name": "@graph-state/core",
   "private": false,
-  "version": "0.1.3",
+  "version": "0.1.7",
   "type": "module",
   "files": [
     "dist"
@@ -27,12 +27,11 @@
     "build": "tsup",
     "test": "vitest --run --config ./vitest.config.ts",
     "lint": "echo 'lint'",
-    "publish": "npm publish",
+    "release": "npm publish",
     "preview": "vite preview"
   },
   "dependencies": {
-    "tsup": "^7.2.0",
-    "use-sync-external-store": "^1.2.0"
+    "tsup": "^7.2.0"
   },
   "devDependencies": {
     "typescript": "^5.2.2"
