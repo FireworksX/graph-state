@@ -1,5 +1,13 @@
 # @graph-state/react
 
+## 0.1.6
+
+### Patch Changes
+
+- f2a43a7: Test full pipeline
+- Updated dependencies [f2a43a7]
+  - @graph-state/core@0.1.8
+
 ## 0.1.4
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.1.8
+
+### Patch Changes
+
+- f2a43a7: Test full pipeline
+
 ## 0.1.4
 
 ### Patch Changes
