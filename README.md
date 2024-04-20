@@ -22,7 +22,7 @@
 
 ## Examples
 
-- Base functional https://codesandbox.io/p/live/1755c979-5ca2-4672-b7e2-10738677a72b
+- Base functional [Codecandbox](https://codesandbox.io/p/live/1755c979-5ca2-4672-b7e2-10738677a72b)
 
 ## Get started
 
