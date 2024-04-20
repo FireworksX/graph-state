@@ -1,15 +1,15 @@
-import {describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest'
 import { createState } from 'src'
 import { avatarLayer, headerLayer, rootLayer } from '../helpers'
 
-export const resolveParentsTest = () => {
+describe('createState', () => {
   const statex = createState()
 
   describe('resolveParents', () => {
     it('should resolve one parent', () => {
       const root = {
         ...rootLayer,
-        field: avatarLayer
+        field: avatarLayer,
       }
       statex.mutate(root)
 
@@ -19,12 +19,12 @@ export const resolveParentsTest = () => {
     it('should resolve parents', () => {
       const root = {
         ...rootLayer,
-        field: avatarLayer
+        field: avatarLayer,
       }
 
       const header = {
         ...headerLayer,
-        field: avatarLayer
+        field: avatarLayer,
       }
       statex.mutate(root)
       statex.mutate(header)
@@ -38,4 +38,4 @@ export const resolveParentsTest = () => {
       expect(statex.resolveParents()).toStrictEqual([])
     })
   })
-}
+})

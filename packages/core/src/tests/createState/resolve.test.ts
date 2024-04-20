@@ -1,18 +1,18 @@
-import {describe, expect, it } from 'vitest';
-import {createState, keyOfEntity} from 'src/createState'
+import { describe, expect, it } from 'vitest'
+import { createState, keyOfEntity } from 'src/createState'
 import { avatarLayer, headerLayer, rootLayer, sizeVariable } from '../helpers'
 
-export const resolveTest = () => {
+describe('createState', () => {
   const statex = createState()
   statex.mutate({
     ...rootLayer,
-    children: [{ ...headerLayer, children: [{ ...avatarLayer, width: sizeVariable, height: sizeVariable }] }]
+    children: [{ ...headerLayer, children: [{ ...avatarLayer, width: sizeVariable, height: sizeVariable }] }],
   })
 
   const resolvedAvatar = {
     ...avatarLayer,
     width: keyOfEntity(sizeVariable),
-    height: keyOfEntity(sizeVariable)
+    height: keyOfEntity(sizeVariable),
   }
 
   describe('resolve', () => {
@@ -29,7 +29,7 @@ export const resolveTest = () => {
     it('should resolve nested layers', () => {
       expect(statex.resolve('Layer:root')).toStrictEqual({
         ...rootLayer,
-        children: [keyOfEntity(headerLayer)]
+        children: [keyOfEntity(headerLayer)],
       })
     })
 
@@ -45,4 +45,4 @@ export const resolveTest = () => {
       expect(statex.resolve()).toBe(null)
     })
   })
-}
+})

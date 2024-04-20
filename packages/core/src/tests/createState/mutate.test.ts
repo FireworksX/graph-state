@@ -1,20 +1,20 @@
-import {describe, expect, it } from 'vitest';
-import {createState, keyOfEntity} from 'src'
+import { describe, expect, it } from 'vitest'
+import { createState, keyOfEntity } from 'src'
 import { avatarLayer, headerLayer, rootLayer } from '../helpers'
 import { isHTMLNode } from 'src/utils/checker'
 
-export const mutateTest = () => {
+describe('createState', () => {
   describe('mutate', () => {
     it('should mutate with string key', () => {
       const statex = createState()
       statex.mutate('Layer:header', {
-        overflow: 'hidden'
+        overflow: 'hidden',
       })
 
       expect(statex.resolve(headerLayer).overflow).toBe('hidden')
 
       statex.mutate('Layer:header', {
-        overflow: 'auto'
+        overflow: 'auto',
       })
 
       expect(statex.resolve(headerLayer).overflow).toBe('auto')
@@ -24,7 +24,7 @@ export const mutateTest = () => {
       const statex = createState()
       statex.mutate('Layer:header', {
         overflow: 'hidden',
-        image: avatarLayer
+        image: avatarLayer,
       })
 
       expect(statex.resolve(headerLayer).overflow).toBe('hidden')
@@ -34,7 +34,7 @@ export const mutateTest = () => {
         expect(prev).toStrictEqual({ ...headerLayer, overflow: 'hidden', image: keyOfEntity(avatarLayer) })
 
         return {
-          overflow: `${prev.overflow}+auto`
+          overflow: `${prev.overflow}+auto`,
         }
       })
 
@@ -45,14 +45,14 @@ export const mutateTest = () => {
       const statex = createState()
       statex.mutate({
         ...headerLayer,
-        overflow: 'hidden'
+        overflow: 'hidden',
       })
 
       expect(statex.resolve(headerLayer).overflow).toBe('hidden')
 
       statex.mutate({
         ...headerLayer,
-        overflow: 'auto'
+        overflow: 'auto',
       })
 
       expect(statex.resolve(headerLayer).overflow).toBe('auto')
@@ -62,7 +62,7 @@ export const mutateTest = () => {
       const statex = createState()
       statex.mutate({
         ...headerLayer,
-        opacity: 0.7
+        opacity: 0.7,
       })
 
       expect(Object.keys(statex.resolve(headerLayer))).toStrictEqual(['_type', '_id', 'opacity'])
@@ -71,7 +71,7 @@ export const mutateTest = () => {
       statex.mutate({
         ...headerLayer,
         opacity: 1,
-        overflow: 'auto'
+        overflow: 'auto',
       })
 
       expect(Object.keys(statex.resolve(headerLayer))).toStrictEqual(['_type', '_id', 'opacity', 'overflow'])
@@ -83,12 +83,12 @@ export const mutateTest = () => {
       const statex = createState()
       statex.mutate({
         ...headerLayer,
-        children: []
+        children: [],
       })
 
       statex.mutate({
         ...headerLayer,
-        children: [avatarLayer]
+        children: [avatarLayer],
       })
 
       expect(statex.resolve(headerLayer).children).toHaveLength(1)
@@ -96,33 +96,30 @@ export const mutateTest = () => {
 
       statex.mutate({
         ...headerLayer,
-        children: [rootLayer]
+        children: [rootLayer],
       })
 
       expect(statex.resolve(headerLayer).children).toHaveLength(2)
-      expect(statex.resolve(headerLayer).children).toStrictEqual([
-        keyOfEntity(avatarLayer),
-        keyOfEntity(rootLayer)
-      ])
+      expect(statex.resolve(headerLayer).children).toStrictEqual([keyOfEntity(avatarLayer), keyOfEntity(rootLayer)])
     })
 
     it('should skip duplicate item in array', () => {
       const statex = createState()
       statex.mutate({
         ...headerLayer,
-        children: []
+        children: [],
       })
 
       statex.mutate({
         ...headerLayer,
-        children: [avatarLayer]
+        children: [avatarLayer],
       })
 
       expect(statex.resolve(headerLayer).children).toHaveLength(1)
 
       statex.mutate({
         ...headerLayer,
-        children: [avatarLayer]
+        children: [avatarLayer],
       })
 
       expect(statex.resolve(headerLayer).children).toHaveLength(1)
@@ -136,7 +133,7 @@ export const mutateTest = () => {
       statex.mutate({
         ...layer,
         children: [key],
-        field: key
+        field: key,
       })
 
       expect(statex.resolve(layer).children).toStrictEqual([key])
@@ -149,8 +146,8 @@ export const mutateTest = () => {
         _type: 'Layer',
         _id: 'header',
         fields: {
-          display: 'none'
-        }
+          display: 'none',
+        },
       })
 
       expect(Object.keys(statex.resolve('Layer:header').fields)).toStrictEqual(['display'])
@@ -160,8 +157,8 @@ export const mutateTest = () => {
           _type: 'Layer',
           _id: 'header',
           fields: {
-            overflow: 'hidden'
-          }
+            overflow: 'hidden',
+          },
         },
         { replace: true }
       )
@@ -174,8 +171,8 @@ export const mutateTest = () => {
         _type: 'Layer',
         _id: 'header',
         fields: {
-          display: 'none'
-        }
+          display: 'none',
+        },
       })
 
       expect(Object.keys(statex.resolve('Layer:header').fields)).toStrictEqual(['display'])
@@ -184,8 +181,8 @@ export const mutateTest = () => {
         'Layer:header',
         {
           fields: {
-            overflow: 'hidden'
-          }
+            overflow: 'hidden',
+          },
         },
         { replace: true }
       )
@@ -200,8 +197,8 @@ export const mutateTest = () => {
         content: {
           _type: 'Property',
           _id: 'PropValue1',
-          content: [1]
-        }
+          content: [1],
+        },
       })
 
       expect(statex.resolve('Property:PropValue1').content).toStrictEqual([1])
@@ -213,8 +210,8 @@ export const mutateTest = () => {
           content: {
             _type: 'Property',
             _id: 'PropValue1',
-            content: [2]
-          }
+            content: [2],
+          },
         },
         { replace: true }
       )
@@ -226,7 +223,7 @@ export const mutateTest = () => {
       statex.mutate({
         _type: 'Layer',
         _id: 'header',
-        children: ['a', 'b']
+        children: ['a', 'b'],
       })
 
       expect(statex.resolve('Layer:header').children).toStrictEqual(['a', 'b'])
@@ -235,7 +232,7 @@ export const mutateTest = () => {
         {
           _type: 'Layer',
           _id: 'header',
-          children: ['c', 'd']
+          children: ['c', 'd'],
         },
         { replace: true }
       )
@@ -248,8 +245,8 @@ export const mutateTest = () => {
         ...rootLayer,
         child: {
           ...headerLayer,
-          recursive: 'Layer:root'
-        }
+          recursive: 'Layer:root',
+        },
       }
 
       expect(() => statex.mutate(recursiveObject)).toThrowError(/Too deep notify./)
@@ -261,19 +258,19 @@ export const mutateTest = () => {
         ...rootLayer,
         options: {
           css: {
-            overflow: 'hidden'
+            overflow: 'hidden',
           },
-          list: [10]
-        }
+          list: [10],
+        },
       })
 
       statex.mutate({
         ...rootLayer,
         options: {
           css: {
-            display: 'none'
-          }
-        }
+            display: 'none',
+          },
+        },
       })
 
       expect(Object.keys(statex.resolve(rootLayer).options)).toStrictEqual(['css', 'list'])
@@ -283,9 +280,9 @@ export const mutateTest = () => {
         ...rootLayer,
         options: {
           css: {
-            list: [20]
-          }
-        }
+            list: [20],
+          },
+        },
       })
 
       expect(Object.keys(statex.resolve(rootLayer).options)).toStrictEqual(['css', 'list'])
@@ -299,7 +296,7 @@ export const mutateTest = () => {
       const domLayer = {
         _type: 'Layer',
         _id: 'dom',
-        value: htmlNode
+        value: htmlNode,
       }
 
       statex.mutate(domLayer)
@@ -308,7 +305,7 @@ export const mutateTest = () => {
       const domArrayLayer = {
         _type: 'Layer',
         _id: 'domArray',
-        value: [htmlNode]
+        value: [htmlNode],
       }
 
       statex.mutate(domArrayLayer)
@@ -317,4 +314,4 @@ export const mutateTest = () => {
       })
     })
   })
-}
+})

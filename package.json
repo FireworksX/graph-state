@@ -12,17 +12,24 @@
     "changeset:version": "changeset version",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "check": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "release": "turbo run build lint && changeset version && changeset publish"
+    "release": "turbo run build test lint check && changeset version && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.25.0",
     "@types/jest": "^29.5.12",
-    "eslint": "^9.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-turbo": "^1.13.2",
+    "eslint-plugin-es5": "^1.5.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.2",
     "jsdom": "^24.0.0",
     "lint-staged": "^13.0.3",
-    "prettier": "^2.7.1",
+    "prettier": "^3.0.0",
     "turbo": "^1.8.3",
     "vitest": "^1.5.0"
   },
@@ -35,6 +42,12 @@
   },
   "resolutions": {
     "strip-ansi": "6.0.1"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "./scripts/eslint/preset.js"
+    ]
   },
   "packageManager": "yarn@1.22.4",
   "publishConfig": {

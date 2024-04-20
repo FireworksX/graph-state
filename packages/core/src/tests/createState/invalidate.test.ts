@@ -1,16 +1,16 @@
-import {describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest'
 import { createState } from 'src'
 import { avatarLayer, rootLayer } from '../helpers'
 
-export const invalidateTest = () => {
+describe('createState', () => {
   describe('invalidate', () => {
     it('should invalidate layer', () => {
       const statex = createState({
         initialState: {
           ...rootLayer,
           children: [avatarLayer],
-          field: avatarLayer
-        }
+          field: avatarLayer,
+        },
       })
 
       statex.invalidate(avatarLayer)
@@ -26,7 +26,7 @@ export const invalidateTest = () => {
       const statex = createState()
       statex.mutate({
         ...rootLayer,
-        children: [avatarLayer]
+        children: [avatarLayer],
       })
 
       statex.subscribe(avatarLayer, spy)
@@ -41,7 +41,7 @@ export const invalidateTest = () => {
       const statex = createState()
       statex.mutate({
         ...rootLayer,
-        children: [avatarLayer]
+        children: [avatarLayer],
       })
 
       statex.invalidate(avatarLayer)
@@ -49,10 +49,10 @@ export const invalidateTest = () => {
 
       statex.mutate({
         ...avatarLayer,
-        field: 'test'
+        field: 'test',
       })
 
       expect(spy).toBeCalledTimes(0)
     })
   })
-}
+})

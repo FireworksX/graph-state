@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector'
-import { Field, GraphState } from '@graph-state/core'
+import type { Field, GraphState } from '@graph-state/core'
 
 const defaultSelector = (data: any) => data
 

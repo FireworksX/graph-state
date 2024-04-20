@@ -1,9 +1,9 @@
-import {describe, expect, it } from 'vitest';
-import {createState, keyOfEntity} from 'src'
+import { describe, expect, it } from 'vitest'
+import { createState, keyOfEntity } from 'src'
 import { avatarLayer, headerLayer, sizeVariable } from '../helpers'
-import {isHTMLNode} from "src/utils/checker";
+import { isHTMLNode } from 'src/utils/checker'
 
-export const buildLinksTest = () => {
+describe('createState', () => {
   const statex = createState()
 
   describe('buildLinks', () => {
@@ -17,13 +17,13 @@ export const buildLinksTest = () => {
       const avatar = {
         ...avatarLayer,
         width: sizeVariable,
-        height: sizeVariable
+        height: sizeVariable,
       }
 
       expect(statex.buildLinks(avatar)).toStrictEqual({
         ...avatarLayer,
         width: keyOfEntity(sizeVariable),
-        height: keyOfEntity(sizeVariable)
+        height: keyOfEntity(sizeVariable),
       })
     })
 
@@ -31,19 +31,19 @@ export const buildLinksTest = () => {
       const avatar = {
         ...avatarLayer,
         width: keyOfEntity(sizeVariable),
-        height: keyOfEntity(sizeVariable)
+        height: keyOfEntity(sizeVariable),
       }
 
       const header = {
         ...headerLayer,
         children: [avatar],
-        width: sizeVariable
+        width: sizeVariable,
       }
 
       expect(statex.buildLinks(header)).toStrictEqual({
         ...headerLayer,
         width: keyOfEntity(sizeVariable),
-        children: [keyOfEntity(avatarLayer)]
+        children: [keyOfEntity(avatarLayer)],
       })
     })
 
@@ -52,10 +52,10 @@ export const buildLinksTest = () => {
       const domLayer = {
         _type: 'Layer',
         _id: 'dom',
-        value: htmlNode
+        value: htmlNode,
       }
 
       expect(isHTMLNode(statex.buildLinks(domLayer)?.value)).toBeTruthy()
     })
   })
-}
+})

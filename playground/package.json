@@ -11,11 +11,12 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
-    "@graph-state/core": "*",
-    "@graph-state/react": "*",
+    "@graph-state/core": "latest",
+    "@graph-state/react": "latest",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

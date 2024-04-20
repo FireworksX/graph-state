@@ -2,19 +2,15 @@ export const createLinkRefs = () => {
   const parentRefs = new Map<string, string[]>()
   const childrenRefs = new Map<string, string[]>()
 
+  /**
+   * When change depKey we need update targetKey
+   */
   const addRefs = (targetKey: string, depKey: string) => {
-    if (parentRefs.has(targetKey)) {
-      const prevDeps = (parentRefs.get(targetKey) || []).filter(dep => dep !== depKey)
-      parentRefs.set(targetKey, [...prevDeps, depKey])
-    } else {
-      parentRefs.set(targetKey, [depKey])
-    }
-    if (childrenRefs.has(targetKey)) {
-      const prevDeps = (childrenRefs.get(targetKey) || []).filter(dep => dep !== targetKey)
-      childrenRefs.set(depKey, [...prevDeps, targetKey])
-    } else {
-      childrenRefs.set(depKey, [targetKey])
-    }
+    const prevParents = (parentRefs.get(targetKey) || []).filter(dep => dep !== depKey)
+    parentRefs.set(targetKey, [...prevParents, depKey])
+
+    const prevChildren = (childrenRefs.get(depKey) || []).filter(dep => dep !== depKey)
+    childrenRefs.set(depKey, [...prevChildren, targetKey])
   }
 
   const getLinkedRefs = (key: string, stack: string[] = []) => {
@@ -32,13 +28,12 @@ export const createLinkRefs = () => {
     const parents = parentRefs.get(key) ?? []
 
     parents.forEach(parentKey => {
-      childrenRefs.set(
-        parentKey,
-        childrenRefs.get(parentKey).filter(link => link !== key)
-      )
+      childrenRefs.set(parentKey, childrenRefs.get(parentKey)?.filter?.(link => link !== key) ?? [])
     })
-    parentRefs.delete(key)
 
+    // childrenRefs.set(key, childrenRefs.get(key))
+
+    parentRefs.delete(key)
   }
 
   return {
@@ -48,6 +43,6 @@ export const createLinkRefs = () => {
     getChildren: (key: string) => childrenRefs.get(key),
     getParents: (key: string) => parentRefs.get(key),
     getLinkedRefs,
-    invalidateRef
+    invalidateRef,
   }
 }

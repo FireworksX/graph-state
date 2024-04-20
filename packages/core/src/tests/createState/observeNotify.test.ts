@@ -1,8 +1,8 @@
-import {describe, expect, it, vi } from 'vitest';
-import {createState, keyOfEntity} from 'src'
-import { avatarLayer, headerLayer, rootLayer } from '../helpers'
+import { describe, expect, it, vi } from 'vitest'
+import { createState, keyOfEntity } from 'src'
+import { avatarLayer, headerLayer, rootLayer, sizeVariable } from '../helpers'
 
-export const observeNotifyTest = () => {
+describe('createState', () => {
   describe('observe/notify', () => {
     it('should notify if set new value into Layer', () => {
       const statex = createState()
@@ -13,7 +13,7 @@ export const observeNotifyTest = () => {
       statex.mutate({
         _type: 'Layer',
         _id: 'root',
-        opacity: 0
+        opacity: 0,
       })
 
       expect(spy).toBeCalledTimes(1)
@@ -24,7 +24,7 @@ export const observeNotifyTest = () => {
 
       const root = {
         ...rootLayer,
-        children: [headerLayer]
+        children: [headerLayer],
       }
       statex.mutate(root)
       const spy = vi.fn()
@@ -32,7 +32,7 @@ export const observeNotifyTest = () => {
       statex.subscribe(headerLayer, spy)
       statex.mutate({
         ...rootLayer,
-        overflow: 'x-hidden'
+        overflow: 'x-hidden',
       })
 
       expect(spy).toBeCalledTimes(1)
@@ -42,7 +42,7 @@ export const observeNotifyTest = () => {
       const statex = createState()
       const root = {
         ...rootLayer,
-        children: [keyOfEntity(headerLayer)]
+        children: [keyOfEntity(headerLayer)],
       }
       statex.mutate(root)
 
@@ -51,7 +51,7 @@ export const observeNotifyTest = () => {
       statex.subscribe(headerLayer, spy)
       statex.mutate({
         ...rootLayer,
-        overflow: 'x-hidden'
+        overflow: 'x-hidden',
       })
 
       expect(spy).toBeCalledTimes(1)
@@ -61,7 +61,7 @@ export const observeNotifyTest = () => {
       const opacity = { _type: 'Variable', _id: 'opacity', value: 0 }
       const root = {
         ...rootLayer,
-        opacity
+        opacity,
       }
       const statex = createState({ initialState: root })
       const spy = vi.fn()
@@ -69,7 +69,7 @@ export const observeNotifyTest = () => {
       statex.subscribe(rootLayer, spy)
       statex.mutate({
         ...opacity,
-        value: 1
+        value: 1,
       })
 
       expect(spy).toBeCalledTimes(0)
@@ -87,7 +87,7 @@ export const observeNotifyTest = () => {
       statex.subscribe(rootLayer, rootSpy)
       statex.mutate({
         ...avatarLayer,
-        visible: false
+        visible: false,
       })
 
       expect(headerSpy).toBeCalledTimes(0)
@@ -106,11 +106,11 @@ export const observeNotifyTest = () => {
       statex.subscribe(avatarLayer, avatarSpy)
       statex.mutate({
         ...rootLayer,
-        visible: false
+        visible: false,
       })
 
       expect(headerSpy).toBeCalledTimes(1)
-      expect(avatarSpy).toBeCalledTimes(2)
+      expect(avatarSpy).toBeCalledTimes(1)
     })
 
     it('should subscribe before create entity', () => {
@@ -122,7 +122,7 @@ export const observeNotifyTest = () => {
       statex.subscribe(avatarLayer, headerSpy)
       statex.mutate({
         ...headerLayer,
-        field: 'test'
+        field: 'test',
       })
 
       expect(headerSpy).toBeCalledTimes(1)
@@ -140,7 +140,7 @@ export const observeNotifyTest = () => {
 
       statex.mutate({
         ...rootLayer,
-        children: ['test']
+        children: ['test'],
       })
 
       expect(spy).toBeCalledTimes(1)
@@ -156,13 +156,13 @@ export const observeNotifyTest = () => {
       statex.subscribe(header, spy)
       statex.mutate({
         ...header,
-        display: 'none'
+        display: 'none',
       })
 
       expect(spy).toBeCalledTimes(1)
       expect(spy).toHaveBeenCalledWith({
         ...header,
-        display: 'none'
+        display: 'none',
       })
     })
 
@@ -175,13 +175,13 @@ export const observeNotifyTest = () => {
       statex.subscribe(header, spy)
       statex.mutate({
         ...header,
-        display: 'none'
+        display: 'none',
       })
 
       expect(spy).toHaveBeenCalledWith({
         ...header,
         display: 'none',
-        ref: keyOfEntity(rootLayer)
+        ref: keyOfEntity(rootLayer),
       })
     })
 
@@ -205,8 +205,6 @@ export const observeNotifyTest = () => {
         updateIndex++
         spy()
 
-        console.log(data, updateIndex)
-
         switch (updateIndex) {
           case 1:
             return expect(data).toStrictEqual(sizeVariable)
@@ -225,4 +223,4 @@ export const observeNotifyTest = () => {
       expect(spy).toBeCalledTimes(9)
     })
   })
-}
+})

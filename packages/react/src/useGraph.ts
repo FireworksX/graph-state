@@ -1,14 +1,9 @@
 import { useCallback, useRef } from 'react'
 import { useSyncExternalStore } from 'use-sync-external-store'
-import { Field, GraphState } from '@graph-state/core'
+import type { Field, GraphState } from '@graph-state/core'
 
-
-export const useGraph = <TState = any>(
-  graphState: GraphState,
-  field: Field,
-): TState => {
+export const useGraph = <TState = any>(graphState: GraphState, field: Field): TState => {
   const nextValue = useRef<TState>(graphState.resolve(field) as any as TState)
-
 
   const subscribe = useCallback(
     (onChange: any) => {

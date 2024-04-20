@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { createLinkRefs } from 'src/createLinkRefs'
+import { createLinkRefs } from '../createLinkRefs'
 
 describe('CreateLinkRefs', () => {
-
   it('should add new ref', () => {
     const linkRefs = createLinkRefs()
 
@@ -27,7 +26,6 @@ describe('CreateLinkRefs', () => {
     expect(linkRefs.getLinkedRefs('target')).toStrictEqual(['one', 'two'])
   })
 
-
   it('should return nested refs', () => {
     const linkRefs = createLinkRefs()
 
@@ -40,13 +38,13 @@ describe('CreateLinkRefs', () => {
   it('should invalidate depend links', () => {
     const refs = createLinkRefs()
 
-    refs.addRefs('target', 'dep1')
-    refs.addRefs('target', 'dep2')
+    refs.addRefs('ChildOne', 'Parent')
+    refs.addRefs('ChildTwo', 'Parent')
 
-    refs.invalidateRef('dep1')
+    refs.invalidateRef('ChildOne')
 
-    console.log(refs);
-
-    expect(refs.getLinkedRefs('target2')).toStrictEqual(['dep2'])
+    expect(refs.getChildren('Parent')).toStrictEqual(['ChildTwo'])
+    expect(refs.getParents('ChildOne')).toStrictEqual(undefined)
+    expect(refs.getParents('ChildTwo')).toStrictEqual(['Parent'])
   })
 })

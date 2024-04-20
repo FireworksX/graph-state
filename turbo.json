@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["NODE_ENV"],
   "pipeline": {
     "build": {
       "outputs": ["dist/**"],
@@ -9,6 +10,8 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {}
+    "lint": {},
+    "check": {},
+    "test": {}
   }
 }

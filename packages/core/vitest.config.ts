@@ -4,13 +4,13 @@ import path from 'path'
 export default defineConfig({
   resolve: {
     alias: {
-      src: path.resolve(__dirname, './src')
-    }
+      src: path.resolve(__dirname, './src'),
+    },
   },
   test: {
     globals: true,
     environment: 'jsdom',
     includeSource: ['src/**/*.{tsx,ts}'],
-    css: false
-  }
+    css: false,
+  },
 })

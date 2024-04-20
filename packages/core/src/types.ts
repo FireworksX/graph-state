@@ -7,10 +7,10 @@ export type Entity<T extends object = object> = {
 export type FieldToEntity<TField extends Field> = TField extends null
   ? null
   : TField extends Entity
-  ? TField
-  : TField extends `${infer TType}:${infer TKey}`
-  ? { _type: TType; _id: TKey }
-  : TField
+    ? TField
+    : TField extends `${infer TType}:${infer TKey}`
+      ? { _type: TType; _id: TKey }
+      : TField
 
 export type Links<TInput extends Entity> = {
   [TKey in keyof TInput]: TInput[TKey] extends (infer TArrayValue)[]
@@ -18,8 +18,8 @@ export type Links<TInput extends Entity> = {
       ? string[]
       : TArrayValue
     : TInput[TKey] extends Record<PropertyKey, infer TObjValue>
-    ? TObjValue extends Entity
-      ? Record<PropertyKey, string>
-      : TObjValue
-    : TInput[TKey]
+      ? TObjValue extends Entity
+        ? Record<PropertyKey, string>
+        : TObjValue
+      : TInput[TKey]
 }

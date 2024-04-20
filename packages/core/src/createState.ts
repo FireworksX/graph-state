@@ -1,9 +1,9 @@
-import { Entity, Field } from 'src'
+import type { Entity, Field } from 'src'
 import { createLinkRefs } from './createLinkRefs'
-import {isHTMLNode, isObject} from "./utils/checker";
-import {iterator} from "./utils/iterator";
-import {get} from "./utils/get";
-import {set} from "src/utils/set";
+import { isHTMLNode, isObject } from './utils/checker'
+import { iterator } from './utils/iterator'
+import { get } from './utils/get'
+import { set } from 'src/utils/set'
 
 type AnyObject = Record<string, unknown>
 
@@ -86,7 +86,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const getArgumentsForMutate = (field: string | Entity, ...args: any[]) => ({
     entityKey: typeof field === 'string' ? field : keyOfEntity(field),
     options: typeof field === 'string' ? args[1] : (args[0] as SetOptions | null),
-    data: typeof field === 'string' ? args[0] : field
+    data: typeof field === 'string' ? args[0] : field,
   })
 
   // TODO Add batchUpdate for deep object
@@ -94,11 +94,11 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     const { entityKey, options, data } = getArgumentsForMutate(field, ...args)
 
     if (!field) return null
-    const currentValue = { ...(links.get(entityKey || '') ?? {}) }
+    const currentValue = { ...(links.get(entityKey ?? '') ?? {}) }
     const entityData = typeof data === 'function' ? data(currentValue) : data
     const entity = {
       ...entityData,
-      ...entityOfKey(entityKey)
+      ...entityOfKey(entityKey),
     }
 
     if (entityKey) {
@@ -116,7 +116,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
           if (isObject(value) && isObject(prevValue)) {
             nextValue = {
               ...prevValue,
-              ...value
+              ...value,
             }
           }
         }
@@ -245,7 +245,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     invalidate,
     buildLinks,
     resolveParents,
-    getArgumentsForMutate
+    getArgumentsForMutate,
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)
@@ -274,6 +274,6 @@ export const entityOfKey = (key?: string | null | number): Entity | null => {
 
   return {
     _type: typeName,
-    _id: restTypes.join(':')
+    _id: restTypes.join(':'),
   }
 }

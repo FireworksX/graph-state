@@ -1,7 +1,12 @@
 import { createState } from '@graph-state/core'
 import { useGraph } from '@graph-state/react'
 import { useState } from 'react'
+import useSWR from 'swr'
 
+export const generateId = () => Math.random().toString(16).slice(2)
+
+
+const fetcher = url => fetch(url).then(r => r.json())
 
 const statex = createState({})
 
@@ -9,9 +14,10 @@ window.statex = statex
 
 
 function App() {
-  const [value, setValue] = useState('')
-  const [index, setIndex] = useState(0)
-  const document = useGraph(statex, statex.root)
+  const { data, error } = useSWR('https://jsonplaceholder.typicode.com/todos', fetcher)
+
+  console.log(data)
+
 
   return (
     <>

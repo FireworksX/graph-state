@@ -1,8 +1,8 @@
-import {describe, expect, it } from 'vitest';
-import {createState, keyOfEntity} from 'src'
+import { describe, expect, it } from 'vitest'
+import { createState, keyOfEntity } from 'src'
 import { avatarLayer, headerLayer, rootLayer, sizeVariable } from '../helpers'
 
-export const inspectFieldsTest = () => {
+describe('createState', () => {
   const statex = createState()
   const entities = [rootLayer, headerLayer, avatarLayer, sizeVariable]
   entities.forEach(el => statex.mutate(el))
@@ -21,4 +21,4 @@ export const inspectFieldsTest = () => {
       expect(statex.inspectFields()).toStrictEqual([])
     })
   })
-}
+})

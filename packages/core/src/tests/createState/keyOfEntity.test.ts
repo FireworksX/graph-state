@@ -1,10 +1,8 @@
-import {describe, expect, it } from 'vitest';
-import {createState, keyOfEntity} from 'src'
+import { describe, expect, it } from 'vitest'
+import { keyOfEntity } from 'src'
 import { rootLayer } from '../helpers'
 
-export const keyOfEntityTest = () => {
-  const statex = createState()
-
+describe('createState', () => {
   describe('keyOfEntity', () => {
     it('should return key', () => {
       expect(keyOfEntity(rootLayer)).toEqual('Layer:root')
@@ -21,4 +19,4 @@ export const keyOfEntityTest = () => {
       expect(keyOfEntity(undefined)).toStrictEqual(null)
     })
   })
-}
+})

@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
 import { useSyncExternalStore } from 'use-sync-external-store/shim'
-import { Entity, GraphState } from '@graph-state/core'
+import type { Entity, GraphState } from '@graph-state/core'
 
 export const useGraphFields = (graphState: GraphState, type: Entity['_type']): string[] => {
   const nextValue = useRef<string[]>(graphState.inspectFields(type))

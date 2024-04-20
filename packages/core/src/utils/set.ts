@@ -1,4 +1,3 @@
-
 export const set = (obj: any, path: string, value: unknown) => {
   const pathArray = (Array.isArray(path) ? path : path.match(/([^[.\]])+/g)) as string[]
 

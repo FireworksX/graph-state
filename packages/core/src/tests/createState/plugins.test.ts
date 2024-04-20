@@ -1,8 +1,8 @@
-import {describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest'
 import { createState } from 'src'
 import { Plugin } from 'src/createState'
 
-export const pluginsTest = () => {
+describe('createState', () => {
   describe('plugins', () => {
     it('should invoke plugin body', () => {
       const pluginBodySpy = vi.fn()
@@ -14,7 +14,7 @@ export const pluginsTest = () => {
       }
 
       const statex = createState({
-        plugins: [plugin]
+        plugins: [plugin],
       })
 
       expect(pluginBodySpy).toBeCalledTimes(1)
@@ -35,7 +35,7 @@ export const pluginsTest = () => {
       }
 
       const statex = createState({
-        plugins: [firstPlugin, secondPlugin]
+        plugins: [firstPlugin, secondPlugin],
       })
 
       expect(firstPluginBodySpy).toBeCalledTimes(1)
@@ -55,7 +55,7 @@ export const pluginsTest = () => {
     }
 
     const statex = createState({
-      plugins: [plugin]
+      plugins: [plugin],
     })
 
     expect(statex).toHaveProperty('testMethod')
@@ -79,7 +79,7 @@ export const pluginsTest = () => {
     }
 
     const statex = createState({
-      plugins: [firstPlugin, secondPlugin]
+      plugins: [firstPlugin, secondPlugin],
     })
 
     expect(statex).toHaveProperty('firstMethod')
@@ -112,7 +112,7 @@ export const pluginsTest = () => {
     }
 
     const statex = createState({
-      plugins: [firstPlugin, secondPlugin]
+      plugins: [firstPlugin, secondPlugin],
     })
 
     statex.firstMethod()
@@ -130,11 +130,11 @@ export const pluginsTest = () => {
     }
 
     const statex = createState({
-      plugins: [plugin]
+      plugins: [plugin],
     })
 
     expect(() => statex.method()).not.toThrow()
     expect(pluginMethod).toReturnWith('first')
     expect(statex).toBeInstanceOf(Object)
   })
-}
+})

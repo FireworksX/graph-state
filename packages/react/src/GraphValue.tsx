@@ -1,5 +1,5 @@
-import { FC, ReactElement } from 'react'
-import { Field, GraphState } from '@graph-state/core'
+import type { FC, ReactElement } from 'react'
+import type { Field, GraphState } from '@graph-state/core'
 import { useGraph } from './useGraph'
 
 interface GraphValueProps {
@@ -12,7 +12,7 @@ export const GraphValue: FC<GraphValueProps> = ({ graphState, field, children })
   if (!graphState) {
     throw new Error('Cannot find statex.')
   }
-  const value = useGraph(graphState, field ?? '') ?? field
+  const value = useGraph(graphState, field || '') || field
 
   if (children) {
     return children(value)
