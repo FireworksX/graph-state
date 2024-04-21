@@ -6,29 +6,29 @@ import { isHTMLNode } from 'src/utils/checker'
 describe('createState', () => {
   describe('mutate', () => {
     it('should mutate with string key', () => {
-      const statex = createState()
-      statex.mutate('Layer:header', {
+      const graphState = createState()
+      graphState.mutate('Layer:header', {
         overflow: 'hidden',
       })
 
-      expect(statex.resolve(headerLayer).overflow).toBe('hidden')
+      expect(graphState.resolve(headerLayer).overflow).toBe('hidden')
 
-      statex.mutate('Layer:header', {
+      graphState.mutate('Layer:header', {
         overflow: 'auto',
       })
 
-      expect(statex.resolve(headerLayer).overflow).toBe('auto')
+      expect(graphState.resolve(headerLayer).overflow).toBe('auto')
     })
 
     it('should mutate with function setter', () => {
-      const statex = createState()
-      statex.mutate('Layer:header', {
+      const graphState = createState()
+      graphState.mutate('Layer:header', {
         overflow: 'hidden',
         image: avatarLayer,
       })
 
-      expect(statex.resolve(headerLayer).overflow).toBe('hidden')
-      expect(statex.resolve(headerLayer).image).toBe(keyOfEntity(avatarLayer))
+      expect(graphState.resolve(headerLayer).overflow).toBe('hidden')
+      expect(graphState.resolve(headerLayer).image).toBe(keyOfEntity(avatarLayer))
 
       statex.mutate('Layer:header', prev => {
         expect(prev).toStrictEqual({ ...headerLayer, overflow: 'hidden', image: keyOfEntity(avatarLayer) })

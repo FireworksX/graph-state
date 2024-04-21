@@ -10,7 +10,7 @@ interface GraphValueProps {
 
 export const GraphValue: FC<GraphValueProps> = ({ graphState, field, children }) => {
   if (!graphState) {
-    throw new Error('Cannot find statex.')
+    throw new Error('Cannot find graphState.')
   }
   const value = useGraph(graphState, field || '') || field
 

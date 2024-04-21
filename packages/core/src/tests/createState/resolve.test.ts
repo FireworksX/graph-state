@@ -3,8 +3,8 @@ import { createState, keyOfEntity } from 'src/createState'
 import { avatarLayer, headerLayer, rootLayer, sizeVariable } from '../helpers'
 
 describe('createState', () => {
-  const statex = createState()
-  statex.mutate({
+  const graphState = createState()
+  graphState.mutate({
     ...rootLayer,
     children: [{ ...headerLayer, children: [{ ...avatarLayer, width: sizeVariable, height: sizeVariable }] }],
   })
@@ -17,17 +17,17 @@ describe('createState', () => {
 
   describe('resolve', () => {
     it('should resolve by entity', () => {
-      expect(statex.resolve({ _type: 'Layer', _id: 'avatar' })).toStrictEqual(resolvedAvatar)
-      expect(statex.resolve({ _type: 'Variable', _id: 'size' })).toStrictEqual(sizeVariable)
+      expect(graphState.resolve({ _type: 'Layer', _id: 'avatar' })).toStrictEqual(resolvedAvatar)
+      expect(graphState.resolve({ _type: 'Variable', _id: 'size' })).toStrictEqual(sizeVariable)
     })
 
     it('should resolve by key', () => {
-      expect(statex.resolve('Layer:avatar')).toStrictEqual(resolvedAvatar)
-      expect(statex.resolve('Variable:size')).toStrictEqual(sizeVariable)
+      expect(graphState.resolve('Layer:avatar')).toStrictEqual(resolvedAvatar)
+      expect(graphState.resolve('Variable:size')).toStrictEqual(sizeVariable)
     })
 
     it('should resolve nested layers', () => {
-      expect(statex.resolve('Layer:root')).toStrictEqual({
+      expect(graphState.resolve('Layer:root')).toStrictEqual({
         ...rootLayer,
         children: [keyOfEntity(headerLayer)],
       })

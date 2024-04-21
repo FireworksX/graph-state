@@ -212,6 +212,29 @@ graphState.mutate({
 
 ```
 
+#### Subscribe on all state
+```js
+import { createState } from '@graph-state/core'
+
+const userGraph = {
+  _type: 'User',
+  _id: 'id',
+  name: 'James'
+}
+
+const graphState = createState({initialState: userGraph})
+
+graphState.subscribe(graphState, (nextState) => {
+  // Call every state update
+})
+
+graphState.mutate({
+  ...userGraph,
+  name: 'Stef'
+})
+```
+
+
 #### Nested graph
 
 ```jsx

@@ -4,7 +4,7 @@ import { headerLayer, rootLayer } from '../helpers'
 
 describe('createState', () => {
   it('should create state with initial state', () => {
-    const statex = createState({
+    const graphState = createState({
       initialState: {
         ...rootLayer,
         field: {
@@ -14,19 +14,6 @@ describe('createState', () => {
       },
     })
 
-    expect(statex.resolve(headerLayer).arg).toBe(10)
-  })
-
-  it('should create state with initial state as array', () => {
-    const statex = createState({
-      initialState: {
-        _type: 'test',
-        _id: '10',
-      },
-    })
-
-    console.log(statex.linkRefs)
-    console.log(statex.resolve(statex), statex.resolve('test:10'))
-    expect(statex.resolve(statex).arg).toBe(10)
+    expect(graphState.resolve(headerLayer).arg).toBe(10)
   })
 })

@@ -3,7 +3,7 @@ import { createState } from 'src'
 import { avatarLayer, headerLayer, rootLayer } from '../helpers'
 
 describe('createState', () => {
-  const statex = createState()
+  const graphState = createState()
 
   describe('resolveParents', () => {
     it('should resolve one parent', () => {
@@ -11,9 +11,9 @@ describe('createState', () => {
         ...rootLayer,
         field: avatarLayer,
       }
-      statex.mutate(root)
+      graphState.mutate(root)
 
-      expect(statex.resolveParents(avatarLayer)).toStrictEqual([statex.resolve(root)])
+      expect(graphState.resolveParents(avatarLayer)).toStrictEqual([graphState.resolve(root)])
     })
 
     it('should resolve parents', () => {
@@ -26,10 +26,10 @@ describe('createState', () => {
         ...headerLayer,
         field: avatarLayer,
       }
-      statex.mutate(root)
-      statex.mutate(header)
+      graphState.mutate(root)
+      graphState.mutate(header)
 
-      expect(statex.resolveParents(avatarLayer)).toStrictEqual([statex.resolve(root), statex.resolve(header)])
+      expect(graphState.resolveParents(avatarLayer)).toStrictEqual([graphState.resolve(root), statex.resolve(header)])
     })
 
     it('invalid field', () => {

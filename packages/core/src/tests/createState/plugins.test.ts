@@ -7,69 +7,69 @@ describe('createState', () => {
     it('should invoke plugin body', () => {
       const pluginBodySpy = vi.fn()
 
-      const plugin: Plugin = statex => {
-        pluginBodySpy(statex)
+      const plugin: Plugin = graphState => {
+        pluginBodySpy(graphState)
 
-        return statex
+        return graphState
       }
 
-      const statex = createState({
+      const graphState = createState({
         plugins: [plugin],
       })
 
       expect(pluginBodySpy).toBeCalledTimes(1)
-      expect(pluginBodySpy).toBeCalledWith(statex)
+      expect(pluginBodySpy).toBeCalledWith(graphState)
     })
 
     it('should invoke few plugins', () => {
       const firstPluginBodySpy = vi.fn()
       const secondPluginBodySpy = vi.fn()
 
-      const firstPlugin: Plugin = statex => {
-        firstPluginBodySpy(statex)
-        return statex
+      const firstPlugin: Plugin = graphState => {
+        firstPluginBodySpy(graphState)
+        return graphState
       }
-      const secondPlugin: Plugin = statex => {
-        secondPluginBodySpy(statex)
-        return statex
+      const secondPlugin: Plugin = graphState => {
+        secondPluginBodySpy(graphState)
+        return graphState
       }
 
-      const statex = createState({
+      const graphState = createState({
         plugins: [firstPlugin, secondPlugin],
       })
 
       expect(firstPluginBodySpy).toBeCalledTimes(1)
-      expect(firstPluginBodySpy).toBeCalledWith(statex)
+      expect(firstPluginBodySpy).toBeCalledWith(graphState)
 
       expect(secondPluginBodySpy).toBeCalledTimes(1)
-      expect(secondPluginBodySpy).toBeCalledWith(statex)
+      expect(secondPluginBodySpy).toBeCalledWith(graphState)
     })
   })
 
-  it('should mutate Statex state', () => {
+  it('should mutate graphState state', () => {
     const fn = vi.fn(() => 'test')
 
-    const plugin: Plugin = statex => {
-      statex.testMethod = fn
-      return statex
+    const plugin: Plugin = graphState => {
+      graphState.testMethod = fn
+      return graphState
     }
 
-    const statex = createState({
+    const graphState = createState({
       plugins: [plugin],
     })
 
-    expect(statex).toHaveProperty('testMethod')
+    expect(graphState).toHaveProperty('testMethod')
 
-    statex.testMethod()
+    graphState.testMethod()
     expect(fn).toReturnWith('test')
   })
 
-  it('should mutate Statex state with few plugins', () => {
+  it('should mutate graphState state with few plugins', () => {
     const pluginFirstMethod = vi.fn(() => 'first')
     const pluginSecondMethod = vi.fn(() => 'second')
 
-    const firstPlugin: Plugin = statex => {
-      statex.firstMethod = pluginFirstMethod
+    const firstPlugin: Plugin = graphState => {
+      graphState.firstMethod = pluginFirstMethod
       return statex
     }
 

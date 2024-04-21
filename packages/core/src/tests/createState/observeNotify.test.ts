@@ -5,12 +5,12 @@ import { avatarLayer, headerLayer, rootLayer, sizeVariable } from '../helpers'
 describe('createState', () => {
   describe('observe/notify', () => {
     it('should notify if set new value into Layer', () => {
-      const statex = createState()
-      statex.mutate(rootLayer)
+      const graphState = createState()
+      graphState.mutate(rootLayer)
       const spy = vi.fn()
 
-      statex.subscribe(rootLayer, spy)
-      statex.mutate({
+      graphState.subscribe(rootLayer, spy)
+      graphState.mutate({
         _type: 'Layer',
         _id: 'root',
         opacity: 0,
@@ -20,17 +20,17 @@ describe('createState', () => {
     })
 
     it('should notify children when parent was changed', () => {
-      const statex = createState()
+      const graphState = createState()
 
       const root = {
         ...rootLayer,
         children: [headerLayer],
       }
-      statex.mutate(root)
+      graphState.mutate(root)
       const spy = vi.fn()
 
-      statex.subscribe(headerLayer, spy)
-      statex.mutate({
+      graphState.subscribe(headerLayer, spy)
+      graphState.mutate({
         ...rootLayer,
         overflow: 'x-hidden',
       })
@@ -39,17 +39,17 @@ describe('createState', () => {
     })
 
     test.skip('should notify if pass key as string', () => {
-      const statex = createState()
+      const graphState = createState()
       const root = {
         ...rootLayer,
         children: [keyOfEntity(headerLayer)],
       }
-      statex.mutate(root)
+      graphState.mutate(root)
 
       const spy = vi.fn()
 
-      statex.subscribe(headerLayer, spy)
-      statex.mutate({
+      graphState.subscribe(headerLayer, spy)
+      graphState.mutate({
         ...rootLayer,
         overflow: 'x-hidden',
       })
@@ -63,11 +63,11 @@ describe('createState', () => {
         ...rootLayer,
         opacity,
       }
-      const statex = createState({ initialState: root })
+      const graphState = createState({ initialState: root })
       const spy = vi.fn()
 
-      statex.subscribe(rootLayer, spy)
-      statex.mutate({
+      graphState.subscribe(rootLayer, spy)
+      graphState.mutate({
         ...opacity,
         value: 1,
       })
@@ -78,14 +78,14 @@ describe('createState', () => {
     it('should skip nested tree notify', () => {
       const header = { ...headerLayer, children: [avatarLayer] }
       const root = { ...rootLayer, children: [header] }
-      const statex = createState({ initialState: root })
+      const graphState = createState({ initialState: root })
 
       const headerSpy = vi.fn()
       const rootSpy = vi.fn()
 
-      statex.subscribe(headerLayer, headerSpy)
-      statex.subscribe(rootLayer, rootSpy)
-      statex.mutate({
+      graphState.subscribe(headerLayer, headerSpy)
+      graphState.subscribe(rootLayer, rootSpy)
+      graphState.mutate({
         ...avatarLayer,
         visible: false,
       })
@@ -97,12 +97,12 @@ describe('createState', () => {
     it('should notify nested tree', () => {
       const header = { ...headerLayer, children: [avatarLayer] }
       const root = { ...rootLayer, children: [header] }
-      const statex = createState({ initialState: root })
+      const graphState = createState({ initialState: root })
 
       const headerSpy = vi.fn()
       const avatarSpy = vi.fn()
 
-      statex.subscribe(headerLayer, headerSpy)
+      graphState.subscribe(headerLayer, headerSpy)
       statex.subscribe(avatarLayer, avatarSpy)
       statex.mutate({
         ...rootLayer,
@@ -185,14 +185,14 @@ describe('createState', () => {
       })
     })
 
-    test.skip('should notify self store', () => {
+    it('should notify self store', () => {
       const statex = createState()
       const spy = vi.fn()
 
       statex.subscribe(statex, spy)
       statex.mutate(rootLayer)
 
-      expect(spy).toBeCalledTimes(9)
+      expect(spy).toBeCalledTimes(1)
     })
 
     test.skip('should notify self store with each state', () => {

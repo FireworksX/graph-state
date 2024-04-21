@@ -4,13 +4,13 @@ import { avatarLayer, headerLayer, sizeVariable } from '../helpers'
 import { isHTMLNode } from 'src/utils/checker'
 
 describe('createState', () => {
-  const statex = createState()
+  const graphState = createState()
 
   describe('buildLinks', () => {
     it('should skip not Entity types', () => {
-      expect(statex.buildLinks(sizeVariable)).toStrictEqual(sizeVariable)
-      expect(statex.buildLinks(10)).toBe(10)
-      expect(statex.buildLinks(undefined)).toBe(undefined)
+      expect(graphState.buildLinks(sizeVariable)).toStrictEqual(sizeVariable)
+      expect(graphState.buildLinks(10)).toBe(10)
+      expect(graphState.buildLinks(undefined)).toBe(undefined)
     })
 
     it('should build first level links', () => {
@@ -20,7 +20,7 @@ describe('createState', () => {
         height: sizeVariable,
       }
 
-      expect(statex.buildLinks(avatar)).toStrictEqual({
+      expect(graphState.buildLinks(avatar)).toStrictEqual({
         ...avatarLayer,
         width: keyOfEntity(sizeVariable),
         height: keyOfEntity(sizeVariable),
@@ -40,7 +40,7 @@ describe('createState', () => {
         width: sizeVariable,
       }
 
-      expect(statex.buildLinks(header)).toStrictEqual({
+      expect(graphState.buildLinks(header)).toStrictEqual({
         ...headerLayer,
         width: keyOfEntity(sizeVariable),
         children: [keyOfEntity(avatarLayer)],
@@ -55,7 +55,7 @@ describe('createState', () => {
         value: htmlNode,
       }
 
-      expect(isHTMLNode(statex.buildLinks(domLayer)?.value)).toBeTruthy()
+      expect(isHTMLNode(graphState.buildLinks(domLayer)?.value)).toBeTruthy()
     })
   })
 })
