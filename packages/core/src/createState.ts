@@ -83,12 +83,6 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       { skipPredicate: (value: any) => isHTMLNode(value) }
     )
 
-  const getArgumentsForMutate = (field: string | Entity, ...args: any[]) => ({
-    entityKey: typeof field === 'string' ? field : keyOfEntity(field),
-    options: typeof field === 'string' ? args[1] : (args[0] as SetOptions | null),
-    data: typeof field === 'string' ? args[0] : field,
-  })
-
   // TODO Add batchUpdate for deep object
   const mutate = (field: string | Entity, ...args: any[]) => {
     const { entityKey, options, data } = getArgumentsForMutate(field, ...args)
@@ -245,11 +239,17 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     invalidate,
     buildLinks,
     resolveParents,
-    getArgumentsForMutate,
+    linkRefs,
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)
 }
+
+export const getArgumentsForMutate = (field: string | Entity, ...args: any[]) => ({
+  entityKey: typeof field === 'string' ? field : keyOfEntity(field),
+  options: typeof field === 'string' ? args[1] : (args[0] as SetOptions | null),
+  data: typeof field === 'string' ? args[0] : field,
+})
 
 export const keyOfEntity = (entity?: Entity | null) => {
   if (entity?._id && entity._type) {

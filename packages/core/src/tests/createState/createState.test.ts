@@ -16,4 +16,17 @@ describe('createState', () => {
 
     expect(statex.resolve(headerLayer).arg).toBe(10)
   })
+
+  it('should create state with initial state as array', () => {
+    const statex = createState({
+      initialState: {
+        _type: 'test',
+        _id: '10',
+      },
+    })
+
+    console.log(statex.linkRefs)
+    console.log(statex.resolve(statex), statex.resolve('test:10'))
+    expect(statex.resolve(statex).arg).toBe(10)
+  })
 })
