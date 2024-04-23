@@ -1,5 +1,17 @@
 # @graph-state/core
 
+## 0.2.0
+
+### Minor Changes
+
+- dec27b3: Integrate ESLint. Update refs system for links.
+- e9f5f73: Add keying map for entities
+
+### Patch Changes
+
+- e9f5f73: Remove link ref if her is empty
+- b7ae94b: Make getArgumentsForMutate as static method.
+
 ## 0.1.8
 
 ### Patch Changes

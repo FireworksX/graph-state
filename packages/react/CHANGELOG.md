@@ -1,5 +1,20 @@
 # @graph-state/react
 
+## 0.2.0
+
+### Minor Changes
+
+- dec27b3: Integrate ESLint. Update refs system for links.
+
+### Patch Changes
+
+- e9f5f73: Update types for new core package
+- Updated dependencies [dec27b3]
+- Updated dependencies [e9f5f73]
+- Updated dependencies [e9f5f73]
+- Updated dependencies [b7ae94b]
+  - @graph-state/core@0.2.0
+
 ## 0.1.6
 
 ### Patch Changes
