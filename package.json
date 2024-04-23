@@ -12,7 +12,7 @@
     "changeset:version": "changeset version",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "check": "turbo run test",
+    "check": "turbo run check",
     "typecheck": "turbo run typecheck",
     "release": "turbo run build test lint check && changeset version && changeset publish"
   },

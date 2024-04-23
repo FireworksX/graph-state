@@ -1,11 +1,11 @@
 import type { FC, ReactElement } from 'react'
-import type { Field, GraphState } from '@graph-state/core'
+import type { Entity, GraphState } from '@graph-state/core'
 import { useGraph } from './useGraph'
 
 interface GraphValueProps {
   children?: (value?: unknown) => ReactElement
   graphState?: GraphState
-  field?: Field
+  field?: Entity
 }
 
 export const GraphValue: FC<GraphValueProps> = ({ graphState, field, children }) => {
