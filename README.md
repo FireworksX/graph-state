@@ -316,9 +316,9 @@ const graphState = createState({
 
 #### keyOfEntity
 ```js
-import {keyOfEntity} from '@graph-state'
+import {keyOfGraph} from '@graph-state'
 
-keyOfEntity({
+keyOfGraph({
   _type: 'User',
   _id: 'id'
 }) // User:id
@@ -326,9 +326,9 @@ keyOfEntity({
 
 #### entityOfKey
 ```js
-import {entityOfKey} from '@graph-state'
+import {graphOfKey} from '@graph-state'
 
-entityOfKey('User:id')
+graphOfKey('User:id')
 /**
  * _type: 'User',
  * _id: 'id'

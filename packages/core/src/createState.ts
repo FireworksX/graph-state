@@ -1,61 +1,32 @@
-import type { Entity, Field } from 'src'
+import type { Graph, CreateStateOptions, GraphState, SetOptions, Entity } from 'src'
 import { createLinkRefs } from './createLinkRefs'
 import { isHTMLNode, isObject } from './utils/checker'
 import { iterator } from './utils/iterator'
 import { get } from './utils/get'
 import { set } from 'src/utils/set'
-
-type AnyObject = Record<string, unknown>
-
-type DataSetter = AnyObject | ((prev: AnyObject) => AnyObject)
-
-export interface GraphState extends Entity {
-  resolve(input: Field): unknown | null
-  buildLinks<TInput = unknown>(input: TInput, options: SetOptions): TInput
-  mutate<TInput extends Entity | null>(entity: TInput, options?: SetOptions): string | null
-  mutate<TInput extends string>(key: TInput, data: DataSetter, options?: SetOptions): string | null
-  getArgumentsForMutate(...args: Parameters<GraphState['mutate']>): {
-    entityKey: string | null
-    options: SetOptions | null
-    data: DataSetter
-  }
-  invalidate(field: Field): void
-  subscribe<TInput extends Entity | string>(input: TInput, callback: (data: any) => void): () => void
-  inspectFields(type: string): string[]
-  resolveParents(field: Field): unknown[]
-}
-
-export interface SetOptions {
-  replace?: boolean
-  overrideMutateMethod?: GraphState['mutate']
-}
+import { isDev } from './helpers/isDev'
+import { errorLog } from './utils/logger'
 
 let ID = 0
 const DEEP_LIMIT = 100
 
-export type Plugin = (state: GraphState) => GraphState
-
-interface CreateStateOptions {
-  id?: string
-  initialState?: Entity
-  plugins?: Plugin[]
-}
+const STATE_TYPE = 'State'
 
 export const createState = (options?: CreateStateOptions): GraphState => {
   const id = options?.id ?? `Instance:${ID++}`
   const plugins = options?.plugins ?? []
+  const keys = options?.keys ?? {}
   const links = new Map<string, any>()
   const subscribes = new Map<string, ((newState: any) => any)[]>()
   const linkRefs = createLinkRefs()
   let notifyDeepIndex = 0
 
-  const resolve = (input?: Field) => {
+  const resolve = (input?: Entity) => {
     if (!input) return null
-    const entity = isObject(input) ? input : entityOfKey(input as string)
-    const entityValue = links.get(keyOfEntity(entity as Entity)!) as Entity
+    const inputKey = keyOfEntity(input)
+    const value = inputKey ? (links.get(inputKey) as Graph) : null
 
-    // Generate new link
-    return entity && entityValue ? { ...entityValue } : null
+    return value ? { ...value } : null
   }
 
   // TODO BuildLink will make ONLY link without subscribe and notify
@@ -63,18 +34,30 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     iterator(
       input,
       (_: PropertyKey, value: any) => {
-        if (isObject(value) && keyOfEntity(value as Entity) && keyOfEntity(input as Entity)) {
+        const inputKey = keyOfEntity(input as Entity)
+        const valueKey = keyOfEntity(value as Entity)
+
+        if (isObject(value) && valueKey) {
           const nextLink = options?.overrideMutateMethod
-            ? options.overrideMutateMethod(value as Entity, options)
-            : mutate(value as Entity, options)
-          if (nextLink) {
-            linkRefs.addRefs(nextLink, keyOfEntity(input as Entity)!)
+            ? options.overrideMutateMethod(value as Graph, options)
+            : mutate(value as Graph, options)
+
+          if (nextLink && inputKey) {
+            linkRefs.addRefs(nextLink, inputKey)
           }
           return nextLink
         }
 
-        if (typeof value === 'string' && entityOfKey(value)) {
-          linkRefs.addRefs(value, keyOfEntity(input as Entity)!)
+        if (typeof value === 'string' && entityOfKey(value) && inputKey) {
+          linkRefs.addRefs(value, inputKey!)
+        }
+
+        if (isDev) {
+          if (isObject(value) && '_type' in value && !valueKey) {
+            errorLog(
+              `Can't build a key for "${value._type}" type with ${JSON.stringify(value)} value. Pass _id, id property or define key.`
+            )
+          }
         }
 
         return value
@@ -84,21 +67,21 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     )
 
   // TODO Add batchUpdate for deep object
-  const mutate = (field: string | Entity, ...args: any[]) => {
-    const { entityKey, options, data } = getArgumentsForMutate(field, ...args)
+  const mutate = (entity: Entity, ...args: any[]) => {
+    const { graphKey, options, data } = getArgumentsForMutate(entity, ...args)
 
-    if (!field) return null
-    const currentValue = { ...(links.get(entityKey ?? '') ?? {}) }
-    const entityData = typeof data === 'function' ? data(currentValue) : data
-    const entity = {
-      ...entityData,
-      ...entityOfKey(entityKey),
+    if (!graphKey) return null
+    const currentValue = { ...(links.get(graphKey ?? '') ?? {}) }
+    const graphData = typeof data === 'function' ? data(currentValue) : data
+    const graph = {
+      ...graphData,
+      ...entityOfKey(graphKey),
     }
 
-    if (entityKey) {
-      const entityWithLinks = buildLinks(entity, options)
+    const graphWithLinks = buildLinks(graph, options)
 
-      iterator(entityWithLinks, (_: PropertyKey, value: any, path: string) => {
+    if (graphKey) {
+      iterator(graphWithLinks, (_: PropertyKey, value: any, path: string) => {
         const prevValue = get(currentValue, path)
         let nextValue = value
 
@@ -119,15 +102,15 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         return nextValue
       })
 
-      links.set(entityKey, currentValue)
+      links.set(graphKey, currentValue)
       notify(currentValue)
     }
 
-    return entityKey
+    return graphKey
   }
 
-  const invalidate = (field: Field) => {
-    const key = typeof field === 'string' ? field : keyOfEntity(field)
+  const invalidate = (enity: Entity) => {
+    const key = keyOfEntity(enity)
 
     if (key) {
       links.delete(key)
@@ -159,13 +142,13 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     }
   }
 
-  const notify = (field: Field) => {
+  const notify = (entity: Entity) => {
     if (notifyDeepIndex > DEEP_LIMIT) {
       throw new Error('Too deep notify.')
     }
 
-    const key = typeof field === 'string' ? field : keyOfEntity(field)
-    const storeKey = keyOfEntity({ _type: 'State', _id: id })
+    const key = keyOfEntity(entity)
+    const storeKey = keyOfEntity({ _type: STATE_TYPE, _id: id })
 
     if (key) {
       notifyDeepIndex++
@@ -193,44 +176,88 @@ export const createState = (options?: CreateStateOptions): GraphState => {
 
   // TODO Add subscribe for all state
   const subscribe = <TInput extends Entity | string>(input: TInput, callback: (data: any) => void) => {
-    const key = (typeof input === 'string' ? input : keyOfEntity(input)) || ''
+    const key = keyOfEntity(input)
 
-    if (subscribes.has(key)) {
-      subscribes.set(key, [...Array.from(subscribes.get(key) || []), callback])
-    } else {
-      subscribes.set(key, [callback])
+    if (key) {
+      if (subscribes.has(key)) {
+        subscribes.set(key, [...Array.from(subscribes.get(key) || []), callback])
+      } else {
+        subscribes.set(key, [callback])
+      }
     }
 
     return () => {
-      const subIndex = (subscribes.get(key) || []).findIndex(sub => sub === callback)
+      if (key) {
+        const subIndex = (subscribes.get(key) || []).findIndex(sub => sub === callback)
 
-      if (subIndex !== -1) {
-        const nextSubscribers = subscribes.get(key) || []
-        nextSubscribers.splice(subIndex, 1)
+        if (subIndex !== -1) {
+          const nextSubscribers = subscribes.get(key) || []
+          nextSubscribers.splice(subIndex, 1)
 
-        subscribes.set(key, nextSubscribers)
+          subscribes.set(key, nextSubscribers)
+        }
       }
     }
   }
 
-  const inspectFields = (entityType: Entity['_type']) =>
+  const inspectFields = (graphType: Graph['_type']) =>
     Array.from(links.entries())
-      .map(([key, entity]) => (entity._type === entityType ? key : undefined))
+      .map(([key, graph]) => (graph._type === graphType ? key : undefined))
       .filter(Boolean) as string[]
 
-  const resolveParents = (field: Field) => {
+  const resolveParents = (field: Entity) => {
     const key = (typeof field === 'string' ? field : keyOfEntity(field)) || ''
     const refs = linkRefs.getParents(key) ?? []
 
     return refs.map(resolve)
   }
 
+  const keyOfEntity = (entity: Entity) => {
+    if (typeof entity === 'string') {
+      return entityOfKey(entity) ? entity : null
+    }
+    if (!entity?._type) {
+      return null
+    }
+
+    let entityId: string | null = null
+
+    if (entity._type in keys) {
+      entityId = keys[entity._type]?.(entity) ?? null
+    } else if (entity.id || entity._id) {
+      entityId = `${entity.id ?? entity._id}`
+    }
+
+    return !entityId ? entityId : `${entity._type}:${entityId}`
+  }
+
+  const entityOfKey = (key?: string | null) => {
+    if (isObject(key) && (key as any)?._type && keyOfEntity(key)) {
+      return key as any as Graph
+    }
+    if (!key || typeof key !== 'string') return null
+
+    const [typeName, ...restTypes] = key.split(':')
+    if (!typeName || restTypes.length < 1) return null
+
+    return {
+      _type: typeName,
+      _id: restTypes.join(':'),
+    }
+  }
+
+  const getArgumentsForMutate = (entity: string | Entity, ...args: any[]) => ({
+    graphKey: typeof entity === 'string' ? entity : keyOfEntity(entity),
+    options: typeof entity === 'string' ? args[1] : (args[0] as SetOptions | undefined),
+    data: typeof entity === 'string' ? args[0] : entity,
+  })
+
   if (options?.initialState) {
     mutate(options.initialState, { replace: true })
   }
 
   const graphState: GraphState = {
-    _type: 'State' as const,
+    _type: STATE_TYPE,
     _id: id,
     mutate,
     subscribe,
@@ -239,41 +266,11 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     invalidate,
     buildLinks,
     resolveParents,
-    linkRefs,
+    keyOfEntity,
+    entityOfKey,
+    links,
+    getArgumentsForMutate,
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)
-}
-
-export const getArgumentsForMutate = (field: string | Entity, ...args: any[]) => ({
-  entityKey: typeof field === 'string' ? field : keyOfEntity(field),
-  options: typeof field === 'string' ? args[1] : (args[0] as SetOptions | null),
-  data: typeof field === 'string' ? args[0] : field,
-})
-
-export const keyOfEntity = (entity?: Entity | null) => {
-  if (entity?._id && entity._type) {
-    return `${entity._type}:${entity._id}`
-  }
-
-  if (typeof entity === 'string' && entityOfKey(entity)) {
-    return entity
-  }
-
-  return null
-}
-
-export const entityOfKey = (key?: string | null | number): Entity | null => {
-  if (isObject(key) && (key as any)?._type && (key as any)?._id) {
-    return key as any as Entity
-  }
-  if (!key || typeof key !== 'string') return null
-
-  const [typeName, ...restTypes] = key.split(':')
-  if (!typeName || restTypes.length < 1) return null
-
-  return {
-    _type: typeName,
-    _id: restTypes.join(':'),
-  }
 }

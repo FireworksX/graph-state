@@ -38,6 +38,7 @@ describe('CreateLinkRefs', () => {
   it('should invalidate depend links', () => {
     const refs = createLinkRefs()
 
+    refs.addRefs('NestedChild', 'ChildOne')
     refs.addRefs('ChildOne', 'Parent')
     refs.addRefs('ChildTwo', 'Parent')
 

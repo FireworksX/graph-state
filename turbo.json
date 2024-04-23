@@ -11,7 +11,9 @@
       "persistent": true
     },
     "lint": {},
-    "check": {},
+    "check": {
+      "dependsOn": ["^build"]
+    },
     "test": {}
   }
 }
