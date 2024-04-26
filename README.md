@@ -1,8 +1,8 @@
 <div align="center">
 
-[![npm](https://img.shields.io/npm/v/@graph-state/core?style=flat-square)](https://www.npmjs.com/package/@mozaikjs/core)
+[![npm](https://img.shields.io/npm/v/@graph-state/core?style=flat-square)](https://www.npmjs.com/package/@graph-state/core)
 ![npm type definitions](https://img.shields.io/npm/types/@graph-state/core?style=flat-square)
-[![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/core?style=flat-square)](https://bundlephobia.com/result?p=@mozaikjs/core)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/core?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/core)
 
 <br/>
 <br/>
@@ -18,11 +18,11 @@
 | Package                                                                               | Version                                                                                                                  | Docs                                                                                                      | Size                                                                                                                                                  |
 |---------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@graph-state/core`](https://github.com/FireworksX/graph-state/tree/master/packages/core#readme) | [![npm](https://img.shields.io/npm/v/@graph-state/core?style=flat-square)](https://www.npmjs.com/package/@graph-state/core) | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/core)   | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/core?style=flat-square)](https://bundlephobia.com/result?p=@mozaikjs/core)    |
-| [`@graph-state/react`](https://github.com/FireworksX/mozaik/tree/main/packages/react/#readme)    | [![npm](https://img.shields.io/npm/v/@graph-state/react?style=flat-square)](https://www.npmjs.com/package/@graph-state/react)   | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/react)  | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/react?style=flat-square)](https://bundlephobia.com/result?p=@mozaiks/react)   |
+| [`@graph-state/react`](https://github.com/FireworksX/mozaik/tree/main/packages/react/#readme)    | [![npm](https://img.shields.io/npm/v/@graph-state/react?style=flat-square)](https://www.npmjs.com/package/@graph-state/react)   | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/react)  | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/react?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/react)   |
 
 ## Examples
 
-- Base functional [CodeSandbox](https://codesandbox.io/p/live/1755c979-5ca2-4672-b7e2-10738677a72b)
+- Base functional [CodeSandbox](https://codesandbox.io/p/sandbox/graph-state-base-s8nmxf)
 
 ## Get started
 
