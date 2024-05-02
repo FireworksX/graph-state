@@ -17,6 +17,7 @@ module.exports = {
     'coverage/',
     'benchmark/',
     'docs/',
+    'playground/',
   ],
 
   settings: {
