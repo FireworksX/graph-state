@@ -263,7 +263,6 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     keyOfEntity,
     entityOfKey,
     getArgumentsForMutate,
-    cache,
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)
