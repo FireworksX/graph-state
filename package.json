@@ -15,7 +15,8 @@
     "test": "turbo run test",
     "check": "turbo run check",
     "typecheck": "turbo run typecheck",
-    "release": "turbo run build test lint check && changeset version && changeset publish"
+    "release": "turbo run build test lint check && changeset version && changeset publish",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@changesets/cli": "^2.25.0",

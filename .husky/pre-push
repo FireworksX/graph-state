@@ -1,0 +1,9 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+yarn test
+yarn storybook:build
+yarn storybook:serve:pm2
+yarn storybook:test || true
+yarn storybook:delete:pm2
+
