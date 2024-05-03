@@ -26,11 +26,11 @@ export const useGraph = <TState = any>(
   )
 
   const updateState = useCallback(
-    (args: DataSetter<TState>) => {
+    (value: DataSetter<TState>) => {
       const key = typeof field === 'string' ? field : graphState.keyOfEntity(field)
 
       if (field && key) {
-        graphState.mutate(key, args)
+        graphState.mutate(key, value)
       }
     },
     [graphState, field]

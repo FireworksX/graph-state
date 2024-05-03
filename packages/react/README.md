@@ -3,7 +3,7 @@
 A React hook that returns a tuple `[value, setter]`, similar to the `useState` React hook.
 
 ### Parameters
-- **graphState**: Instance of graph manager state. It`s a **graph**. You can create compositions with nested **states** which had isolate scope of graphs.
+- **graphState**: Instance of graph manager state. It`s a **graph**.
 - **entity**: The key of the graph entity that we subscribe and mutate.
 
 ### Returns

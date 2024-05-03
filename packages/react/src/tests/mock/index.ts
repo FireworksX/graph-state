@@ -19,9 +19,6 @@ export const mockPost = {
 
 export const mockGraphState = () =>
   createState({
-    keys: {
-      Author: author => author.key,
-    },
     initialState: {
       _type: 'Root',
       _id: generateId(),

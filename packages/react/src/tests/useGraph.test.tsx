@@ -17,14 +17,14 @@ describe('useGraph', () => {
 
     expect(result.current[0]).toStrictEqual({
       _type: 'Author',
-      _id: '100',
+      _id: '20',
       name: 'Elizabeth J. McKeon',
       key: '100',
     })
   })
 
   it('should handle subscribing to field changes', () => {
-    const authorKey = 'Author:100'
+    const authorKey = 'Author:20'
     const postKey = 'Post:0'
     const graphState = mockGraphState()
 
@@ -38,7 +38,7 @@ describe('useGraph', () => {
   })
 
   it("should unsubscribe when there's an unmount", () => {
-    const authorKey = 'Author:100'
+    const authorKey = 'Author:20'
     const graphState = mockGraphState()
 
     const { result, unmount } = renderHook(() => useGraph(graphState, authorKey))
@@ -49,6 +49,6 @@ describe('useGraph', () => {
 
     result.current[1]({ name: 'Donald M. Timm' })
 
-    expect(result.current[0]).toStrictEqual({ _type: 'Author', _id: '100', name: 'John Doe', key: '100' })
+    expect(result.current[0]).toStrictEqual({ _type: 'Author', _id: '20', name: 'John Doe', key: '100' })
   })
 })

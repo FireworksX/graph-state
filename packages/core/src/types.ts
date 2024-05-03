@@ -53,9 +53,7 @@ export interface KeyingConfig {
 
 export type AnyObject = Record<string, unknown>
 
-export type DataSetter<T = any> = T extends undefined
-  ? AnyObject | ((prev: AnyObject) => AnyObject)
-  : T | ((prev: T) => T)
+export type DataSetter<T = any> = T | ((prev: T) => T)
 
 export type Dispatch<T> = (value: T) => void
 
