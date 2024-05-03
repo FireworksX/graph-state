@@ -1,5 +1,7 @@
+export type Type = string
+
 export interface SystemFields {
-  _type: string
+  _type: Type
   id?: string | number | null
   _id?: string | number | null
 }
@@ -10,7 +12,7 @@ export interface DataFields {
 
 export type Graph = SystemFields & DataFields
 
-export type DataField = Scalar | Graph | undefined
+export type DataField = Scalar | Graph | undefined | Scalar[] | Graph[]
 
 export type Entity = undefined | null | Graph | string
 
@@ -22,42 +24,43 @@ export interface ScalarObject {
 }
 
 export type Scalar = Primitive | ScalarObject
-
 export type Primitive = null | number | boolean | string
-
-export type FieldToEntity<TField extends Entity> = TField extends null
-  ? null
-  : TField extends Graph
-    ? TField
-    : TField extends `${infer TType}:${infer TKey}`
-      ? { _type: TType; _id: TKey }
-      : TField
-
-export type Links<TInput extends Graph> = {
-  [TKey in keyof TInput]: TInput[TKey] extends (infer TArrayValue)[]
-    ? TArrayValue extends Graph
-      ? string[]
-      : TArrayValue
-    : TInput[TKey] extends Record<PropertyKey, infer TObjValue>
-      ? TObjValue extends Graph
-        ? Record<PropertyKey, string>
-        : TObjValue
-      : TInput[TKey]
-}
-
 export type KeyGenerator = (data: Graph) => string | null
+export type ResolverResult = DataField | (DataFields & { __typename?: string }) | null | undefined
+export type ResolveInfo = unknown
+
+export type Resolver<TParent = Graph, TResult = ResolverResult> = (
+  parent: TParent,
+  state: GraphState,
+  info: ResolveInfo
+) => TResult
 
 export interface KeyingConfig {
   [typename: string]: KeyGenerator
+}
+
+export type ResolverConfig = {
+  [typeName: string]:
+    | {
+        [fieldName: string]: Resolver | undefined
+      }
+    | undefined
 }
 
 export type AnyObject = Record<string, unknown>
 
 type DataSetter = AnyObject | ((prev: AnyObject) => AnyObject)
 
+export type MutateField = (
+  graph: Graph | Graph[] | null,
+  parentFieldKey?: LinkKey,
+  options?: SetOptions
+) => (LinkKey | LinkKey[] | null | null[])[] | LinkKey
+
 export interface SetOptions {
   replace?: boolean
   overrideMutateMethod?: GraphState['mutate']
+  parent?: Entity
 }
 
 export type Plugin = (state: GraphState) => GraphState
@@ -67,12 +70,12 @@ export interface CreateStateOptions {
   initialState?: Graph
   plugins?: Plugin[]
   keys?: KeyingConfig
+  resolvers?: ResolverConfig
 }
 
 export interface GraphState extends Graph {
   resolve(input: Entity): unknown | null
-  buildLinks<TInput = unknown>(input: TInput, options: SetOptions): TInput
-  mutate<TInput extends Graph | null>(Graph: TInput, options?: SetOptions): string | null
+  mutate<TInput extends Graph | null>(graph: TInput, options?: SetOptions): string | null
   mutate<TInput extends string>(key: TInput, data: DataSetter, options?: SetOptions): string | null
   invalidate(field: Entity): void
   subscribe<TInput extends Graph | string>(input: TInput, callback: (data: any) => void): () => void
