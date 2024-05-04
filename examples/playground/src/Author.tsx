@@ -7,7 +7,7 @@ interface AuthorProps extends PropsWithChildren {
 }
 
 export const Author: FC<AuthorProps> = ({ authorEntity, children }) => {
-  const author = useGraph(graphState, authorEntity);
+  const [author] = useGraph(graphState, authorEntity);
 
   return (
     <div style={{ background: '#ffdddd' }}>

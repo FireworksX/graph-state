@@ -8,7 +8,7 @@ interface PostProps {
 }
 
 export const Post: FC<PostProps> = ({ postKey }) => {
-  const post = useGraph(graphState, postKey);
+  const [post] = useGraph(graphState, postKey);
 
   return (
     <div style={{ width: 300, background: '#eee' }}>

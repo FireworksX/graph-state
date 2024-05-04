@@ -187,6 +187,18 @@ describe('createState', () => {
       expect(graphState.inspectFields(10)).toStrictEqual([])
       expect(graphState.inspectFields()).toStrictEqual([])
     })
+
+    it('should skip partial keys', () => {
+      graphState.mutate({
+        _type: 'User',
+        _id: 'id',
+        nested: {
+          value: 100,
+        },
+      })
+
+      expect(graphState.inspectFields('User')).toStrictEqual(['User:id'])
+    })
   })
 
   describe('invalidate', () => {

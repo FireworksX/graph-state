@@ -40,11 +40,11 @@ const generatePost = () => ({
 const graph = {
   _type: 'Root',
   _id: 'rootId',
-  // child: {
-  //   _type: 'Layer',
-  //   _id: 'fff',
-  //   recursive: 'Root:rootId',
-  // },
+  child: {
+    _type: 'Layer',
+    _id: 'fff',
+    recursive: 'Root:rootId',
+  },
   name: 'rootname',
   skills: [
     { _type: 'Skill', _id: 'skillId', name: 'js', webLink: 'Https' },
@@ -55,11 +55,12 @@ const graph = {
 };
 
 export const graphState = createState({
-  // keys: {
-  //   User: user => user.key,
-  // },
+  keys: {
+    User: user => `${user.key}`,
+  },
   initialState: graph,
 });
+
 
 function App() {
   const posts = useGraphFields(graphState, 'Post');
@@ -67,18 +68,21 @@ function App() {
 
   const renameAuthor = (userKey: string, nextName: string) =>
     graphState.mutate(userKey, {
-      name: nextName,
-      social: {
-        _type: 'Social',
-        _id: generateId(),
-        name: `Social ${nextName}`,
-      },
+      name: nextName
     });
+
+
 
   return (
     <>
       <h2>Rename authors</h2>
-      {users.map(user => (
+      {posts.map((link) => (
+        <>
+          <pre>{JSON.stringify(graphState.resolve(link), null, 2)}</pre>
+          <hr/>
+        </>
+      ))}
+      {users.map((user) => (
         <Author key={user} authorEntity={user}>
           <input
             type="text"
@@ -88,7 +92,7 @@ function App() {
         </Author>
       ))}
 
-      {posts.map(post => (
+      {posts.map((post) => (
         <Post key={post} postKey={post} />
       ))}
     </>

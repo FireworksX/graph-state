@@ -1,9 +1,12 @@
 import { unique } from './utils/unique'
+import type { LinkKey } from './types'
+import { isPartialKey } from './utils/isPartOfGraph'
 
 export const createCache = () => {
-  const links = new Map<string, any>()
-  const parentRefs = new Map<string, string[]>()
-  const childrenRefs = new Map<string, string[]>()
+  const types = new Map<string, LinkKey[]>()
+  const links = new Map<LinkKey, any>()
+  const parentRefs = new Map<LinkKey, LinkKey[]>()
+  const childrenRefs = new Map<LinkKey, LinkKey[]>()
 
   /**
    * When change depKey we need update targetKey
@@ -45,8 +48,17 @@ export const createCache = () => {
   }
 
   const writeLink = (key: string | null | undefined, value: any, depKey?: string) => {
-    if (key) {
+    if (typeof key === 'string') {
       links.set(key, value)
+
+      if (!isPartialKey(key)) {
+        const [type] = key.split(':')
+        if (!types.has(type)) {
+          types.set(type, [key])
+        } else {
+          types.get(type)?.push(key)
+        }
+      }
     }
 
     if (depKey && key) {
@@ -76,5 +88,6 @@ export const createCache = () => {
     getLinkedRefs,
     invalidate,
     links,
+    types,
   }
 }

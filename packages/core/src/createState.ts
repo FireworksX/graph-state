@@ -193,11 +193,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     }
   }
 
-  const inspectFields = (graphType: Graph['_type']) =>
-    cache
-      .getLinkEntries()
-      .map(([key, graph]) => (graph?._type === graphType ? key : undefined))
-      .filter(Boolean) as string[]
+  const inspectFields = (graphType: Graph['_type']) => cache.types.get(graphType) ?? []
 
   const resolveParents = (field: Entity) => {
     const key = (typeof field === 'string' ? field : keyOfEntity(field)) || ''
@@ -263,6 +259,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     keyOfEntity,
     entityOfKey,
     getArgumentsForMutate,
+    types: cache.types,
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)
