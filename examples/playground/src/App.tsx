@@ -47,13 +47,13 @@ const graph = {
     authorOne,
     recursive: 'Root:rootId',
   },
-  name: 'rootname',
-  skills: [
-    { _type: 'Skill', _id: 'skillId', name: 'js', webLink: 'Https' },
-    'php',
-  ],
-
-  posts: [generatePost(), generatePost(), generatePost()],
+  // name: 'rootname',
+  // skills: [
+  //   { _type: 'Skill', _id: 'skillId', name: 'js', webLink: 'Https' },
+  //   'php',
+  // ],
+  //
+  // posts: [generatePost(), generatePost(), generatePost()],
 };
 
 export const graphState = createState({
