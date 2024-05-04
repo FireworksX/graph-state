@@ -51,8 +51,8 @@ export const createCache = () => {
     if (typeof key === 'string') {
       links.set(key, value)
 
-      if (!isPartialKey(key)) {
-        const [type] = key.split(':')
+      const [type] = key.split(':')
+      if (!isPartialKey(key) && !types.get(type)?.includes(key)) {
         if (!types.has(type)) {
           types.set(type, [key])
         } else {

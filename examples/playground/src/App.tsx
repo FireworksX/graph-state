@@ -1,5 +1,5 @@
 import { createState } from '@graph-state/core';
-import { useGraphFields } from '@graph-state/react';
+import { GraphValue, useGraphFields } from '@graph-state/react';
 import { Post } from './Post.tsx';
 import { Author } from './Author.tsx';
 
@@ -55,44 +55,31 @@ const graph = {
 };
 
 export const graphState = createState({
-  keys: {
-    User: user => `${user.key}`,
-  },
   initialState: graph,
 });
-
 
 function App() {
   const posts = useGraphFields(graphState, 'Post');
   const users = useGraphFields(graphState, 'User');
 
-  const renameAuthor = (userKey: string, nextName: string) =>
-    graphState.mutate(userKey, {
-      name: nextName
-    });
-
-
-
   return (
     <>
       <h2>Rename authors</h2>
-      {posts.map((link) => (
-        <>
-          <pre>{JSON.stringify(graphState.resolve(link), null, 2)}</pre>
-          <hr/>
-        </>
-      ))}
-      {users.map((user) => (
-        <Author key={user} authorEntity={user}>
-          <input
-            type="text"
-            value={(graphState.resolve(user) as any).name}
-            onChange={({ target }) => renameAuthor(user, target.value)}
-          />
-        </Author>
+      {users.map(userKey => (
+        <GraphValue key={userKey} graphState={graphState} field={userKey}>
+          {(user, updateUser) => (
+            <Author key={userKey} authorEntity={userKey}>
+              <input
+                type="text"
+                value={user.name}
+                onChange={({ target }) => updateUser({ name: target.value })}
+              />
+            </Author>
+          )}
+        </GraphValue>
       ))}
 
-      {posts.map((post) => (
+      {posts.map(post => (
         <Post key={post} postKey={post} />
       ))}
     </>
