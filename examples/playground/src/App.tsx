@@ -10,14 +10,14 @@ const random = (min: number, max: number) =>
 
 const authorOne = {
   _type: 'User',
-  _id: generateId(),
+  _id: 'one',
   name: 'John Doe',
   key: '100',
 };
 
 const authorTwo = {
   _type: 'User',
-  _id: generateId(),
+  _id: 'two',
   name: 'Sam Smith',
   key: '200',
 };
@@ -40,9 +40,11 @@ const generatePost = () => ({
 const graph = {
   _type: 'Root',
   _id: 'rootId',
+  authorOne,
   child: {
     _type: 'Layer',
     _id: 'fff',
+    authorOne,
     recursive: 'Root:rootId',
   },
   name: 'rootname',
@@ -57,6 +59,8 @@ const graph = {
 export const graphState = createState({
   initialState: graph,
 });
+
+console.log(graphState.resolveParents(authorOne));
 
 function App() {
   const posts = useGraphFields(graphState, 'Post');
