@@ -49,7 +49,9 @@ export type ResolverConfig = {
 
 export type AnyObject = Record<string, unknown>
 
-type DataSetter = AnyObject | ((prev: AnyObject) => AnyObject)
+export type DataSetter<T = any> = T | ((prev: T) => T)
+
+export type Dispatch<T> = (value: T) => void
 
 export type MutateField = (
   graph: Graph | Graph[] | null,
