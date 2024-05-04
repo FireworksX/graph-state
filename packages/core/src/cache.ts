@@ -1,6 +1,6 @@
 import { unique } from './utils/unique'
 
-export const cache = () => {
+export const createCache = () => {
   const links = new Map<string, any>()
   const parentRefs = new Map<string, string[]>()
   const childrenRefs = new Map<string, string[]>()

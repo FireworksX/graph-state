@@ -2,7 +2,7 @@ import type { Graph, CreateStateOptions, GraphState, SetOptions, Entity } from '
 import type { DataField } from 'src'
 import { isGraph, isHTMLNode, isObject, isPrimitive } from './utils/checker'
 import { iterator } from './utils/iterator'
-import { cache as cacheManager } from './cache'
+import { createCache } from './cache'
 import { joinKeys } from './utils/joinKeys'
 import { isPartOfGraph } from './utils/isPartOfGraph'
 
@@ -15,7 +15,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const plugins = options?.plugins ?? []
   const keys = options?.keys ?? {}
   // const resolvers = options?.resolvers ?? {}
-  const cache = cacheManager()
+  const cache = createCache()
   const subscribes = new Map<string, ((newState: any) => any)[]>()
   let deepIndex = 0
 
