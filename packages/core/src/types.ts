@@ -53,7 +53,9 @@ export interface KeyingConfig {
 
 export type AnyObject = Record<string, unknown>
 
-type DataSetter = AnyObject | ((prev: AnyObject) => AnyObject)
+export type DataSetter<T = any> = T | ((prev: T) => T)
+
+export type Dispatch<T> = (value: T) => void
 
 export interface SetOptions {
   replace?: boolean
