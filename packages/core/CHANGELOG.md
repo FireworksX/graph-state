@@ -1,5 +1,24 @@
 # @graph-state/core
 
+## 0.3.0
+
+### Minor Changes
+
+- 6cd0030: Update link base structure. Add batch update.
+
+### Patch Changes
+
+- 05f88d0: Add types for inspectFields
+- 4abe615: Skip not changing mutation (primitives only)
+- 2b8e8c7: useGraph:
+
+  - Changed the structure of the useGraph hook, now it returns a tuple of `[value, setter]`.
+  - Vitest configure & added base tests.
+
+  Core:
+
+  - Added new types
+
 ## 0.2.0
 
 ### Minor Changes
