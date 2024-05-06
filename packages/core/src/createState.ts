@@ -1,126 +1,119 @@
 import type { Graph, CreateStateOptions, GraphState, SetOptions, Entity } from 'src'
-import { createLinkRefs } from './createLinkRefs'
-import { isHTMLNode, isObject } from './utils/checker'
+import type { DataField } from 'src'
+import { isGraph, isHTMLNode, isObject, isPrimitive } from './utils/checker'
 import { iterator } from './utils/iterator'
-import { get } from './utils/get'
-import { set } from 'src/utils/set'
-import { isDev } from './helpers/isDev'
-import { errorLog } from './utils/logger'
+import { createCache } from './cache'
+import { joinKeys } from './utils/joinKeys'
+import { isPartOfGraph } from './utils/isPartOfGraph'
 
 let ID = 0
 const DEEP_LIMIT = 100
-
-const STATE_TYPE = 'State'
+const STATE_TYPE = 'Instance'
 
 export const createState = (options?: CreateStateOptions): GraphState => {
-  const id = options?.id ?? `Instance:${ID++}`
+  const id = options?.id ?? `${ID++}`
   const plugins = options?.plugins ?? []
   const keys = options?.keys ?? {}
-  const links = new Map<string, any>()
+  // const resolvers = options?.resolvers ?? {}
+  const cache = createCache()
   const subscribes = new Map<string, ((newState: any) => any)[]>()
-  const linkRefs = createLinkRefs()
-  let notifyDeepIndex = 0
+  let deepIndex = 0
 
   const resolve = (input?: Entity) => {
     if (!input) return null
     const inputKey = keyOfEntity(input)
-    const value = inputKey ? (links.get(inputKey) as Graph) : null
+    let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
+
+    if (isObject(value) || Array.isArray(value)) {
+      value = Object.entries(value).reduce((acc, [key, value]) => {
+        if ((isPrimitive(value) && !entityOfKey(value as any)) || !isPartOfGraph(keyOfEntity(value as any), inputKey)) {
+          return { ...acc, [key]: value }
+        }
+
+        acc[key] = safeResolve(value as any)
+
+        return acc
+      }, {} as Graph)
+    }
 
     return value ? { ...value } : null
   }
 
-  // TODO BuildLink will make ONLY link without subscribe and notify
-  const buildLinks = <TInput = unknown>(input: TInput, options?: SetOptions): TInput =>
-    iterator(
-      input,
-      (_: PropertyKey, value: any) => {
-        const inputKey = keyOfEntity(input as Entity)
-        const valueKey = keyOfEntity(value as Entity)
+  const safeResolve = (input?: Entity) => resolve(input) ?? input
 
-        if (isObject(value) && valueKey) {
-          const nextLink = options?.overrideMutateMethod
-            ? options.overrideMutateMethod(value as Graph, options)
-            : mutate(value as Graph, options)
+  const mutateField = (input: DataField, parentFieldKey?: string, options?: SetOptions): DataField => {
+    if (!input || isPrimitive(input) || isHTMLNode(input)) {
+      return input
+    }
 
-          if (nextLink && inputKey) {
-            linkRefs.addRefs(nextLink, inputKey)
-          }
-          return nextLink
-        }
+    if (Array.isArray(input)) {
+      return input.map((item, index) => {
+        const indexKey = parentFieldKey ? joinKeys(parentFieldKey, `${index}`) : undefined
+        return mutateField(item, indexKey, options)
+      })
+    }
 
-        if (typeof value === 'string' && entityOfKey(value) && inputKey) {
-          linkRefs.addRefs(value, inputKey!)
-        }
+    const entityKey = isGraph(input) ? keyOfEntity(input) : null
+    const childKey = entityKey ?? parentFieldKey
 
-        if (isDev) {
-          if (isObject(value) && '_type' in value && !valueKey) {
-            errorLog(
-              `Can't build a key for "${value._type}" type with ${JSON.stringify(value)} value. Pass _id, id property or define key.`
-            )
-          }
-        }
+    return mutate(childKey, input, options)
+  }
 
-        return value
-      },
-      '',
-      { skipPredicate: (value: any) => isHTMLNode(value) }
-    )
-
-  // TODO Add batchUpdate for deep object
   const mutate = (entity: Entity, ...args: any[]) => {
     const { graphKey, options, data } = getArgumentsForMutate(entity, ...args)
-
-    if (!graphKey) return null
-    const currentValue = { ...(links.get(graphKey ?? '') ?? {}) }
-    const graphData = typeof data === 'function' ? data(currentValue) : data
-    const graph = {
-      ...graphData,
+    const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
+    const prevGraph = resolve(graphKey ?? '')
+    const computedDataFields = typeof data === 'function' ? data(prevGraph) : data
+    let graphData: Graph = {
+      ...computedDataFields,
       ...entityOfKey(graphKey),
     }
 
-    const graphWithLinks = buildLinks(graph, options)
-
-    if (graphKey) {
-      iterator(graphWithLinks, (_: PropertyKey, value: any, path: string) => {
-        const prevValue = get(currentValue, path)
-        let nextValue = value
-
-        if (!options?.replace && !isHTMLNode(value)) {
-          if (Array.isArray(value) && Array.isArray(prevValue)) {
-            nextValue = [...new Set([...prevValue, ...value])]
-          }
-
-          if (isObject(value) && isObject(prevValue)) {
-            nextValue = {
-              ...prevValue,
-              ...value,
-            }
-          }
-        }
-
-        set(currentValue, path, nextValue)
-        return nextValue
-      })
-
-      links.set(graphKey, currentValue)
-      notify(currentValue)
+    if (!options?.replace && isObject(prevGraph) && isObject(graphData)) {
+      graphData = {
+        ...prevGraph,
+        ...graphData,
+      }
     }
 
+    const nextGraph = Object.entries(graphData).reduce((acc, [key, value]) => {
+      const fieldKey = joinKeys(graphKey, key)
+      let fieldValue = value
+      const prevValue = prevGraph?.[key]
+
+      if (isObject(fieldValue) || Array.isArray(fieldValue)) {
+        fieldValue = mutateField(fieldValue, fieldKey, {
+          ...options,
+          parent: graphKey,
+        })
+      }
+
+      if (!options?.replace && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
+        fieldValue = [...prevValue, ...fieldValue]
+      }
+
+      acc[key] = fieldValue
+
+      return acc
+    }, {} as Graph)
+
+    cache.writeLink(graphKey, nextGraph, parentKey)
+
+    notify(graphKey)
     return graphKey
   }
 
-  const invalidate = (enity: Entity) => {
-    const key = keyOfEntity(enity)
+  const invalidate = (entity: Entity) => {
+    const key = keyOfEntity(entity)
 
     if (key) {
-      links.delete(key)
-      const parents = linkRefs.getLinkedRefs(key)
+      const parents = cache.getLinkedRefs(key)
       const subs = subscribes.get(key) || []
-      linkRefs.invalidateRef(key)
+      cache.invalidate(key)
 
       parents.forEach(parentKey => {
         const parentValue = resolve(parentKey)
-        const validate = (value: any) => entityOfKey(value) && links.has(value)
+        const validate = (value: any) => entityOfKey(value) && cache.hasLink(value)
         const freshParent = iterator(parentValue, (_: PropertyKey, value: any) => {
           if (Array.isArray(value)) {
             return value.filter(validate)
@@ -133,7 +126,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
           return value
         })
 
-        links.set(parentKey, freshParent)
+        cache.writeLink(parentKey, freshParent)
         notify(parentKey)
       })
       subs.forEach(cb => cb(null))
@@ -143,7 +136,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   }
 
   const notify = (entity: Entity) => {
-    if (notifyDeepIndex > DEEP_LIMIT) {
+    if (deepIndex > DEEP_LIMIT) {
       throw new Error('Too deep notify.')
     }
 
@@ -151,9 +144,9 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     const storeKey = keyOfEntity({ _type: STATE_TYPE, _id: id })
 
     if (key) {
-      notifyDeepIndex++
+      deepIndex++
       const subs = subscribes.get(key) || []
-      const deps = linkRefs.getChildren(key) || []
+      const deps = cache.getChildren(key) || []
       const nextResult = resolve(key)
 
       if (!nextResult) return
@@ -171,7 +164,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       }
     }
 
-    notifyDeepIndex = 0
+    deepIndex = 0
   }
 
   // TODO Add subscribe for all state
@@ -200,14 +193,11 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     }
   }
 
-  const inspectFields = (graphType: Graph['_type']) =>
-    Array.from(links.entries())
-      .map(([key, graph]) => (graph._type === graphType ? key : undefined))
-      .filter(Boolean) as string[]
+  const inspectFields = (graphType: Graph['_type']) => cache.types.get(graphType) ?? []
 
   const resolveParents = (field: Entity) => {
     const key = (typeof field === 'string' ? field : keyOfEntity(field)) || ''
-    const refs = linkRefs.getParents(key) ?? []
+    const refs = cache.getParents(key) ?? []
 
     return refs.map(resolve)
   }
@@ -231,13 +221,13 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     return !entityId ? entityId : `${entity._type}:${entityId}`
   }
 
-  const entityOfKey = (key?: string | null) => {
-    if (isObject(key) && (key as any)?._type && keyOfEntity(key)) {
-      return key as any as Graph
+  const entityOfKey = (entity?: Entity) => {
+    if (isObject(entity) && (entity as any)?._type && keyOfEntity(entity)) {
+      return entity as any as Graph
     }
-    if (!key || typeof key !== 'string') return null
+    if (!entity || typeof entity !== 'string') return null
 
-    const [typeName, ...restTypes] = key.split(':')
+    const [typeName, ...restTypes] = entity.split(':')
     if (!typeName || restTypes.length < 1) return null
 
     return {
@@ -262,14 +252,14 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     mutate,
     subscribe,
     resolve,
+    safeResolve,
+    resolveParents,
     inspectFields,
     invalidate,
-    buildLinks,
-    resolveParents,
     keyOfEntity,
     entityOfKey,
-    links,
     getArgumentsForMutate,
+    types: cache.types,
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)

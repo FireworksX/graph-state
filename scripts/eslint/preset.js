@@ -17,7 +17,6 @@ module.exports = {
     'coverage/',
     'benchmark/',
     'docs/',
-    'playground/',
   ],
 
   settings: {
@@ -25,11 +24,8 @@ module.exports = {
       version: 'detect',
     },
   },
-
   extends: ['eslint:recommended', 'prettier', 'turbo'],
-
   plugins: ['@typescript-eslint', 'prettier'],
-
   rules: {
     'no-undef': 'off',
     'no-empty': 'off',

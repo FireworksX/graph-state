@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import { useSyncExternalStore } from 'use-sync-external-store'
+import { useSyncExternalStore } from 'use-sync-external-store/shim'
 import type { DataSetter, Dispatch, Entity, GraphState } from '@graph-state/core'
 
 export const useGraph = <TState = any>(

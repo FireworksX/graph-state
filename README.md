@@ -148,7 +148,8 @@ graphState.mutate('User:usernameOne', prev => ({
 
 ```
 
-> By default, state merging on top level. Merge objects and arrays. You don`t need spread every update.
+> By default, state deep merged. You don`t need spread every update.
+> You can use {replace: true} on mutation for replace state.
 
 ---
 

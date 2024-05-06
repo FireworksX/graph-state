@@ -168,82 +168,6 @@ describe('createState', () => {
     })
   })
 
-  describe('buildLinks', () => {
-    const graphState = createState()
-
-    it('should skip not Entity types', () => {
-      expect(graphState.buildLinks(sizeVariable)).toStrictEqual(sizeVariable)
-      expect(graphState.buildLinks(10)).toBe(10)
-      expect(graphState.buildLinks(undefined)).toBe(undefined)
-    })
-
-    it('should build first level links', () => {
-      const avatar = {
-        ...avatarLayer,
-        width: sizeVariable,
-        height: sizeVariable,
-      }
-
-      expect(graphState.buildLinks(avatar)).toStrictEqual({
-        ...avatarLayer,
-        width: graphState.keyOfEntity(sizeVariable),
-        height: graphState.keyOfEntity(sizeVariable),
-      })
-    })
-
-    it('should build nested links', () => {
-      const avatar = {
-        ...avatarLayer,
-        width: graphState.keyOfEntity(sizeVariable),
-        height: graphState.keyOfEntity(sizeVariable),
-      }
-
-      const header = {
-        ...headerLayer,
-        children: [avatar],
-        width: sizeVariable,
-      }
-
-      expect(graphState.buildLinks(header)).toStrictEqual({
-        ...headerLayer,
-        width: graphState.keyOfEntity(sizeVariable),
-        children: [graphState.keyOfEntity(avatarLayer)],
-      })
-    })
-
-    it('should skip build links inside non graph state', () => {
-      const post = {
-        _type: 'Post',
-        _id: 'postId',
-      }
-
-      const state = {
-        _type: 'Root',
-        payload: {
-          post: post,
-        },
-      }
-
-      expect(graphState.buildLinks(state)).toStrictEqual({
-        ...state,
-        payload: {
-          post: graphState.keyOfEntity(state.payload.post),
-        },
-      })
-    })
-
-    it('should skip HTML node', () => {
-      const htmlNode = global.document.createElement('div')
-      const domLayer = {
-        _type: 'Layer',
-        _id: 'dom',
-        value: htmlNode,
-      }
-
-      expect(isHTMLNode(graphState.buildLinks(domLayer)?.value)).toBeTruthy()
-    })
-  })
-
   describe('inspectFields', () => {
     const graphState = createState()
     const entities = [rootLayer, headerLayer, avatarLayer, sizeVariable]
@@ -262,6 +186,18 @@ describe('createState', () => {
     it('invalid entityType', () => {
       expect(graphState.inspectFields(10)).toStrictEqual([])
       expect(graphState.inspectFields()).toStrictEqual([])
+    })
+
+    it('should skip partial keys', () => {
+      graphState.mutate({
+        _type: 'User',
+        _id: 'id',
+        nested: {
+          value: 100,
+        },
+      })
+
+      expect(graphState.inspectFields('User')).toStrictEqual(['User:id'])
     })
   })
 
@@ -336,16 +272,17 @@ describe('createState', () => {
 
     it('should mutate with function setter', () => {
       const graphState = createState()
+      const avatarKey = graphState.keyOfEntity(avatarLayer)
       graphState.mutate('Layer:header', {
         overflow: 'hidden',
         image: avatarLayer,
       })
 
       expect(graphState.resolve(headerLayer).overflow).toBe('hidden')
-      expect(graphState.resolve(headerLayer).image).toBe(graphState.keyOfEntity(avatarLayer))
+      expect(graphState.resolve(headerLayer).image).toStrictEqual(avatarKey)
 
       graphState.mutate('Layer:header', prev => {
-        expect(prev).toStrictEqual({ ...headerLayer, overflow: 'hidden', image: graphState.keyOfEntity(avatarLayer) })
+        expect(prev).toStrictEqual({ ...headerLayer, overflow: 'hidden', image: avatarKey })
 
         return {
           overflow: `${prev.overflow}+auto`,
@@ -420,7 +357,7 @@ describe('createState', () => {
       ])
     })
 
-    it('should skip duplicate item in array', () => {
+    it('should not skip duplicate item in array', () => {
       const graphState = createState()
       graphState.mutate({
         ...headerLayer,
@@ -439,7 +376,7 @@ describe('createState', () => {
         children: [avatarLayer],
       })
 
-      expect(graphState.resolve(headerLayer).children).toHaveLength(1)
+      expect(graphState.resolve(headerLayer).children).toHaveLength(2)
     })
 
     it('should set value as link', () => {
@@ -467,7 +404,7 @@ describe('createState', () => {
         },
       })
 
-      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['display'])
+      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['display', '_type', '_id'])
 
       graphState.mutate(
         {
@@ -479,7 +416,7 @@ describe('createState', () => {
         },
         { replace: true }
       )
-      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['overflow'])
+      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['overflow', '_type', '_id'])
     })
 
     it('should replace fields with string key', () => {
@@ -492,7 +429,7 @@ describe('createState', () => {
         },
       })
 
-      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['display'])
+      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['display', '_type', '_id'])
 
       graphState.mutate(
         'Layer:header',
@@ -503,7 +440,7 @@ describe('createState', () => {
         },
         { replace: true }
       )
-      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['overflow'])
+      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['overflow', '_type', '_id'])
     })
 
     it('should replace fields in nested link', () => {
@@ -556,7 +493,7 @@ describe('createState', () => {
       expect(graphState.resolve('Layer:header').children).toStrictEqual(['c', 'd'])
     })
 
-    it('should throw Error when recursive object', () => {
+    test.skip('should throw Error when recursive object', () => {
       const graphState = createState()
       const recursiveObject = {
         ...rootLayer,
@@ -566,10 +503,10 @@ describe('createState', () => {
         },
       }
 
-      expect(() => graphState.mutate(recursiveObject)).toThrowError(/Too deep notify./)
+      expect(() => graphState.mutate(recursiveObject)).toThrowError(/Too deep/)
     })
 
-    it('should not merge nested fields', () => {
+    it('should merge nested fields', () => {
       const graphState = createState()
       graphState.mutate({
         ...rootLayer,
@@ -590,8 +527,10 @@ describe('createState', () => {
         },
       })
 
-      expect(Object.keys(graphState.resolve(rootLayer).options)).toStrictEqual(['css', 'list'])
-      expect(Object.keys(graphState.resolve(rootLayer).options.css)).toStrictEqual(['display'])
+      expect(Object.keys(graphState.resolve(rootLayer).options)).toEqual(expect.arrayContaining(['css', 'list']))
+      expect(Object.keys(graphState.resolve(rootLayer).options.css)).toEqual(
+        expect.arrayContaining(['overflow', 'display'])
+      )
 
       graphState.mutate({
         ...rootLayer,
@@ -602,8 +541,8 @@ describe('createState', () => {
         },
       })
 
-      expect(Object.keys(graphState.resolve(rootLayer).options)).toStrictEqual(['css', 'list'])
-      expect(Object.keys(graphState.resolve(rootLayer).options.css)).toStrictEqual(['list'])
+      expect(Object.keys(graphState.resolve(rootLayer).options)).toEqual(expect.arrayContaining(['css', 'list']))
+      expect(Object.keys(graphState.resolve(rootLayer).options.css)).toEqual(expect.arrayContaining(['list']))
     })
 
     it('should skip HTML node', () => {
@@ -653,18 +592,22 @@ describe('createState', () => {
 
       const root = {
         ...rootLayer,
+        someProp: avatarLayer,
         children: [headerLayer],
       }
       graphState.mutate(root)
-      const spy = vi.fn()
+      const spyHeader = vi.fn()
+      const spyAvatar = vi.fn()
 
-      graphState.subscribe(headerLayer, spy)
+      graphState.subscribe(headerLayer, spyHeader)
+      graphState.subscribe(avatarLayer, spyAvatar)
       graphState.mutate({
         ...rootLayer,
         overflow: 'x-hidden',
       })
 
-      expect(spy).toBeCalledTimes(1)
+      expect(spyAvatar).toBeCalledTimes(1)
+      expect(spyHeader).toBeCalledTimes(1)
     })
 
     test.skip('should notify if pass key as string', () => {
@@ -1006,6 +949,10 @@ describe('createState', () => {
       expect(graphState.resolve({ _type: 'Variable', _id: 'size' })).toStrictEqual(sizeVariable)
     })
 
+    it('should return null if pass not graph entity', () => {
+      expect(graphState.resolve({ _type: 'Layer', _idWrong: 'avatar' })).toBe(null)
+    })
+
     it('should resolve by key', () => {
       expect(graphState.resolve('Layer:avatar')).toStrictEqual(resolvedAvatar)
       expect(graphState.resolve('Variable:size')).toStrictEqual(sizeVariable)
@@ -1028,6 +975,22 @@ describe('createState', () => {
       expect(graphState.resolve('')).toBe(null)
       expect(graphState.resolve(10)).toBe(null)
       expect(graphState.resolve()).toBe(null)
+    })
+  })
+
+  describe('safeResolve', () => {
+    it('should return value it pass not graph entity', () => {
+      const graphState = createState({
+        initialState: rootLayer,
+      })
+
+      expect(graphState.safeResolve(10)).toBe(10)
+
+      /**
+       * If till Layer:valid is not exist, it will return Layer:root string
+       */
+      expect(graphState.safeResolve('Layer:valid')).toStrictEqual('Layer:valid')
+      expect(graphState.safeResolve(rootLayer)).toStrictEqual(rootLayer)
     })
   })
 

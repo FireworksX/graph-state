@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { renderHook } from '@testing-library/react-hooks'
+import { renderHook } from '@testing-library/react-hooks/dom'
 import { mockGraphState } from './mock'
 import { useGraphFields } from '../useGraphFields'
 import { useGraph } from '../useGraph'
