@@ -60,6 +60,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   }
 
   const mutate = (entity: Entity, ...args: any[]) => {
+    let hasChange = false
     const { graphKey, options, data } = getArgumentsForMutate(entity, ...args)
     const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
     const prevGraph = resolve(graphKey ?? '')
@@ -92,14 +93,18 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         fieldValue = [...prevValue, ...fieldValue]
       }
 
+      if (prevValue !== fieldValue && !hasChange) hasChange = true
+
       acc[key] = fieldValue
 
       return acc
     }, {} as Graph)
 
     cache.writeLink(graphKey, nextGraph, parentKey)
+    if (hasChange) {
+      notify(graphKey)
+    }
 
-    notify(graphKey)
     return graphKey
   }
 
@@ -198,7 +203,6 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const resolveParents = (field: Entity) => {
     const key = (typeof field === 'string' ? field : keyOfEntity(field)) || ''
     const refs = cache.getParents(key) ?? []
-
     return refs.map(resolve)
   }
 

@@ -647,6 +647,24 @@ describe('createState', () => {
       expect(spy).toBeCalledTimes(0)
     })
 
+    it('should skip notify if nothing was changed (primitives only)', () => {
+      const momUser = { _type: 'User', _id: 'mom', name: 'Mom' }
+      const user = { _type: 'User', _id: 'userId', name: 'John Doe', mom: momUser }
+      const graphState = createState({ initialState: user })
+      const spy = vi.fn()
+
+      graphState.subscribe(user, spy)
+      graphState.subscribe(momUser, spy)
+      graphState.mutate(graphState.keyOfEntity(user), {
+        name: 'John Doe',
+      })
+      graphState.mutate(graphState.keyOfEntity(momUser), {
+        name: 'Mom',
+      })
+
+      expect(spy).toBeCalledTimes(0)
+    })
+
     it('should skip nested tree notify', () => {
       const header = { ...headerLayer, children: [avatarLayer] }
       const root = { ...rootLayer, children: [header] }
