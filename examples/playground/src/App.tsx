@@ -1,5 +1,6 @@
 import { createState } from '@graph-state/core';
 import { GraphValue, useGraphFields } from '@graph-state/react';
+import loggerPlugin from '@graph-state/plugin-logger';
 import { Post } from './Post.tsx';
 import { Author } from './Author.tsx';
 
@@ -53,11 +54,12 @@ const graph = {
   //   'php',
   // ],
   //
-  // posts: [generatePost(), generatePost(), generatePost()],
+  posts: [generatePost(), generatePost(), generatePost()],
 };
 
 export const graphState = createState({
   initialState: graph,
+  plugins: [loggerPlugin()],
 });
 
 console.log(graphState.resolveParents(authorOne));

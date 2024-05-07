@@ -15,6 +15,7 @@
     "swr": "^2.2.5"
   },
   "devDependencies": {
+    "@graph-state/plugin-logger": "*",
     "@graph-state/core": "*",
     "@graph-state/react": "*",
     "@types/react": "^18.2.15",
