@@ -1,5 +1,24 @@
 # @graph-state/react
 
+## 0.2.1
+
+### Patch Changes
+
+- 2b8e8c7: useGraph:
+
+  - Changed the structure of the useGraph hook, now it returns a tuple of `[value, setter]`.
+  - Vitest configure & added base tests.
+
+  Core:
+
+  - Added new types
+
+- Updated dependencies [05f88d0]
+- Updated dependencies [6cd0030]
+- Updated dependencies [4abe615]
+- Updated dependencies [2b8e8c7]
+  - @graph-state/core@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes
