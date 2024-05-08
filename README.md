@@ -22,7 +22,7 @@
 
 ## Examples
 
-- Base functional [CodeSandbox](https://codesandbox.io/p/sandbox/graph-state-base-s8nmxf)
+- Base functional [CodeSandbox](https://codesandbox.io/p/devbox/pq5l3h)
 
 ## Get started
 
