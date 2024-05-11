@@ -35,6 +35,11 @@ export const createCache = () => {
       childrenRefs.set(parentKey, childrenRefs.get(parentKey)?.filter?.(link => link !== key) ?? [])
     })
 
+    const [type] = key.split(':')
+    if (!isPartialKey(key) && types.get(type)?.includes(key)) {
+      types.set(type, types.get?.(type)?.filter(link => link !== key) ?? [])
+    }
+
     // childrenRefs.set(key, childrenRefs.get(key))
 
     parentRefs.delete(key)
