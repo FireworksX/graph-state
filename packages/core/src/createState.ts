@@ -198,7 +198,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     }
   }
 
-  const inspectFields = (graphType: Graph['_type']) => cache.types.get(graphType) ?? []
+  const inspectFields = (graphType: Graph['_type']) => [...(cache.types.get(graphType) ?? [])]
 
   const resolveParents = (field: Entity) => {
     const key = (typeof field === 'string' ? field : keyOfEntity(field)) || ''

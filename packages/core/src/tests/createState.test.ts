@@ -183,6 +183,12 @@ describe('createState', () => {
       expect(graphState.inspectFields('Variable')).toStrictEqual([sizeVariable].map(graphState.keyOfEntity))
     })
 
+    it('should return new link', () => {
+      const one = graphState.inspectFields('Variable')
+      const two = graphState.inspectFields('Variable')
+      expect(one === two).not.toBeTruthy()
+    })
+
     it('invalid entityType', () => {
       expect(graphState.inspectFields(10)).toStrictEqual([])
       expect(graphState.inspectFields()).toStrictEqual([])
