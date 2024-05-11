@@ -155,19 +155,17 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       const deps = cache.getChildren(key) || []
       const nextResult = resolve(key)
 
-      if (!nextResult) return
-
-      subs.forEach(cb => {
-        cb(nextResult)
-      })
-
-      deps.forEach(notify)
-
       if (storeKey) {
         subscribes.get(storeKey)?.forEach(cb => {
           cb(nextResult)
         })
       }
+
+      if (!nextResult) return
+      subs.forEach(cb => {
+        cb(nextResult)
+      })
+      deps.forEach(notify)
     }
 
     deepIndex = 0

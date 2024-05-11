@@ -238,7 +238,11 @@ describe('createState', () => {
       graphState.invalidate(avatarLayer)
 
       expect(graphState.inspectFields('Layer')).toHaveLength(1)
-      expect(spy).toBeCalledTimes(1)
+      /**
+       * 1st - notify parent (rootLayer)
+       * 2nd - notify store (Instance)
+       */
+      expect(spy).toBeCalledTimes(2)
     })
 
     it('should notify after invalidate', () => {
@@ -820,14 +824,14 @@ describe('createState', () => {
         switch (updateIndex) {
           case 1:
             return expect(data).toStrictEqual(avatarLayer)
-          case 2:
+          case 3:
             return expect(data).toStrictEqual(avatarLayer)
           case 4:
-            return expect(data).toStrictEqual(avatarLayer)
+            return expect(data).toMatchObject(rootLayer)
           case 5:
             return expect(data).toStrictEqual(avatarLayer)
           case 7:
-            return expect(data).toMatchObject(rootLayer)
+            return expect(data).toMatchObject(avatarLayer)
         }
       })
       graphState.mutate({
