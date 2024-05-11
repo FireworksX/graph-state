@@ -13,6 +13,7 @@ export const useGraphFields = (graphState: GraphState, type: Graph['_type']): st
 
         graphState.subscribe(graphState, () => {
           const nextFields = graphState.inspectFields(type)
+
           if (nextFields !== nextValue.current) {
             nextValue.current = nextFields
             onChange()
