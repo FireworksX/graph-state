@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createCache } from '../cache'
+import { createState } from '../createState'
 
 describe('createCache', () => {
   it('should add new ref', () => {
@@ -47,6 +48,22 @@ describe('createCache', () => {
     expect(refs.getChildren('Parent')).toStrictEqual(['ChildTwo'])
     expect(refs.getParents('ChildOne')).toStrictEqual(undefined)
     expect(refs.getParents('ChildTwo')).toStrictEqual(['Parent'])
+  })
+
+  it('should remove link when invalidate', () => {
+    const graphState = createState()
+    graphState.mutate({
+      _type: 'User',
+      _id: 'id1',
+    })
+    graphState.mutate({
+      _type: 'User',
+      _id: 'id2',
+    })
+
+    expect(graphState.inspectFields('User')).toStrictEqual(['User:id1', 'User:id2'])
+    graphState.invalidate('User:id1')
+    expect(graphState.inspectFields('User')).toStrictEqual(['User:id2'])
   })
 
   describe('links', () => {
