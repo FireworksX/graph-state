@@ -225,6 +225,22 @@ describe('createState', () => {
       expect(graphState.resolve(rootLayer).field).toStrictEqual(null)
     })
 
+    it('should notify Instance state after invalidate', () => {
+      const spy = vi.fn()
+      const graphState = createState()
+      graphState.mutate({
+        ...rootLayer,
+        children: [avatarLayer],
+        post: avatarLayer,
+      })
+
+      graphState.subscribe(graphState, spy)
+      graphState.invalidate(avatarLayer)
+
+      expect(graphState.inspectFields('Layer')).toHaveLength(1)
+      expect(spy).toBeCalledTimes(1)
+    })
+
     it('should notify after invalidate', () => {
       const spy = vi.fn()
       const graphState = createState()
@@ -791,7 +807,7 @@ describe('createState', () => {
       expect(spy).toBeCalledTimes(1)
     })
 
-    test.skip('should notify self store with each state', () => {
+    it('should notify self store with each state', () => {
       const graphState = createState()
       const spy = vi.fn()
 
@@ -803,20 +819,27 @@ describe('createState', () => {
 
         switch (updateIndex) {
           case 1:
-            return expect(data).toStrictEqual(sizeVariable)
+            return expect(data).toStrictEqual(avatarLayer)
           case 2:
-            return expect(data).toStrictEqual(sizeVariable)
-          case 3:
             return expect(data).toStrictEqual(avatarLayer)
           case 4:
             return expect(data).toStrictEqual(avatarLayer)
           case 5:
-            return expect(data).toStrictEqual(rootLayer)
+            return expect(data).toStrictEqual(avatarLayer)
+          case 7:
+            return expect(data).toMatchObject(rootLayer)
         }
       })
-      graphState.mutate(rootLayer)
+      graphState.mutate({
+        ...rootLayer,
+        children: [avatarLayer],
+        user: {
+          avatarLayer,
+        },
+        header: avatarLayer,
+      })
 
-      expect(spy).toBeCalledTimes(9)
+      expect(spy).toBeCalledTimes(7)
     })
   })
 

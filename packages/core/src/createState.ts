@@ -114,6 +114,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     if (key) {
       const parents = cache.getLinkedRefs(key)
       const subs = subscribes.get(key) || []
+
       cache.invalidate(key)
 
       parents.forEach(parentKey => {
