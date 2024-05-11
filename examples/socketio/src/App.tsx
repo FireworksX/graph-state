@@ -13,17 +13,17 @@ const socketIOPlugin = (socket, options) => graphState => {
   const transforms = options?.transforms ?? {};
   const effects = options?.effects ?? {};
 
-  socket.onAny((eventName: string, value: any) => {
+  socket.onAny((eventName: string, ...args: unknown[]) => {
     const transform = transforms[eventName];
     const effect = effects[eventName];
-    const nextValue = transform ? transform(value) : value;
+    const nextValue = transform ? transform(...args) : args;
 
     if (typeof nextValue === 'object') {
       graphState.mutate(nextValue);
     }
 
     if (effect) {
-      effect(nextValue, graphState);
+      effect(graphState);
     }
   });
 };
@@ -62,8 +62,6 @@ export const graphState = createState({
 const App = () => {
   const messages = useGraphFields(graphState, 'Message');
 
-  console.log(messages);
-  messages.forEach(m => console.log(graphState.resolve(m)));
   return (
     <Chat>
       {messages.map(messageKey => (
