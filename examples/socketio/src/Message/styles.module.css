@@ -29,3 +29,21 @@
     font-size: 12px;
     color: #cccccc;
 }
+
+
+.update {
+    border: none;
+    background: none;
+    color: blue;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+
+.remove {
+    border: none;
+    background: none;
+    color: red;
+    font-size: 12px;
+    cursor: pointer;
+}

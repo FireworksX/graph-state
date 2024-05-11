@@ -84,7 +84,7 @@ export interface GraphState extends Graph {
   inspectFields(type: string): string[]
   resolveParents(field: Entity): unknown[]
   keyOfEntity(entity: Entity): LinkKey | null
-  entityOfKey(key: LinkKey): Entity | null
+  entityOfKey(key: LinkKey): Graph | null
   getArgumentsForMutate(
     field: string | Graph,
     args: Parameters<GraphState['mutate']>

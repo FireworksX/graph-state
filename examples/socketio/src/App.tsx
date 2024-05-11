@@ -9,37 +9,61 @@ export const socket = io('http://localhost:5400', {
   transports: ['websocket'],
 });
 
-const socketIOPlugin = socket => graphState => {
-  console.log(graphState);
+const socketIOPlugin = (socket, options) => graphState => {
+  const transforms = options?.transforms ?? {};
+  const effects = options?.effects ?? {};
 
   socket.onAny((eventName: string, value: any) => {
-    if (typeof value === 'object') {
-      graphState.mutate(value);
+    const transform = transforms[eventName];
+    const effect = effects[eventName];
+    const nextValue = transform ? transform(value) : value;
+
+    if (typeof nextValue === 'object') {
+      graphState.mutate(nextValue);
+    }
+
+    if (effect) {
+      effect(nextValue, graphState);
     }
   });
 };
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
-export const me = {
-  _type: 'User',
-  id: generateId(),
-  name: null,
-};
+export const currentUserID = generateId();
 
 export const graphState = createState({
-  // initialState: {
-  //   _type: 'Message',
-  //   id: getId(),
-  //   content: 'Hello',
-  //   user: userOne,
-  // },
-  plugins: [socketIOPlugin(socket)],
+  plugins: [
+    socketIOPlugin(socket, {
+      transforms: {
+        chatMessage(message: unknown) {
+          if (typeof message === 'string') {
+            return {
+              _type: 'Message',
+              _id: generateId(),
+              kind: 'message',
+              content: message,
+              date: new Date().toISOString(),
+            };
+          }
+
+          return message;
+        },
+      },
+      effects: {
+        removeMessage(value, cache) {
+          cache.invalidate(value);
+        },
+      },
+    }),
+  ],
 });
 
 const App = () => {
   const messages = useGraphFields(graphState, 'Message');
 
+  console.log(messages);
+  messages.forEach(m => console.log(graphState.resolve(m)));
   return (
     <Chat>
       {messages.map(messageKey => (

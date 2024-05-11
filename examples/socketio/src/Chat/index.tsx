@@ -1,12 +1,16 @@
 import styles from './styles.module.css';
 import { Message } from '../Message';
-import { useState } from 'react';
-import { graphState, me, socket } from '../App.tsx';
+import { useEffect, useState } from 'react';
+import { currentUserID, graphState, socket } from '../App.tsx';
 import { useGraph } from '@graph-state/react';
 
 export const Chat = ({ children }) => {
-  const [meGraph] = useGraph(graphState, me);
+  const [currentUser, setCurrentUser] = useGraph(
+    graphState,
+    `User:${currentUserID}`
+  );
   const [message, setMessage] = useState('');
+  const [login, setLogin] = useState('');
 
   const onSubmit = e => {
     e.preventDefault();
@@ -14,16 +18,39 @@ export const Chat = ({ children }) => {
     setMessage('');
   };
 
+  const onLogin = e => {
+    setCurrentUser({ name: login });
+    e.preventDefault();
+    setLogin('');
+    setCurrentUser((actualUser: any) => {
+      socket.emit('login', actualUser);
+    });
+  };
+
   return (
     <div className={styles.wrapper}>
-      <div className={styles.body}>{children}</div>
-      <form action="" onSubmit={onSubmit}>
-        <input
-          className={styles.input}
-          value={message}
-          onChange={e => setMessage(e.target.value)}
-        />
-      </form>
+      {currentUser ? (
+        <>
+          <div className={styles.body}>{children}</div>
+          <form action="" onSubmit={onSubmit}>
+            <input
+              className={styles.input}
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+            />
+          </form>
+        </>
+      ) : (
+        <form className={styles.loginBody} onSubmit={onLogin}>
+          <div>Enter your login</div>
+          <input
+            className={styles.loginInput}
+            type="text"
+            value={login}
+            onChange={e => setLogin(e.target.value)}
+          />
+        </form>
+      )}
     </div>
   );
 };

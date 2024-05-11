@@ -17,8 +17,8 @@ app.get('/', (_req, res) => {
   res.sendFile(join(__dirname, 'index.html'));
 });
 
-const subscribe = (id: string, socket: any) => {
-  subscribers.set(id, socket);
+const subscribe = (id: string, userGraph: any) => {
+  subscribers.set(id, userGraph);
   console.log(`Connected to ${id}.`);
 };
 
@@ -28,18 +28,53 @@ const unsubscribe = (id: string) => {
 };
 
 io.on('connection', socket => {
-  const id = socket.handshake.headers.origin as any;
-  subscribe(id, socket);
+  const id = socket.id;
 
   socket.on('disconnect', () => {
+    io.emit('chatMessage', {
+      _type: 'Message',
+      _id: generateId(),
+      kind: 'logout',
+      user: subscribers.get(id),
+    });
     unsubscribe(id);
   });
 
   socket.on('chatMessage', (message: string) => {
+    io.emit('chatMessage', message);
+  });
+
+  socket.on('safeRemoveMessage', (messageId: string) => {
+    io.emit('safeRemoveMessage', {
+      _type: 'Message',
+      _id: messageId,
+      removed: true,
+    });
+  });
+
+  socket.on('removeMessage', (messageId: string) => {
+    io.emit('removeMessage', {
+      _type: 'Message',
+      _id: messageId,
+    });
+  });
+
+  socket.on('updateMessage', (messageId: string, newContent: string) => {
+    io.emit('updateMessage', {
+      _type: 'Message',
+      _id: messageId,
+      content: newContent,
+      date: new Date().toISOString(),
+    });
+  });
+
+  socket.on('login', (userGraph: any) => {
+    subscribe(id, userGraph);
     io.emit('chatMessage', {
       _type: 'Message',
       _id: generateId(),
-      content: message,
+      kind: 'login',
+      user: userGraph,
     });
   });
 });
