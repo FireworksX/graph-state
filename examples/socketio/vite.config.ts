@@ -22,6 +22,10 @@ export default defineConfig({
         __dirname,
         '../../plugins/logger/dist/index.js'
       ),
+      '@graph-state/plugin-ws': path.resolve(
+        __dirname,
+        '../../plugins/ws/dist/index.js'
+      ),
     },
   },
 });

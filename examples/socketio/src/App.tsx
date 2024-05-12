@@ -1,32 +1,14 @@
 import io from 'socket.io-client';
-import { useState } from 'react';
 import { Chat } from './Chat';
-import { createState } from '@graph-state/core';
-import { GraphValue, useGraph, useGraphFields } from '@graph-state/react';
+import type { Graph } from '@graph-state/core';
+import { createState, isGraph } from '@graph-state/core';
+import { useGraphFields } from '@graph-state/react';
+import wsPlugin from '@graph-state/plugin-ws';
 import { Message } from './Message';
 
 export const socket = io('http://localhost:5400', {
   transports: ['websocket'],
 });
-
-const socketIOPlugin = (socket, options) => graphState => {
-  const transforms = options?.transforms ?? {};
-  const effects = options?.effects ?? {};
-
-  socket.onAny((eventName: string, ...args: unknown[]) => {
-    const transform = transforms[eventName];
-    const effect = effects[eventName];
-    const nextValue = transform ? transform(...args) : args;
-
-    if (typeof nextValue === 'object') {
-      graphState.mutate(nextValue);
-    }
-
-    if (effect) {
-      effect(graphState);
-    }
-  });
-};
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -34,24 +16,26 @@ export const currentUserID = generateId();
 
 export const graphState = createState({
   plugins: [
-    socketIOPlugin(socket, {
+    wsPlugin(socket, {
       transforms: {
-        chatMessage(message: unknown) {
+        chatMessageOld(_cache, message: unknown, user: unknown) {
           if (typeof message === 'string') {
+            const timestamp = new Date().getTime();
             return {
               _type: 'Message',
-              _id: generateId(),
+              _id: timestamp,
               kind: 'message',
               content: message,
+              user,
               date: new Date().toISOString(),
-            };
+            } as Graph;
           }
 
-          return message;
+          return null;
         },
       },
       effects: {
-        removeMessage(value, cache) {
+        removeMessage(cache, value: any) {
           cache.invalidate(value);
         },
       },

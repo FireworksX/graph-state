@@ -41,7 +41,18 @@ io.on('connection', socket => {
   });
 
   socket.on('chatMessage', (message: string) => {
-    io.emit('chatMessage', message);
+    io.emit('chatMessage', {
+      _type: 'Message',
+      _id: generateId(),
+      kind: 'message',
+      content: message,
+      user: subscribers.get(id),
+      date: new Date().toISOString(),
+    });
+  });
+
+  socket.on('chatMessageOld', (message: string) => {
+    io.emit('chatMessageOld', message, subscribers.get(id));
   });
 
   socket.on('safeRemoveMessage', (messageId: string) => {

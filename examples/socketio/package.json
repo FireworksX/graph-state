@@ -17,12 +17,13 @@
     "react-dom": "^18.2.0",
     "socket.io": "4.7.5",
     "socket.io-client": "^4.7.5",
-    "swr": "^2.2.5"
-  },
-  "devDependencies": {
+    "swr": "^2.2.5",
     "@graph-state/core": "*",
     "@graph-state/plugin-logger": "*",
-    "@graph-state/react": "*",
+    "@graph-state/plugin-ws": "*",
+    "@graph-state/react": "*"
+  },
+  "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",

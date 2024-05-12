@@ -57,7 +57,7 @@ export const Message = ({ messageKey }) => {
               )}
             </div>
           </div>
-          {!removed && (
+          {!removed && isYou && (
             <>
               <button
                 className={styles.update}

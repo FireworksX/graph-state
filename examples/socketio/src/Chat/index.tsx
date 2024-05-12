@@ -14,7 +14,7 @@ export const Chat = ({ children }) => {
 
   const onSubmit = e => {
     e.preventDefault();
-    socket.emit('chatMessage', message);
+    socket.emit('chatMessageOld', message);
     setMessage('');
   };
 
