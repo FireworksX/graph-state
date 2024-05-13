@@ -1,5 +1,15 @@
 # @graph-state/react
 
+## 0.2.2
+
+### Patch Changes
+
+- 6c8b8d2: Remove link after invalidation. Fix re-render useInspectFields.
+- Updated dependencies [6c8b8d2]
+- Updated dependencies [a315338]
+- Updated dependencies [745f7f1]
+  - @graph-state/core@0.3.1
+
 ## 0.2.1
 
 ### Patch Changes
