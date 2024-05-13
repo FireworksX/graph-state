@@ -1,5 +1,13 @@
 # @graph-state/core
 
+## 0.3.1
+
+### Patch Changes
+
+- 6c8b8d2: Remove link after invalidation. Fix re-render useInspectFields.
+- a315338: Export utils
+- 745f7f1: Fix inspectField to return new link
+
 ## 0.3.0
 
 ### Minor Changes
