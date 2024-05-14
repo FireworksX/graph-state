@@ -15,10 +15,12 @@
 
 ## Packages
 
-| Package                                                                               | Version                                                                                                                  | Docs                                                                                                      | Size                                                                                                                                                  |
-|---------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@graph-state/core`](https://github.com/FireworksX/graph-state/tree/master/packages/core#readme) | [![npm](https://img.shields.io/npm/v/@graph-state/core?style=flat-square)](https://www.npmjs.com/package/@graph-state/core) | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/core)   | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/core?style=flat-square)](https://bundlephobia.com/result?p=@mozaikjs/core)    |
-| [`@graph-state/react`](https://github.com/FireworksX/mozaik/tree/main/packages/react/#readme)    | [![npm](https://img.shields.io/npm/v/@graph-state/react?style=flat-square)](https://www.npmjs.com/package/@graph-state/react)   | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/react)  | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/react?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/react)   |
+| Package                                                                                                     | Version                                                                                                                                       | Docs                                                                                                     | Size                                                                                                                                                                        |
+|-------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`@graph-state/core`](https://github.com/FireworksX/graph-state/tree/master/packages/core#readme)           | [![npm](https://img.shields.io/npm/v/@graph-state/core?style=flat-square)](https://www.npmjs.com/package/@graph-state/core)                   | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/core)  | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/core?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/core)                      |
+| [`@graph-state/react`](https://github.com/FireworksX/mozaik/tree/main/packages/react/#readme)               | [![npm](https://img.shields.io/npm/v/@graph-state/react?style=flat-square)](https://www.npmjs.com/package/@graph-state/react)                 | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/react) | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/react?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/react)                 |
+| [`@graph-state/plugin-logger`](https://github.com/FireworksX/graph-state/tree/master/plugins/logger#readme) | [![npm](https://img.shields.io/npm/v/@graph-state/plugin-logger?style=flat-square)](https://www.npmjs.com/package/@graph-state/plugin-logger) | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/plugins/logger) | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/plugin-logger?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/plugin-logger) |
+| [`@graph-state/plugin-ws`](https://github.com/FireworksX/graph-state/tree/master/plugins/ws#readme)         | [![npm](https://img.shields.io/npm/v/@graph-state/plugin0ws?style=flat-square)](https://www.npmjs.com/package/@graph-state/plugin-ws)         | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/plugins/logger) | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/plugin-ws?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/plugin-ws)         |
 
 ## Examples
 
@@ -77,7 +79,7 @@ Is plain object with `_type`
 ```jsx
 const baseGraph = {
   _type: 'Graph',
-  _id: 'any uniq id' // if don`t passed, will be generate uniq key
+  _id: 'any uniq id' // or id or use keying config
 }
 ```
 
@@ -317,9 +319,7 @@ const graphState = createState({
 
 #### keyOfEntity
 ```js
-import {keyOfGraph} from '@graph-state'
-
-keyOfGraph({
+graphState.keyOfGraph({
   _type: 'User',
   _id: 'id'
 }) // User:id
@@ -327,9 +327,7 @@ keyOfGraph({
 
 #### entityOfKey
 ```js
-import {graphOfKey} from '@graph-state'
-
-graphOfKey('User:id')
+graphState.entityOfKey('User:id')
 /**
  * _type: 'User',
  * _id: 'id'
