@@ -49,7 +49,7 @@
   "eslintConfig": {
     "root": true,
     "extends": [
-      "./scripts/eslint/preset.js"
+      "./scripts/eslint/preset.json"
     ]
   },
   "packageManager": "yarn@1.22.4",
