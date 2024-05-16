@@ -1,3 +1,4 @@
+import type { Graph, GraphState, LinkKey } from '@graph-state/core';
 import { createState } from '@graph-state/core';
 import { GraphValue, useGraphFields } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
@@ -57,12 +58,48 @@ const graph = {
   posts: [generatePost(), generatePost(), generatePost()],
 };
 
+interface ExtendMap {
+  [graphType: string]: (cache: GraphState<any>, graphLink: LinkKey) => Graph;
+}
+
+/**
+ * Сделать чтобы логер добвил метод для лога
+ * getArgumentsForMutate - должен вызывать data если это функция и возвращать результат
+ * @param extendsMap
+ */
+
+const extendPlugin = (extendsMap: ExtendMap) => graphState => {
+  const originalMutate = graphState.mutate;
+  Object.entries(extendsMap).forEach(([type, extender]) => {
+    console.log(type, extender, graphState);
+  });
+
+  graphState.mutate = (...args) => {
+    const { graphKey, data } = graphState.getArgumentsForMutate(...args);
+    const graphType = graphState.entityOfKey(graphKey)._type;
+    const extender = extendsMap?.[graphType];
+
+    if (extender) {
+      const extendData = extender(graphState, graphKey);
+      console.log(extendData, args);
+    }
+
+    originalMutate(...args);
+  };
+};
+
 export const graphState = createState({
   initialState: graph,
-  plugins: [loggerPlugin()],
+  plugins: [
+    loggerPlugin(),
+    extendPlugin({
+      User: (cache, graphLink) => {
+        console.log(cache, graphLink);
+        return cache.resolve(graphLink);
+      },
+    }),
+  ],
 });
-
-console.log(graphState.resolveParents(authorOne));
 
 function App() {
   const posts = useGraphFields(graphState, 'Post');

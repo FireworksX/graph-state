@@ -22,6 +22,10 @@ export default defineConfig({
         __dirname,
         '../../plugins/logger/dist/index.js'
       ),
+      '@graph-state/plugin-extend': path.resolve(
+        __dirname,
+        '../../plugins/extend/dist/index.js'
+      ),
     },
   },
 });
