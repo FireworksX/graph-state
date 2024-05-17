@@ -101,8 +101,16 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     }, {} as Graph)
 
     cache.writeLink(graphKey, nextGraph, parentKey)
+
     if (hasChange) {
       notify(graphKey)
+    }
+
+    /**
+     * When complete nested updates, call GB
+     */
+    if (!parentKey) {
+      cache.runGarbageCollector()
     }
 
     return graphKey
@@ -263,6 +271,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     entityOfKey,
     getArgumentsForMutate,
     types: cache.types,
+    cache,
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)

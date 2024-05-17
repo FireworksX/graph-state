@@ -1,4 +1,18 @@
 import type { Plugin } from '@graph-state/core';
+import { isPartialKey } from '@graph-state/core';
+
+declare module '@graph-state/core' {
+  interface GraphState {
+    debugLog(
+      eventName: DebugEventName,
+      level: DebugLevel,
+      ...messages: unknown[]
+    ): void;
+  }
+}
+
+type DebugEventName = 'mutate' | 'invalidate' | string;
+type DebugLevel = 'error' | 'warning' | 'info' | string;
 
 interface LoggerOptions {
   onlyBrowser?: boolean;
@@ -6,70 +20,47 @@ interface LoggerOptions {
 
 const isBrowser = typeof window !== 'undefined';
 
+const debugLog = (
+  eventName: DebugEventName,
+  level: DebugLevel,
+  ...messages: unknown[]
+) => {
+  const capitalizeEventName =
+    eventName.charAt(0).toUpperCase() + eventName.slice(1);
+
+  const colorsMap: Record<DebugLevel, string> = {
+    info: '#03A9F4',
+    error: '#ff4848',
+    warning: '#ffc548',
+  };
+
+  // eslint-disable-next-line no-console
+  console.debug(
+    `%c ${capitalizeEventName}`,
+    `color: ${colorsMap[level]}; font-weight: bold`,
+    ...messages
+  );
+};
+
 const loggerPlugin: (options?: LoggerOptions) => Plugin =
   options => graphState => {
-    const originalMutate = graphState.mutate;
     const originalInvalidate = graphState.invalidate;
-
-    const mutationLog = (
-      targetKey: unknown,
-      nextState: unknown,
-      options?: unknown
-    ) => {
-      if (options) {
-        // eslint-disable-next-line no-console
-        console.debug(
-          '%c Mutation of',
-          'color: #03A9F4; font-weight: bold',
-          targetKey,
-          'to',
-          nextState,
-          'with options',
-          options
-        );
-      } else {
-        // eslint-disable-next-line no-console
-        console.debug(
-          '%c Mutation of',
-          'color: #03A9F4; font-weight: bold',
-          targetKey,
-          'to',
-          nextState
-        );
-      }
-    };
-
-    const invalidateLog = (...options: any) =>
-      // eslint-disable-next-line no-console
-      console.debug(
-        '%c Invalidate',
-        'color: #ff4848; font-weight: bold',
-        ...options
-      );
+    const log = (graphState.debugLog = debugLog);
 
     if (options?.onlyBrowser && !isBrowser) {
       return graphState;
     }
 
-    graphState.mutate = (...args: any) => {
-      const { graphKey, options, data } = graphState.getArgumentsForMutate(
-        // @ts-ignore
-        ...args
-      );
+    graphState.subscribe(graphState, nextState => {
+      const graphKey = graphState.keyOfEntity(nextState);
 
-      if (typeof data === 'function') {
-        const setterResult = data(graphState.resolve(graphKey) as any);
-        mutationLog(graphKey, setterResult, options);
-      } else {
-        mutationLog(graphKey, data, options);
+      if (graphKey && !isPartialKey(graphKey)) {
+        log('mutate', 'info', 'of', graphKey, 'to', nextState);
       }
-
-      // @ts-ignore
-      return originalMutate(...args);
-    };
+    });
 
     graphState.invalidate = (...args: any) => {
-      invalidateLog(...args);
+      log('invalidate', 'error', 'of', ...args);
 
       // @ts-ignore
       return originalInvalidate(...args);

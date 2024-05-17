@@ -12,7 +12,10 @@ export const Post: FC<PostProps> = ({ postKey }) => {
 
   return (
     <div style={{ width: 300, background: '#eee' }}>
-      <h1>{post.title}</h1>
+      <h1>
+        {post.title}{' '}
+        <button onClick={() => graphState.invalidate(postKey)}>Remove</button>
+      </h1>
       <p>{post.description}</p>
       <Author authorEntity={post.author} />
     </div>
