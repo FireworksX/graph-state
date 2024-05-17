@@ -93,4 +93,5 @@ export interface GraphState extends Graph {
     options?: SetOptions
     data: DataSetter
   }
+  types: Map<Type, Set<LinkKey>>
 }
