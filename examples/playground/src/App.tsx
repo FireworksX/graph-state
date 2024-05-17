@@ -47,7 +47,13 @@ const graph = {
   //   'php',
   // ],
   //
-  posts: [generatePost(), generatePost()],
+  posts: [
+    generatePost(),
+    generatePost(),
+    generatePost(),
+    generatePost(),
+    generatePost(),
+  ],
 };
 
 export const graphState = createState({
@@ -55,18 +61,9 @@ export const graphState = createState({
   plugins: [loggerPlugin()],
 });
 
-console.log('-----------');
-graphState.mutate(
-  {
-    ...graph,
-    posts: [generatePost()],
-  },
-  {
-    replace: true,
-  }
-);
-
 window.graphState = graphState;
+
+console.log(graphState);
 
 function App() {
   const posts = useGraphFields(graphState, 'Post');
