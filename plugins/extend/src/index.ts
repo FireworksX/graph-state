@@ -1,68 +1,55 @@
-import type { Entity, GraphState, Plugin } from '@graph-state/core';
-import { isGraph } from '@graph-state/core';
+import type { Entity, Graph, GraphState, Plugin } from '@graph-state/core';
 
-type Transform = (cache: GraphState, ...args: unknown[]) => Entity;
+export type Extender = (graph: Graph, cache: GraphState) => Graph;
 
-type Effect = (cache: GraphState, ...args: unknown[]) => void;
-
-interface WebSocketEvent {
-  eventName: string;
-  data: unknown;
+interface ExtendMap {
+  [graphType: string]: Extender;
 }
 
-interface WsOptions {
-  transforms?: Record<string, Transform>;
-  effects?: Record<string, Effect>;
+declare module '@graph-state/core' {
+  interface GraphState {
+    extendGraph(entity: Entity, extender: ExtendMap[string]): void;
+  }
 }
 
-interface WebSocket {
-  addEventListener(eventName: string, event: any): void;
-}
+const extendPlugin: (extendsMap?: ExtendMap) => Plugin =
+  extendsMap => (graphState: GraphState) => {
+    const originalMutate = graphState.mutate;
 
-interface SocketIO {
-  onAny(...args: any[]): void;
-}
+    graphState.mutate = (...args: any) => {
+      const { graphKey, data, options } = graphState.getArgumentsForMutate(
+        ...(args as Parameters<GraphState['getArgumentsForMutate']>)
+      );
+      const graph = graphState.resolve(graphKey) as Graph;
+      const extender = extendsMap?.[graph?._type];
 
-const wsPlugin: (socket: SocketIO | WebSocket, options?: WsOptions) => Plugin =
-  (socket, options) => graphState => {
-    const transforms = options?.transforms ?? {};
-    const effects = options?.effects ?? {};
-
-    const applyState = (eventName: string, ...args: unknown[]) => {
-      const transform = transforms[eventName];
-      const effect = effects[eventName];
-      const nextValue = transform ? transform(graphState, ...args) : args[0];
-
-      if (isGraph(nextValue)) {
-        graphState.mutate(nextValue);
-      } else {
-        console.warn(
-          `[graph-state-ws]: Skip apply state for ${eventName}. Because got not Graph.`,
-          nextValue
-        );
+      if (extender && graphKey) {
+        const extendData = extender({ ...graph, ...data }, graphState);
+        return originalMutate(graphKey, extendData, options);
       }
 
-      if (effect) {
-        effect(graphState, ...args);
+      return originalMutate(...(args as Parameters<GraphState['mutate']>));
+    };
+
+    graphState.extendGraph = (entity: Entity, extender: Extender) => {
+      const nextGraph = extender?.(
+        graphState.resolve(entity) as Graph,
+        graphState
+      );
+
+      if (nextGraph) {
+        graphState.mutate(nextGraph);
       }
     };
 
-    if ('onAny' in socket) {
-      socket.onAny((eventName: string, ...args: unknown[]) =>
-        applyState(eventName, ...args)
-      );
-    }
-
-    if (socket instanceof WebSocket) {
-      socket.addEventListener('message', event => {
-        const parsedEvent = JSON.parse(event.data) as WebSocketEvent;
-        if (parsedEvent.eventName && parsedEvent.data) {
-          applyState(parsedEvent.eventName, parsedEvent.data);
-        }
+    Object.keys(extendsMap ?? {}).forEach(type => {
+      const links = Array.from(graphState.types?.get?.(type) ?? []);
+      links.forEach(link => {
+        graphState.mutate(graphState.resolve(link) as Graph);
       });
-    }
+    });
 
     return graphState;
   };
 
-export default wsPlugin;
+export default extendPlugin;

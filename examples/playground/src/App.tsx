@@ -1,7 +1,9 @@
-import type { Graph, GraphState, LinkKey } from '@graph-state/core';
+import type { Entity, Graph, GraphState, LinkKey } from '@graph-state/core';
 import { createState } from '@graph-state/core';
 import { GraphValue, useGraphFields } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
+import type { Extender } from '@graph-state/plugin-extend';
+import extendPlugin from '@graph-state/plugin-extend';
 import { Post } from './Post.tsx';
 import { Author } from './Author.tsx';
 
@@ -15,6 +17,7 @@ const authorOne = {
   _id: 'one',
   name: 'John Doe',
   key: '100',
+  age: 20,
 };
 
 const authorTwo = {
@@ -22,6 +25,7 @@ const authorTwo = {
   _id: 'two',
   name: 'Sam Smith',
   key: '200',
+  age: 44,
 };
 
 const generatePost = () => ({
@@ -58,33 +62,17 @@ const graph = {
   posts: [generatePost(), generatePost(), generatePost()],
 };
 
-interface ExtendMap {
-  [graphType: string]: (cache: GraphState<any>, graphLink: LinkKey) => Graph;
-}
-
 /**
- * Сделать чтобы логер добвил метод для лога
+ * Сделать чтобы логер добавил метод для лога
  * getArgumentsForMutate - должен вызывать data если это функция и возвращать результат
  * @param extendsMap
  */
 
-const extendPlugin = (extendsMap: ExtendMap) => graphState => {
-  const originalMutate = graphState.mutate;
-  Object.entries(extendsMap).forEach(([type, extender]) => {
-    console.log(type, extender, graphState);
-  });
-
-  graphState.mutate = (...args) => {
-    const { graphKey, data } = graphState.getArgumentsForMutate(...args);
-    const graphType = graphState.entityOfKey(graphKey)._type;
-    const extender = extendsMap?.[graphType];
-
-    if (extender) {
-      const extendData = extender(graphState, graphKey);
-      console.log(extendData, args);
-    }
-
-    originalMutate(...args);
+export const extendUser: Extender = (cache, user) => {
+  console.log(cache);
+  return {
+    ...user,
+    age: user.age ?? random(18, 40),
   };
 };
 
@@ -93,9 +81,13 @@ export const graphState = createState({
   plugins: [
     loggerPlugin(),
     extendPlugin({
-      User: (cache, graphLink) => {
-        console.log(cache, graphLink);
-        return cache.resolve(graphLink);
+      Post: (graph, cache) => {
+        const author = cache.resolve(graph.author);
+
+        return {
+          ...graph,
+          isOldAuthor: author?.age > 24,
+        };
       },
     }),
   ],
@@ -117,6 +109,14 @@ function App() {
                 value={user.name}
                 onChange={({ target }) => updateUser({ name: target.value })}
               />
+              <label htmlFor="">
+                Age
+                <input
+                  type="text"
+                  value={user.age}
+                  onChange={({ target }) => updateUser({ age: target.value })}
+                />
+              </label>
             </Author>
           )}
         </GraphValue>
