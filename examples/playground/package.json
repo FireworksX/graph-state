@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@graph-state/plugin-logger": "*",
+    "@graph-state/plugin-extend": "*",
     "@graph-state/core": "*",
     "@graph-state/react": "*",
     "@types/react": "^18.2.15",
