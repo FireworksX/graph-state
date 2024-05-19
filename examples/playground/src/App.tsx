@@ -82,11 +82,9 @@ export const graphState = createState({
     loggerPlugin(),
     extendPlugin({
       Post: (graph, cache) => {
-        const author = cache.resolve(graph.author);
-
         return {
           ...graph,
-          isOldAuthor: author?.age > 24,
+          isOldAuthor: () => cache.resolve(graph.author)?.age > 24,
         };
       },
     }),
