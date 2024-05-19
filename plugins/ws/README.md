@@ -30,8 +30,6 @@ export const graphState = createState({
     wsPlugin(socket),
   ],
 });
-
-
 ```
 
 Now each event from socket will populate graphState. Server acts as source of truth.

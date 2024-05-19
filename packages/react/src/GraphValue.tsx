@@ -14,9 +14,9 @@ export const GraphValue: FC<GraphValueProps> = ({ graphState, field, children })
   }
   const value = useGraph(graphState, field || '') || field
 
-  if (children) {
+  if (typeof children === 'function') {
     return children(...value)
   }
 
-  return <>{value}</>
+  return <>{children}</>
 }
