@@ -3,6 +3,7 @@ import { GraphValue, useGraphFields } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import { Post } from './Post.tsx';
 import { Author } from './Author.tsx';
+import { Swr } from './Swr.tsx';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -62,32 +63,31 @@ export const graphState = createState({
   plugins: [loggerPlugin()],
 });
 
-console.log(graphState.resolveParents(authorOne));
-
 function App() {
   const posts = useGraphFields(graphState, 'Post');
   const users = useGraphFields(graphState, 'User');
 
   return (
     <>
-      <h2>Rename authors</h2>
-      {users.map(userKey => (
-        <GraphValue key={userKey} graphState={graphState} field={userKey}>
-          {(user, updateUser) => (
-            <Author key={userKey} authorEntity={userKey}>
-              <input
-                type="text"
-                value={user.name}
-                onChange={({ target }) => updateUser({ name: target.value })}
-              />
-            </Author>
-          )}
-        </GraphValue>
-      ))}
+      <Swr />
+      {/*<h2>Rename authors</h2>*/}
+      {/*{users.map(userKey => (*/}
+      {/*  <GraphValue key={userKey} graphState={graphState} field={userKey}>*/}
+      {/*    {(user, updateUser) => (*/}
+      {/*      <Author key={userKey} authorEntity={userKey}>*/}
+      {/*        <input*/}
+      {/*          type="text"*/}
+      {/*          value={user.name}*/}
+      {/*          onChange={({ target }) => updateUser({ name: target.value })}*/}
+      {/*        />*/}
+      {/*      </Author>*/}
+      {/*    )}*/}
+      {/*  </GraphValue>*/}
+      {/*))}*/}
 
-      {posts.map(post => (
-        <Post key={post} postKey={post} />
-      ))}
+      {/*{posts.map(post => (*/}
+      {/*  <Post key={post} postKey={post} />*/}
+      {/*))}*/}
     </>
   );
 }

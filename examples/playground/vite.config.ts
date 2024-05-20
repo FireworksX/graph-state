@@ -18,6 +18,10 @@ export default defineConfig({
         __dirname,
         '../../packages/react/dist/index.js'
       ),
+      '@graph-state/plugin-swr': path.resolve(
+        __dirname,
+        '../../plugins/swr/dist/index.js'
+      ),
       '@graph-state/plugin-logger': path.resolve(
         __dirname,
         '../../plugins/logger/dist/index.js'

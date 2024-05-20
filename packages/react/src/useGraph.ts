@@ -30,7 +30,7 @@ export const useGraph = <TState = any>(
       const key = typeof field === 'string' ? field : graphState.keyOfEntity(field)
 
       if (field && key) {
-        graphState.mutate(key, value)
+        graphState.mutate(key, value, { replace: true })
       }
     },
     [graphState, field]

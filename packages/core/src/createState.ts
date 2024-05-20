@@ -219,7 +219,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     if (entity._type in keys) {
       entityId = keys[entity._type]?.(entity) ?? null
     } else if (entity.id || entity._id) {
-      entityId = `${entity.id ?? entity._id}`
+      entityId = `${entity._id ?? entity.id}`
     }
 
     return !entityId ? entityId : `${entity._type}:${entityId}`
