@@ -41,20 +41,19 @@ const generatePost = () => ({
 const graph = {
   _type: 'Root',
   _id: 'rootId',
-  authorOne,
-  child: {
-    _type: 'Layer',
-    _id: 'fff',
-    authorOne,
-    recursive: 'Root:rootId',
-  },
   // name: 'rootname',
   // skills: [
   //   { _type: 'Skill', _id: 'skillId', name: 'js', webLink: 'Https' },
   //   'php',
   // ],
   //
-  posts: [generatePost(), generatePost(), generatePost()],
+  posts: [
+    generatePost(),
+    generatePost(),
+    generatePost(),
+    generatePost(),
+    generatePost(),
+  ],
 };
 
 export const graphState = createState({
@@ -62,7 +61,9 @@ export const graphState = createState({
   plugins: [loggerPlugin()],
 });
 
-console.log(graphState.resolveParents(authorOne));
+window.graphState = graphState;
+
+console.log(graphState);
 
 function App() {
   const posts = useGraphFields(graphState, 'Post');
