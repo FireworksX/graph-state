@@ -1,5 +1,5 @@
 import { useGraph } from '@graph-state/react';
-import { graphState } from './App.tsx';
+import { extendUser, graphState } from './App.tsx';
 import type { FC, PropsWithChildren } from 'react';
 
 interface AuthorProps extends PropsWithChildren {
@@ -12,6 +12,10 @@ export const Author: FC<AuthorProps> = ({ authorEntity, children }) => {
   return (
     <div style={{ background: '#ffdddd' }}>
       <h3>{author?.name}</h3>
+      <pre>{author?.age}</pre>
+      <button onClick={() => graphState.extendGraph(author, extendUser)}>
+        Extend
+      </button>
       {children}
     </div>
   );

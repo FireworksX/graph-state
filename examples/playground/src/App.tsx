@@ -1,6 +1,9 @@
+import type { Entity, Graph, GraphState, LinkKey } from '@graph-state/core';
 import { createState } from '@graph-state/core';
 import { GraphValue, useGraphFields } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
+import type { Extender } from '@graph-state/plugin-extend';
+import extendPlugin from '@graph-state/plugin-extend';
 import { Post } from './Post.tsx';
 import { Author } from './Author.tsx';
 
@@ -14,6 +17,7 @@ const authorOne = {
   _id: 'one',
   name: 'John Doe',
   key: '100',
+  age: 20,
 };
 
 const authorTwo = {
@@ -21,6 +25,7 @@ const authorTwo = {
   _id: 'two',
   name: 'Sam Smith',
   key: '200',
+  age: 44,
 };
 
 const generatePost = () => ({
@@ -41,29 +46,50 @@ const generatePost = () => ({
 const graph = {
   _type: 'Root',
   _id: 'rootId',
+  authorOne,
+  child: {
+    _type: 'Layer',
+    _id: 'fff',
+    authorOne,
+    recursive: 'Root:rootId',
+  },
   // name: 'rootname',
   // skills: [
   //   { _type: 'Skill', _id: 'skillId', name: 'js', webLink: 'Https' },
   //   'php',
   // ],
   //
-  posts: [
-    generatePost(),
-    generatePost(),
-    generatePost(),
-    generatePost(),
-    generatePost(),
-  ],
+  posts: [generatePost(), generatePost(), generatePost()],
+};
+
+/**
+ * Сделать чтобы логер добавил метод для лога
+ * getArgumentsForMutate - должен вызывать data если это функция и возвращать результат
+ * @param extendsMap
+ */
+
+export const extendUser: Extender = (cache, user) => {
+  console.log(cache);
+  return {
+    ...user,
+    age: user.age ?? random(18, 40),
+  };
 };
 
 export const graphState = createState({
   initialState: graph,
-  plugins: [loggerPlugin()],
+  plugins: [
+    loggerPlugin(),
+    extendPlugin({
+      Post: (graph, cache) => {
+        return {
+          ...graph,
+          isOldAuthor: () => cache.resolve(graph.author)?.age > 24,
+        };
+      },
+    }),
+  ],
 });
-
-window.graphState = graphState;
-
-console.log(graphState);
 
 function App() {
   const posts = useGraphFields(graphState, 'Post');
@@ -81,6 +107,14 @@ function App() {
                 value={user.name}
                 onChange={({ target }) => updateUser({ name: target.value })}
               />
+              <label htmlFor="">
+                Age
+                <input
+                  type="text"
+                  value={user.age}
+                  onChange={({ target }) => updateUser({ age: target.value })}
+                />
+              </label>
             </Author>
           )}
         </GraphValue>

@@ -17,6 +17,7 @@ export const Post: FC<PostProps> = ({ postKey }) => {
         <button onClick={() => graphState.invalidate(postKey)}>Remove</button>
       </h1>
       <p>{post.description}</p>
+      <pre>Author status: {post.isOldAuthor() ? 'OLD' : 'YONG'}</pre>
       <Author authorEntity={post.author} />
     </div>
   );

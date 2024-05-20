@@ -64,9 +64,8 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     const { graphKey, options, data } = getArgumentsForMutate(entity, ...args)
     const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
     const prevGraph = resolve(graphKey ?? '')
-    const computedDataFields = typeof data === 'function' ? data(prevGraph) : data
     let graphData: Graph = {
-      ...computedDataFields,
+      ...data,
       ...entityOfKey(graphKey),
     }
 
@@ -247,11 +246,18 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     }
   }
 
-  const getArgumentsForMutate = (entity: string | Entity, ...args: any[]) => ({
-    graphKey: typeof entity === 'string' ? entity : keyOfEntity(entity),
-    options: typeof entity === 'string' ? args[1] : (args[0] as SetOptions | undefined),
-    data: typeof entity === 'string' ? args[0] : entity,
-  })
+  const getArgumentsForMutate = (entity: string | Entity, ...args: any[]) => {
+    let data = typeof entity === 'string' ? args[0] : entity
+    if (typeof data === 'function') {
+      data = data(resolve(entity))
+    }
+
+    return {
+      graphKey: typeof entity === 'string' ? entity : keyOfEntity(entity),
+      options: typeof entity === 'string' ? args[1] : (args[0] as SetOptions | undefined),
+      data,
+    }
+  }
 
   if (options?.initialState) {
     mutate(options.initialState, { replace: true })
