@@ -1,5 +1,17 @@
 # @graph-state/plugin-logger
 
+## 0.2.0
+
+### Minor Changes
+
+- 3f57437: Update log reactions. Add method debugLog to GraphState instance.
+
+### Patch Changes
+
+- Updated dependencies [d4e81d0]
+- Updated dependencies [043db75]
+  - @graph-state/core@0.4.0
+
 ## 0.1.1
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # @graph-state/react
 
+## 0.3.0
+
+### Minor Changes
+
+- cea793d: Add new Component GraphValues.
+
+### Patch Changes
+
+- cea793d: Update GraphValue component.
+- Updated dependencies [d4e81d0]
+- Updated dependencies [043db75]
+  - @graph-state/core@0.4.0
+
 ## 0.2.2
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @graph-state/core
 
+## 0.4.0
+
+### Minor Changes
+
+- 043db75: Add GarbageCollector for links
+
+### Patch Changes
+
+- d4e81d0: Add extend plugin. Core method getArgumentsForMutate return computed data.
+
 ## 0.3.1
 
 ### Patch Changes
