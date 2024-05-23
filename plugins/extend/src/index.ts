@@ -3,6 +3,7 @@ import type {
   Graph,
   GraphState,
   Plugin,
+  SetOptions,
   Type,
 } from '@graph-state/core';
 
@@ -14,8 +15,16 @@ interface ExtendMap {
 
 declare module '@graph-state/core' {
   interface GraphState {
-    extendGraph(entity: Entity, extender: Extender): void;
-    declareExtendGraph(type: Type, extender: Extender): void;
+    extendGraph(
+      entity: Entity,
+      extender: Extender,
+      mutateOptions?: SetOptions
+    ): void;
+    declareExtendGraph(
+      type: Type,
+      extender: Extender,
+      mutateOptions?: SetOptions
+    ): void;
   }
 }
 
@@ -32,10 +41,10 @@ const extendPlugin: (extendsMap?: ExtendMap) => Plugin =
       }
     };
 
-    const recheck = () => {
+    const recheck = (mutateOptions?: SetOptions) => {
       for (const type of extendersStack.keys()) {
         for (const link of graphState.types?.get?.(type) ?? []) {
-          graphState.mutate(graphState.resolve(link) as Graph);
+          graphState.mutate(graphState.resolve(link) as Graph, mutateOptions);
         }
       }
     };
@@ -62,20 +71,24 @@ const extendPlugin: (extendsMap?: ExtendMap) => Plugin =
       return originalMutate(...(args as Parameters<GraphState['mutate']>));
     };
 
-    graphState.extendGraph = (entity: Entity, extender: Extender) => {
+    graphState.extendGraph = (
+      entity: Entity,
+      extender: Extender,
+      mutateOptions
+    ) => {
       const nextGraph = extender?.(
         graphState.resolve(entity) as Graph,
         graphState
       );
 
       if (nextGraph) {
-        graphState.mutate(nextGraph);
+        graphState.mutate(nextGraph, mutateOptions);
       }
     };
 
-    graphState.declareExtendGraph = (type, extender) => {
+    graphState.declareExtendGraph = (type, extender, mutateOptions) => {
       appendExtender(type, extender);
-      recheck();
+      recheck(mutateOptions);
     };
 
     Object.entries(extendsMap ?? {}).forEach(([type, extender]) =>
