@@ -1,5 +1,11 @@
 # @graph-state/plugin-extend
 
+## 0.3.0
+
+### Minor Changes
+
+- 28d8231: Add declare method.
+
 ## 0.2.0
 
 ### Minor Changes
