@@ -68,28 +68,26 @@ const graph = {
  * @param extendsMap
  */
 
-export const extendUser: Extender = (cache, user) => {
-  console.log(cache);
+export const extendUser: Extender = (user, cache) => {
   return {
     ...user,
-    age: user.age ?? random(18, 40),
+    age: random(18, 40),
   };
 };
 
 export const graphState = createState({
   initialState: graph,
-  plugins: [
-    loggerPlugin(),
-    extendPlugin({
-      Post: (graph, cache) => {
-        return {
-          ...graph,
-          isOldAuthor: () => cache.resolve(graph.author)?.age > 24,
-        };
-      },
-    }),
-  ],
+  plugins: [loggerPlugin(), extendPlugin()],
 });
+
+// setTimeout(() => {
+//   graphState.declareExtendGraph('Post', (graph, cache) => {
+//     return {
+//       ...graph,
+//       isOldAuthor: () => cache.resolve(graph.author)?.age > 24,
+//     };
+//   });
+// }, 1000);
 
 function App() {
   const posts = useGraphFields(graphState, 'Post');

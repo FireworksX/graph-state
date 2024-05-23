@@ -57,3 +57,19 @@ export const graphState = createState({
 graphState.extendGraph('User:test', (cache, graph) => graph)
 
 ```
+
+## Lazy extends
+You can add lazy extender.
+
+```jsx
+export const graphState = createState({
+  plugins: [extendPlugin()],
+});
+
+setTimeout(() => {
+  // Extend all User graphs and add extender for next updates.
+  graphState.declareExtendGraph('User', (cache, graph) => graph)
+}, 1000)
+
+
+```
