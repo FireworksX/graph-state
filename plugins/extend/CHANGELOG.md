@@ -1,5 +1,11 @@
 # @graph-state/plugin-extend
 
+## 0.3.1
+
+### Patch Changes
+
+- c8daaa2: Pass mutate options on extend methods.
+
 ## 0.3.0
 
 ### Minor Changes
