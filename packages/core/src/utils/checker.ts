@@ -5,7 +5,7 @@ export const isEmptyValue = (value: unknown): value is null | undefined =>
 
 export const isValue = <T>(value: T): value is Exclude<T, null | undefined> => !isEmptyValue(value)
 
-export const isObject = (value: unknown): value is object =>
+export const isObject = (value: unknown): value is Record<any, any> =>
   typeof value === 'object' && !Array.isArray(value) && isValue(value)
 
 export const isHTMLNode = (o: any) => {
@@ -20,3 +20,20 @@ export const isGraph = (x: unknown): x is Graph => typeof x === 'object' && type
 
 export const isPrimitive = (value: any): value is string | number | boolean =>
   (typeof value !== 'object' && typeof value !== 'function') || value === null
+
+export const deepEqual = (a: any, b: any) => {
+  if (a === b) return true
+  if (!isObject(a) || !isObject(b)) return false
+
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+
+  if (keysA.length !== keysB.length) return false
+
+  for (const key of keysA) {
+    if (!keysB.includes(key)) return false
+    if (!deepEqual(a[key], b[key])) return false
+  }
+
+  return true
+}

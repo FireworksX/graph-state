@@ -1,6 +1,6 @@
 import type { Graph, CreateStateOptions, GraphState, SetOptions, Entity } from 'src'
 import type { DataField } from 'src'
-import { isGraph, isHTMLNode, isObject, isPrimitive } from './utils/checker'
+import { isGraph, isHTMLNode, isObject, isPrimitive, deepEqual } from './utils/checker'
 import { iterator } from './utils/iterator'
 import { createCache } from './cache'
 import { joinKeys } from './utils/joinKeys'
@@ -64,6 +64,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     const { graphKey, options, data } = getArgumentsForMutate(entity, ...args)
     const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
     const prevGraph = resolve(graphKey ?? '')
+
     let graphData: Graph = {
       ...data,
       ...entityOfKey(graphKey),
@@ -92,7 +93,9 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         fieldValue = [...prevValue, ...fieldValue]
       }
 
-      if (prevValue !== fieldValue && !hasChange) hasChange = true
+      if (!deepEqual(prevValue, fieldValue === fieldKey ? safeResolve(fieldValue) : fieldValue) && !hasChange) {
+        hasChange = true
+      }
 
       acc[key] = fieldValue
 
@@ -140,6 +143,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         })
 
         cache.writeLink(parentKey, freshParent)
+
         notify(parentKey)
       })
       subs.forEach(cb => cb(null))

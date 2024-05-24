@@ -17,7 +17,15 @@ const authorOne = {
   _id: 'one',
   name: 'John Doe',
   key: '100',
-  age: 20,
+  characteristics: {
+    gender: 'male',
+    age: 20,
+    traits: {
+      openness: true,
+      extroversion: true,
+      humility: false,
+    },
+  },
 };
 
 const authorTwo = {
@@ -91,6 +99,13 @@ export const graphState = createState({
   ],
 });
 
+setInterval(() => {
+  graphState.mutate('User:one', prev => ({
+    ...prev,
+    name: 'User one',
+  }));
+}, 3000);
+
 function App() {
   const posts = useGraphFields(graphState, 'Post');
   const users = useGraphFields(graphState, 'User');
@@ -98,6 +113,24 @@ function App() {
   return (
     <>
       <h2>Rename authors</h2>
+      <button
+        onClick={() =>
+          graphState.mutate('User:one', prev => ({
+            ...prev,
+            characteristics: {
+              ...prev.characteristics,
+              traits: {
+                openness: false,
+                extroversion: false,
+                humility: true,
+                awareness: true,
+              },
+            },
+          }))
+        }
+      >
+        Update Author One
+      </button>
       {users.map(userKey => (
         <GraphValue key={userKey} graphState={graphState} field={userKey}>
           {(user, updateUser) => (
