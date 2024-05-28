@@ -93,9 +93,8 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         fieldValue = [...prevValue, ...fieldValue]
       }
 
-      if (!internal.hasChange) {
-        internal.hasChange = !shallowEqual(prevValue, fieldKey === fieldValue ? safeResolve(fieldValue) : fieldValue)
-      }
+      internal.hasChange =
+        internal.hasChange || !shallowEqual(prevValue, fieldKey === fieldValue ? safeResolve(fieldValue) : fieldValue)
 
       acc[key] = fieldValue
 
