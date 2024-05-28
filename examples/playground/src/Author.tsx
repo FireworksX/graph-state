@@ -13,6 +13,7 @@ export const Author: FC<AuthorProps> = ({ authorEntity, children }) => {
     <div style={{ background: '#ffdddd' }}>
       <h3>{author?.name}</h3>
       <pre>{author?.age}</pre>
+      <pre>{JSON.stringify(author, null, 2)}</pre>
       <button onClick={() => graphState.extendGraph(author, extendUser)}>
         Extend
       </button>

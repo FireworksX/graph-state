@@ -17,7 +17,15 @@ const authorOne = {
   _id: 'one',
   name: 'John Doe',
   key: '100',
-  age: 20,
+  characteristics: {
+    gender: 'male',
+    age: 20,
+    traits: {
+      openness: true,
+      extroversion: true,
+      humility: false,
+    },
+  },
 };
 
 const authorTwo = {
@@ -58,7 +66,7 @@ const graph = {
   //   { _type: 'Skill', _id: 'skillId', name: 'js', webLink: 'Https' },
   //   'php',
   // ],
-  //
+
   posts: [generatePost(), generatePost(), generatePost()],
 };
 
@@ -75,6 +83,9 @@ export const extendUser: Extender = (user, cache) => {
   };
 };
 
+const momUser = { _type: 'User', _id: 'mom', name: 'Mom' };
+const user = { _type: 'User', _id: 'userId', name: 'John Doe', mom: momUser };
+
 export const graphState = createState({
   initialState: graph,
   plugins: [loggerPlugin(), extendPlugin()],
@@ -90,12 +101,31 @@ export const graphState = createState({
 // }, 1000);
 
 function App() {
-  const posts = useGraphFields(graphState, 'Post');
+  // const posts = useGraphFields(graphState, 'Post');
   const users = useGraphFields(graphState, 'User');
 
   return (
     <>
       <h2>Rename authors</h2>
+      <button
+        // onClick={() => graphState.mutate('User:userId', { name: 'John Doe' })}
+        onClick={() =>
+          graphState.mutate('User:one', prev => ({
+            ...prev,
+            characteristics: {
+              ...prev.characteristics,
+              traits: {
+                openness: false,
+                extroversion: false,
+                humility: true,
+                awareness: true,
+              },
+            },
+          }))
+        }
+      >
+        Update Author One
+      </button>
       {users.map(userKey => (
         <GraphValue key={userKey} graphState={graphState} field={userKey}>
           {(user, updateUser) => (
@@ -118,9 +148,9 @@ function App() {
         </GraphValue>
       ))}
 
-      {posts.map(post => (
-        <Post key={post} postKey={post} />
-      ))}
+      {/*{posts.map(post => (*/}
+      {/*  <Post key={post} postKey={post} />*/}
+      {/*))}*/}
     </>
   );
 }

@@ -63,6 +63,9 @@ export interface SetOptions {
   replace?: boolean
   overrideMutateMethod?: GraphState['mutate']
   parent?: Entity
+  internal?: {
+    hasChange?: boolean
+  }
 }
 
 export type Plugin = (state: GraphState) => GraphState

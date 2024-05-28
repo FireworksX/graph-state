@@ -673,22 +673,76 @@ describe('createState', () => {
       expect(spy).toBeCalledTimes(0)
     })
 
-    it('should skip notify if nothing was changed (primitives only)', () => {
-      const momUser = { _type: 'User', _id: 'mom', name: 'Mom' }
-      const user = { _type: 'User', _id: 'userId', name: 'John Doe', mom: momUser }
-      const graphState = createState({ initialState: user })
-      const spy = vi.fn()
+    describe('should skip notify if nothing was changed', () => {
+      it('with primitive', () => {
+        const momUser = { _type: 'User', _id: 'mom', name: 'Mom' }
+        const user = { _type: 'User', _id: 'userId', name: 'John Doe', mom: momUser }
+        const graphState = createState({ initialState: user })
+        const spy = vi.fn()
 
-      graphState.subscribe(user, spy)
-      graphState.subscribe(momUser, spy)
-      graphState.mutate(graphState.keyOfEntity(user), {
-        name: 'John Doe',
-      })
-      graphState.mutate(graphState.keyOfEntity(momUser), {
-        name: 'Mom',
+        graphState.subscribe(user, spy)
+        graphState.subscribe(momUser, spy)
+        graphState.mutate(graphState.keyOfEntity(user), {
+          name: 'John Doe',
+        })
+        graphState.mutate(graphState.keyOfEntity(momUser), {
+          name: 'Mom',
+        })
+
+        expect(spy).toBeCalledTimes(0)
       })
 
-      expect(spy).toBeCalledTimes(0)
+      it('should be called once with nested object', () => {
+        const graphState = createState({
+          initialState: {
+            _type: 'User',
+            _id: 'one',
+            name: 'John Doe',
+            key: '100',
+            characteristics: {
+              gender: 'male',
+              age: 20,
+              traits: {
+                openness: true,
+                extroversion: true,
+                humility: false,
+              },
+            },
+          },
+        })
+        const spy = vi.fn()
+        graphState.subscribe('User:one', spy)
+
+        const updatedTraits = {
+          traits: {
+            openness: false,
+            extroversion: false,
+            humility: true,
+            awareness: true,
+            deepTraits: {
+              illnesses: true,
+            },
+          },
+        }
+
+        graphState.mutate('User:one', prev => ({
+          ...prev,
+          characteristics: {
+            ...prev.characteristics,
+            ...updatedTraits,
+          },
+        }))
+
+        graphState.mutate('User:one', prev => ({
+          ...prev,
+          characteristics: {
+            ...prev.characteristics,
+            ...updatedTraits,
+          },
+        }))
+
+        expect(spy).toBeCalledTimes(1)
+      })
     })
 
     it('should skip nested tree notify', () => {
@@ -816,22 +870,20 @@ describe('createState', () => {
       const spy = vi.fn()
 
       let updateIndex = 0
-
       graphState.subscribe(graphState, data => {
         updateIndex++
         spy()
-
         switch (updateIndex) {
           case 1:
             return expect(data).toStrictEqual(avatarLayer)
-          case 3:
+          case 2:
             return expect(data).toStrictEqual(avatarLayer)
           case 4:
-            return expect(data).toMatchObject(rootLayer)
-          case 5:
             return expect(data).toStrictEqual(avatarLayer)
-          case 7:
+          case 5:
             return expect(data).toMatchObject(avatarLayer)
+          case 6:
+            return expect(data).toMatchObject(graphState.resolve(graphState.keyOfEntity(rootLayer)))
         }
       })
       graphState.mutate({
@@ -843,7 +895,7 @@ describe('createState', () => {
         header: avatarLayer,
       })
 
-      expect(spy).toBeCalledTimes(7)
+      expect(spy).toBeCalledTimes(9)
     })
   })
 
