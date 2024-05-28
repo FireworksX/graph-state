@@ -66,7 +66,7 @@ const graph = {
   //   { _type: 'Skill', _id: 'skillId', name: 'js', webLink: 'Https' },
   //   'php',
   // ],
-  //
+
   posts: [generatePost(), generatePost(), generatePost()],
 };
 
@@ -84,36 +84,33 @@ export const extendUser: Extender = (cache, user) => {
   };
 };
 
+const momUser = { _type: 'User', _id: 'mom', name: 'Mom' };
+const user = { _type: 'User', _id: 'userId', name: 'John Doe', mom: momUser };
+
 export const graphState = createState({
   initialState: graph,
   plugins: [
     loggerPlugin(),
-    extendPlugin({
-      Post: (graph, cache) => {
-        return {
-          ...graph,
-          isOldAuthor: () => cache.resolve(graph.author)?.age > 24,
-        };
-      },
-    }),
+    // extendPlugin({
+    //   Post: (graph, cache) => {
+    //     return {
+    //       ...graph,
+    //       isOldAuthor: () => cache.resolve(graph.author)?.age > 24,
+    //     };
+    //   },
+    // }),
   ],
 });
 
-setInterval(() => {
-  graphState.mutate('User:one', prev => ({
-    ...prev,
-    name: 'User one',
-  }));
-}, 3000);
-
 function App() {
-  const posts = useGraphFields(graphState, 'Post');
+  // const posts = useGraphFields(graphState, 'Post');
   const users = useGraphFields(graphState, 'User');
 
   return (
     <>
       <h2>Rename authors</h2>
       <button
+        // onClick={() => graphState.mutate('User:userId', { name: 'John Doe' })}
         onClick={() =>
           graphState.mutate('User:one', prev => ({
             ...prev,
@@ -153,9 +150,9 @@ function App() {
         </GraphValue>
       ))}
 
-      {posts.map(post => (
-        <Post key={post} postKey={post} />
-      ))}
+      {/*{posts.map(post => (*/}
+      {/*  <Post key={post} postKey={post} />*/}
+      {/*))}*/}
     </>
   );
 }

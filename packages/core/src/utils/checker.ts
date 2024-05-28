@@ -1,4 +1,5 @@
 import type { Graph, LinkKey } from 'src'
+import type { DataField } from 'src'
 
 export const isEmptyValue = (value: unknown): value is null | undefined =>
   !value && (value === null || value === undefined)
@@ -21,7 +22,7 @@ export const isGraph = (x: unknown): x is Graph => typeof x === 'object' && type
 export const isPrimitive = (value: any): value is string | number | boolean =>
   (typeof value !== 'object' && typeof value !== 'function') || value === null
 
-export const deepEqual = (a: any, b: any) => {
+export const shallowEqual = (a: DataField, b: DataField) => {
   if (a === b) return true
   if (!isObject(a) || !isObject(b)) return false
 
@@ -32,7 +33,6 @@ export const deepEqual = (a: any, b: any) => {
 
   for (const key of keysA) {
     if (!keysB.includes(key)) return false
-    if (!deepEqual(a[key], b[key])) return false
   }
 
   return true

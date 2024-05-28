@@ -1,6 +1,6 @@
 import type { Graph, CreateStateOptions, GraphState, SetOptions, Entity } from 'src'
 import type { DataField } from 'src'
-import { isGraph, isHTMLNode, isObject, isPrimitive, deepEqual } from './utils/checker'
+import { isGraph, isHTMLNode, isObject, isPrimitive, shallowEqual } from './utils/checker'
 import { iterator } from './utils/iterator'
 import { createCache } from './cache'
 import { joinKeys } from './utils/joinKeys'
@@ -55,15 +55,14 @@ export const createState = (options?: CreateStateOptions): GraphState => {
 
     const entityKey = isGraph(input) ? keyOfEntity(input) : null
     const childKey = entityKey ?? parentFieldKey
-
     return mutate(childKey, input, options)
   }
 
   const mutate = (entity: Entity, ...args: any[]) => {
-    let hasChange = false
     const { graphKey, options, data } = getArgumentsForMutate(entity, ...args)
     const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
     const prevGraph = resolve(graphKey ?? '')
+    const internal = options?.internal || { hasChange: false }
 
     let graphData: Graph = {
       ...data,
@@ -86,6 +85,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         fieldValue = mutateField(fieldValue, fieldKey, {
           ...options,
           parent: graphKey,
+          internal,
         })
       }
 
@@ -93,8 +93,8 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         fieldValue = [...prevValue, ...fieldValue]
       }
 
-      if (!deepEqual(prevValue, fieldValue === fieldKey ? safeResolve(fieldValue) : fieldValue) && !hasChange) {
-        hasChange = true
+      if (!internal.hasChange) {
+        internal.hasChange = !shallowEqual(prevValue, fieldKey === fieldValue ? safeResolve(fieldValue) : fieldValue)
       }
 
       acc[key] = fieldValue
@@ -104,7 +104,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
 
     cache.writeLink(graphKey, nextGraph, parentKey)
 
-    if (hasChange) {
+    if (internal.hasChange) {
       notify(graphKey)
     }
 

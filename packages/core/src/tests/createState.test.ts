@@ -595,6 +595,61 @@ describe('createState', () => {
         expect(isHTMLNode(node)).toBeTruthy()
       })
     })
+    it('should be called once', () => {
+      const graphState = createState({
+        initialState: {
+          _type: 'User',
+          _id: 'one',
+          name: 'John Doe',
+          key: '100',
+          characteristics: {
+            gender: 'male',
+            age: 20,
+            traits: {
+              openness: true,
+              extroversion: true,
+              humility: false,
+            },
+          },
+        },
+      })
+      const spy = vi.fn()
+      graphState.subscribe('User:one', spy)
+
+      graphState.mutate('User:one', prev => ({
+        ...prev,
+        characteristics: {
+          ...prev.characteristics,
+          traits: {
+            openness: false,
+            extroversion: false,
+            humility: true,
+            awareness: true,
+            deepTraits: {
+              illnesses: true,
+            },
+          },
+        },
+      }))
+
+      graphState.mutate('User:one', prev => ({
+        ...prev,
+        characteristics: {
+          ...prev.characteristics,
+          traits: {
+            openness: false,
+            extroversion: false,
+            humility: true,
+            awareness: true,
+            deepTraits: {
+              illnesses: true,
+            },
+          },
+        },
+      }))
+
+      expect(spy).toBeCalledTimes(1)
+    })
   })
 
   describe('observe/notify', () => {
@@ -816,22 +871,20 @@ describe('createState', () => {
       const spy = vi.fn()
 
       let updateIndex = 0
-
       graphState.subscribe(graphState, data => {
         updateIndex++
         spy()
-
         switch (updateIndex) {
           case 1:
             return expect(data).toStrictEqual(avatarLayer)
-          case 3:
+          case 2:
             return expect(data).toStrictEqual(avatarLayer)
           case 4:
-            return expect(data).toMatchObject(rootLayer)
-          case 5:
             return expect(data).toStrictEqual(avatarLayer)
-          case 7:
+          case 5:
             return expect(data).toMatchObject(avatarLayer)
+          case 6:
+            return expect(data).toMatchObject(graphState.resolve(graphState.keyOfEntity(rootLayer)))
         }
       })
       graphState.mutate({
@@ -843,7 +896,7 @@ describe('createState', () => {
         header: avatarLayer,
       })
 
-      expect(spy).toBeCalledTimes(7)
+      expect(spy).toBeCalledTimes(9)
     })
   })
 
