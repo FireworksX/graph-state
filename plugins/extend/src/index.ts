@@ -1,4 +1,11 @@
-import type { Entity, Graph, GraphState, Plugin } from '@graph-state/core';
+import type {
+  Entity,
+  Graph,
+  GraphState,
+  Plugin,
+  SetOptions,
+  Type,
+} from '@graph-state/core';
 
 export type Extender = (graph: Graph, cache: GraphState) => Graph;
 
@@ -8,46 +15,87 @@ interface ExtendMap {
 
 declare module '@graph-state/core' {
   interface GraphState {
-    extendGraph(entity: Entity, extender: ExtendMap[string]): void;
+    extendGraph(
+      entity: Entity,
+      extender: Extender,
+      mutateOptions?: SetOptions
+    ): void;
+    declareExtendGraph(
+      type: Type,
+      extender: Extender,
+      mutateOptions?: SetOptions
+    ): void;
   }
 }
 
 const extendPlugin: (extendsMap?: ExtendMap) => Plugin =
   extendsMap => (graphState: GraphState) => {
     const originalMutate = graphState.mutate;
+    const extendersStack = new Map<Type, Extender[]>();
+
+    const appendExtender = (type: Type, extender: Extender) => {
+      if (extendersStack.has(type)) {
+        extendersStack.get(type)?.push(extender);
+      } else {
+        extendersStack.set(type, [extender]);
+      }
+    };
+
+    const recheck = (mutateOptions?: SetOptions) => {
+      for (const type of extendersStack.keys()) {
+        for (const link of graphState.types?.get?.(type) ?? []) {
+          graphState.mutate(graphState.resolve(link) as Graph, mutateOptions);
+        }
+      }
+    };
 
     graphState.mutate = (...args: any) => {
       const { graphKey, data, options } = graphState.getArgumentsForMutate(
         ...(args as Parameters<GraphState['getArgumentsForMutate']>)
       );
       const graph = graphState.resolve(graphKey) as Graph;
-      const extender = extendsMap?.[graph?._type];
+      const extenders = extendersStack.get(graph?._type);
 
-      if (extender && graphKey) {
-        const extendData = extender({ ...graph, ...data }, graphState);
+      if (extenders && graphKey) {
+        const initialData = { ...graph, ...data };
+        const extendData = extenders.reduce(
+          (data, extender) => ({
+            ...data,
+            ...extender(data, graphState),
+          }),
+          initialData
+        );
         return originalMutate(graphKey, extendData, options);
       }
 
       return originalMutate(...(args as Parameters<GraphState['mutate']>));
     };
 
-    graphState.extendGraph = (entity: Entity, extender: Extender) => {
+    graphState.extendGraph = (
+      entity: Entity,
+      extender: Extender,
+      mutateOptions
+    ) => {
       const nextGraph = extender?.(
         graphState.resolve(entity) as Graph,
         graphState
       );
 
       if (nextGraph) {
-        graphState.mutate(nextGraph);
+        graphState.mutate(nextGraph, mutateOptions);
       }
     };
 
-    Object.keys(extendsMap ?? {}).forEach(type => {
-      const links = Array.from(graphState.types?.get?.(type) ?? []);
-      links.forEach(link => {
-        graphState.mutate(graphState.resolve(link) as Graph);
-      });
-    });
+    graphState.declareExtendGraph = (type, extender, mutateOptions) => {
+      appendExtender(type, extender);
+      recheck(mutateOptions);
+    };
+
+    Object.entries(extendsMap ?? {}).forEach(([type, extender]) =>
+      appendExtender(type, extender)
+    );
+
+    recheck();
 
     return graphState;
   };
