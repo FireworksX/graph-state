@@ -260,6 +260,27 @@ describe('createState', () => {
       expect(spy).toHaveBeenCalledWith(null)
     })
 
+    it('should notify after invalidating and recreating', () => {
+      const spy = vi.fn()
+      const graphState = createState()
+      graphState.mutate({
+        ...rootLayer,
+        children: [avatarLayer],
+      })
+
+      graphState.subscribe(rootLayer, spy)
+      graphState.invalidate(rootLayer)
+
+      expect(spy).toHaveBeenCalledWith(null)
+
+      graphState.mutate({
+        ...rootLayer,
+        children: [avatarLayer],
+      })
+
+      expect(spy).toBeCalledTimes(2)
+    })
+
     it('should skip notify after invalidate', () => {
       const spy = vi.fn()
       const graphState = createState()
