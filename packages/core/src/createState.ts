@@ -5,6 +5,8 @@ import { iterator } from './utils/iterator'
 import { createCache } from './cache'
 import { joinKeys } from './utils/joinKeys'
 import { isPartOfGraph } from './utils/isPartOfGraph'
+import { uniqueLinks } from './utils/unique'
+import { isDev } from './utils/isDev'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -91,6 +93,10 @@ export const createState = (options?: CreateStateOptions): GraphState => {
 
       if (!options?.replace && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
         fieldValue = [...prevValue, ...fieldValue]
+      }
+
+      if (Array.isArray(fieldValue) && options?.dedup !== false) {
+        fieldValue = uniqueLinks(...fieldValue)
       }
 
       internal.hasChange =
@@ -278,8 +284,8 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     entityOfKey,
     getArgumentsForMutate,
     types: cache.types,
-    cache,
-    subscribers,
+    cache: isDev ? cache : undefined,
+    subscribers: isDev ? subscribers : undefined,
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)
