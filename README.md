@@ -12,6 +12,7 @@
 
 
 > graph-state is **graph based** state manager, designed for both simple and complex applications.
+> Focused on work with many deep and dependence data.
 
 ## Packages
 
@@ -51,18 +52,40 @@ import { useGraph } from '@graph-state/react'
 import { createState } from '@graph-state/core'
 
 const grapState = createState({
-  initialState: {
-    _type: 'Node',
-    _id: 'ID',
-    value: 150
-  }
+  value: 150
 })
 
 const App = () => {
-  const nodeValue = useGraph(grapState, 'Node:ID')
+  const [state, setState] = useGraph(grapState)
 
-  return <h1>{nodeValue.value}</h1>
+  return <div>
+    <h1>{state.value}</h1>
+    <input type="text" value={state.value} onChange={(e) => setState({ value: e.target.value })}/>
+  </div>
 }
+```
+
+## Base state
+```js
+const state = createState({
+  initialState: {
+    modal: 'about',
+    layers: []
+  }
+})
+
+state.subscribe(state, (data) => {
+  // state updates
+})
+
+state.resolve() // { modal: 'about', layers: [] }
+// or state.resolve(state) or state.resolve(state.key)
+
+state.mutate({
+  layers: [19]
+})
+
+state.resolve() // { modal: 'about', layers: [19] }
 ```
 
 ## Concept
@@ -242,7 +265,7 @@ const userGraph = {
 
 const graphState = createState({initialState: userGraph})
 
-graphState.subscribe(graphState, (nextState) => {
+graphState.subscribe(nextState => {
   // Call every state update
 })
 

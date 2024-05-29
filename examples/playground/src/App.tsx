@@ -1,6 +1,6 @@
 import type { Entity, Graph, GraphState, LinkKey } from '@graph-state/core';
 import { createState } from '@graph-state/core';
-import { GraphValue, useGraphFields } from '@graph-state/react';
+import { GraphValue, useGraph, useGraphFields } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import type { Extender } from '@graph-state/plugin-extend';
 import extendPlugin from '@graph-state/plugin-extend';
@@ -55,74 +55,45 @@ const graph = {
  */
 
 export const graphState = createState({
-  initialState: graph,
+  initialState: {
+    posts: [generatePost(), generatePost(), generatePost()],
+  },
   plugins: [loggerPlugin()],
 });
 window.graphState = graphState;
 
-console.log('----');
-graphState.mutate(graph, { dedup: false });
-
-console.log(graphState.resolve(graph));
-
 function App() {
-  // const posts = useGraphFields(graphState, 'Post');
-  const users = useGraphFields(graphState, 'User');
+  const posts = useGraphFields(graphState, 'Post');
 
   return (
     <>
-      <button
-        onClick={() =>
-          graphState.mutate({
-            _type: 'User',
-            _id: 'one',
-            name: 'John Doe',
-            key: '100',
-            characteristics: {
-              gender: 'male',
-              age: 20,
-              traits: {
-                openness: true,
-                extroversion: true,
-                humility: false,
-                _type: 'User',
-                _id: 'one.characteristics.traits',
-              },
-              _type: 'User',
-              _id: 'one.characteristics',
-            },
-          })
-        }
-      >
-        Reinit author
-      </button>
       <br />
-      <h2>Rename authors</h2>
-      {users.map(userKey => (
-        <GraphValue key={userKey} graphState={graphState} field={userKey}>
-          {(user, updateUser) => (
-            <Author key={userKey} authorEntity={userKey}>
-              <input
-                type="text"
-                value={user.name}
-                onChange={({ target }) => updateUser({ name: target.value })}
-              />
-              <label htmlFor="">
-                Age
-                <input
-                  type="text"
-                  value={user.age}
-                  onChange={({ target }) => updateUser({ age: target.value })}
-                />
-              </label>
-            </Author>
-          )}
-        </GraphValue>
-      ))}
-
-      {/*{posts.map(post => (*/}
-      {/*  <Post key={post} postKey={post} />*/}
+      {/*<h2>Rename authors</h2>*/}
+      {/*{users.map(userKey => (*/}
+      {/*  <GraphValue key={userKey} graphState={graphState} field={userKey}>*/}
+      {/*    {(user, updateUser) => (*/}
+      {/*      <Author key={userKey} authorEntity={userKey}>*/}
+      {/*        <input*/}
+      {/*          type="text"*/}
+      {/*          value={user.name}*/}
+      {/*          onChange={({ target }) => updateUser({ name: target.value })}*/}
+      {/*        />*/}
+      {/*        <label htmlFor="">*/}
+      {/*          Age*/}
+      {/*          <input*/}
+      {/*            type="text"*/}
+      {/*            value={user.age}*/}
+      {/*            onChange={({ target }) => updateUser({ age: target.value })}*/}
+      {/*          />*/}
+      {/*        </label>*/}
+      {/*      </Author>*/}
+      {/*    )}*/}
+      {/*  </GraphValue>*/}
       {/*))}*/}
+
+      {posts.map(post => (
+        <Post key={post} postKey={post} />
+      ))}
     </>
   );
 }

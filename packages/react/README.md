@@ -21,9 +21,12 @@ import { createState } from '@graph-state/core';
 
 export const graphState = createState({
   initialState: {
-    _type: 'User',
-    _id: 'id',
-    age: 23
+    version: 1,
+    user: {
+      _type: 'User',
+      _id: 'id',
+      age: 23
+    }
   }
 });
 ```
@@ -33,9 +36,11 @@ export const graphState = createState({
 import { useGraph } from '@graph-state/react';
 
 const App = () => {
+  const [state, updateState] = useGraph(graphState)
   const [user, updateUser] = useGraph(graphState, 'User:id')
   
   return <div>
+    <h2>Version: {state.version}</h2>
     <h2>Age: {user.age}</h2>
     <button onClick={() => updateUser({age: Math.random() * 100})}>Update age</button>
   </div>

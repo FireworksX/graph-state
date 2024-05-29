@@ -4,7 +4,7 @@ import type { DataSetter, Dispatch, Entity, GraphState } from '@graph-state/core
 
 export const useGraph = <TState = any>(
   graphState: GraphState,
-  field: Entity
+  field: Entity = graphState.key
 ): [TState, Dispatch<DataSetter<TState>>] => {
   const nextValue = useRef<TState>(graphState.resolve(field) as any as TState)
 
