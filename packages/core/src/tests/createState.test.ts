@@ -404,26 +404,53 @@ describe('createState', () => {
       ])
     })
 
-    it('should not skip duplicate item in array', () => {
-      const graphState = createState()
-      graphState.mutate({
-        ...headerLayer,
-        children: [],
+    describe('array merge', () => {
+      it('should skip duplicate links in array by default', () => {
+        const graphState = createState()
+        graphState.mutate({
+          ...headerLayer,
+          children: [],
+        })
+
+        graphState.mutate({
+          ...headerLayer,
+          children: [avatarLayer, avatarLayer, 'hello', 'hello'],
+        })
+
+        expect(graphState.resolve(headerLayer).children).toHaveLength(3)
+
+        graphState.mutate({
+          ...headerLayer,
+          children: [avatarLayer, 'hello'],
+        })
+
+        expect(graphState.resolve(headerLayer).children).toHaveLength(4)
       })
 
-      graphState.mutate({
-        ...headerLayer,
-        children: [avatarLayer],
+      it('should allow duplicate links with options', () => {
+        const graphState = createState()
+        graphState.mutate({
+          ...headerLayer,
+          children: [],
+        })
+
+        graphState.mutate(
+          {
+            ...headerLayer,
+            children: [avatarLayer, avatarLayer],
+          },
+          { dedup: false }
+        )
+
+        expect(graphState.resolve(headerLayer).children).toHaveLength(2)
+
+        graphState.mutate({
+          ...headerLayer,
+          children: [avatarLayer],
+        })
+
+        expect(graphState.resolve(headerLayer).children).toHaveLength(1)
       })
-
-      expect(graphState.resolve(headerLayer).children).toHaveLength(1)
-
-      graphState.mutate({
-        ...headerLayer,
-        children: [avatarLayer],
-      })
-
-      expect(graphState.resolve(headerLayer).children).toHaveLength(2)
     })
 
     it('should set value as link', () => {

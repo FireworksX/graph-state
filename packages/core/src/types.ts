@@ -63,6 +63,7 @@ export interface SetOptions {
   replace?: boolean
   overrideMutateMethod?: GraphState['mutate']
   parent?: Entity
+  dedup?: boolean
   internal?: {
     hasChange?: boolean
   }

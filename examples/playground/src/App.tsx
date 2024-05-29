@@ -17,15 +17,6 @@ const authorOne = {
   _id: 'one',
   name: 'John Doe',
   key: '100',
-  characteristics: {
-    gender: 'male',
-    age: 20,
-    traits: {
-      openness: true,
-      extroversion: true,
-      humility: false,
-    },
-  },
 };
 
 const authorTwo = {
@@ -33,7 +24,6 @@ const authorTwo = {
   _id: 'two',
   name: 'Sam Smith',
   key: '200',
-  age: 44,
 };
 
 const generatePost = () => ({
@@ -54,19 +44,7 @@ const generatePost = () => ({
 const graph = {
   _type: 'Root',
   _id: 'rootId',
-  authorOne,
-  child: {
-    _type: 'Layer',
-    _id: 'fff',
-    authorOne,
-    recursive: 'Root:rootId',
-  },
-  // name: 'rootname',
-  // skills: [
-  //   { _type: 'Skill', _id: 'skillId', name: 'js', webLink: 'Https' },
-  //   'php',
-  // ],
-
+  authors: [authorOne, authorOne, authorOne, authorOne],
   posts: [generatePost(), generatePost(), generatePost()],
 };
 
@@ -76,26 +54,16 @@ const graph = {
  * @param extendsMap
  */
 
-export const extendUser: Extender = (user, cache) => {
-  return {
-    ...user,
-    age: random(18, 40),
-  };
-};
-
 export const graphState = createState({
   initialState: graph,
   plugins: [loggerPlugin()],
 });
 window.graphState = graphState;
-// setTimeout(() => {
-//   graphState.declareExtendGraph('Post', (graph, cache) => {
-//     return {
-//       ...graph,
-//       isOldAuthor: () => cache.resolve(graph.author)?.age > 24,
-//     };
-//   });
-// }, 1000);
+
+console.log('----');
+graphState.mutate(graph, { dedup: false });
+
+console.log(graphState.resolve(graph));
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');

@@ -19,6 +19,8 @@ export const isGraphOrKey = (x: any): x is LinkKey | Graph => typeof x === 'stri
 
 export const isGraph = (x: unknown): x is Graph => typeof x === 'object' && typeof (x as any)._type === 'string'
 
+export const isLinkKey = (x: unknown): x is LinkKey => typeof x === 'string' && x.split(':').length >= 2
+
 export const isPrimitive = (value: any): value is string | number | boolean =>
   (typeof value !== 'object' && typeof value !== 'function') || value === null
 

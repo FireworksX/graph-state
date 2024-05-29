@@ -18,7 +18,7 @@
 | Package                                                                                                     | Version                                                                                                                                       | Docs                                                                                                     | Size                                                                                                                                                                        |
 |-------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [`@graph-state/core`](https://github.com/FireworksX/graph-state/tree/master/packages/core#readme)           | [![npm](https://img.shields.io/npm/v/@graph-state/core?style=flat-square)](https://www.npmjs.com/package/@graph-state/core)                   | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/core)  | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/core?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/core)                   |
-| [`@graph-state/react`](https://github.com/FireworksX/mozaik/tree/main/packages/react/#readme)               | [![npm](https://img.shields.io/npm/v/@graph-state/react?style=flat-square)](https://www.npmjs.com/package/@graph-state/react)                 | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/react) | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/react?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/react)                 |
+| [`@graph-state/react`](https://github.com/FireworksX/graph-state/tree/master/packages/react/#readme)        | [![npm](https://img.shields.io/npm/v/@graph-state/react?style=flat-square)](https://www.npmjs.com/package/@graph-state/react)                 | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/packages/react) | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/react?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/react)                 |
 | [`@graph-state/plugin-logger`](https://github.com/FireworksX/graph-state/tree/master/plugins/logger#readme) | [![npm](https://img.shields.io/npm/v/@graph-state/plugin-logger?style=flat-square)](https://www.npmjs.com/package/@graph-state/plugin-logger) | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/plugins/logger) | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/plugin-logger?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/plugin-logger) |
 | [`@graph-state/plugin-ws`](https://github.com/FireworksX/graph-state/tree/master/plugins/ws#readme)         | [![npm](https://img.shields.io/npm/v/@graph-state/plugin-ws?style=flat-square)](https://www.npmjs.com/package/@graph-state/plugin-ws)         | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/plugins/ws)     | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/plugin-ws?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/plugin-ws)         |
 | [`@graph-state/plugin-extend`](https://github.com/FireworksX/graph-state/tree/master/plugins/extend#readme) | [![npm](https://img.shields.io/npm/v/@graph-state/plugin-extend?style=flat-square)](https://www.npmjs.com/package/@graph-state/plugin-extend) | [![](https://img.shields.io/badge/API%20Docs-markdown-lightgrey.svg?style=flat-square)](/plugins/extend) | [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@graph-state/plugin-ws?style=flat-square)](https://bundlephobia.com/result?p=@graph-state/plugin-extend)     |
@@ -153,6 +153,20 @@ graphState.mutate('User:usernameOne', prev => ({
 
 > By default, state deep merged. You don`t need spread every update.
 > You can use {replace: true} on mutation for replace state.
+
+### Mutate options
+
+ - `replace` - force replace object or array (default: false)
+ - `dedup` - skip duplicate links in array (default: true)
+```js
+state.mutate(
+  { ...some data }, 
+  {
+    replace: true,
+    dedup: false
+  }
+)
+```
 
 ---
 
@@ -320,7 +334,7 @@ const graphState = createState({
 
 #### keyOfEntity
 ```js
-graphState.keyOfGraph({
+graphState.keyOfEntity({
   _type: 'User',
   _id: 'id'
 }) // User:id
