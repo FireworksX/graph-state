@@ -1,5 +1,5 @@
 import { useGraph } from '@graph-state/react';
-import { extendUser, graphState } from './App.tsx';
+import { graphState } from './App.tsx';
 import type { FC, PropsWithChildren } from 'react';
 
 interface AuthorProps extends PropsWithChildren {
@@ -7,17 +7,23 @@ interface AuthorProps extends PropsWithChildren {
 }
 
 export const Author: FC<AuthorProps> = ({ authorEntity, children }) => {
-  const [author] = useGraph(graphState, authorEntity);
+  const [author, setAuthor] = useGraph(graphState, authorEntity);
 
   return (
-    <div style={{ background: '#ffdddd' }}>
-      <h3>{author?.name}</h3>
-      <pre>{author?.age}</pre>
-      <pre>{JSON.stringify(author, null, 2)}</pre>
-      <button onClick={() => graphState.extendGraph(author, extendUser)}>
-        Extend
+    <>
+      <button onClick={() => setAuthor({ name: 'Hello kitty' })}>
+        Update author
       </button>
-      {children}
-    </div>
+
+      <div style={{ background: '#ffdddd' }}>
+        <h3>{author?.name}</h3>
+        <pre>{author?.age}</pre>
+        <pre>{JSON.stringify(author, null, 2)}</pre>
+        <button onClick={() => graphState.invalidate(authorEntity)}>
+          Invalidate Author
+        </button>
+        {children}
+      </div>
+    </>
   );
 };

@@ -48,7 +48,7 @@ const generatePost = () => ({
   title: `Post title ${generateId()}`,
   description:
     'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
-  author: random(0, 1) ? authorOne : authorTwo,
+  author: authorOne,
 });
 
 const graph = {
@@ -83,14 +83,11 @@ export const extendUser: Extender = (user, cache) => {
   };
 };
 
-const momUser = { _type: 'User', _id: 'mom', name: 'Mom' };
-const user = { _type: 'User', _id: 'userId', name: 'John Doe', mom: momUser };
-
 export const graphState = createState({
   initialState: graph,
-  plugins: [loggerPlugin(), extendPlugin()],
+  plugins: [loggerPlugin()],
 });
-
+window.graphState = graphState;
 // setTimeout(() => {
 //   graphState.declareExtendGraph('Post', (graph, cache) => {
 //     return {
@@ -106,26 +103,33 @@ function App() {
 
   return (
     <>
-      <h2>Rename authors</h2>
       <button
-        // onClick={() => graphState.mutate('User:userId', { name: 'John Doe' })}
         onClick={() =>
-          graphState.mutate('User:one', prev => ({
-            ...prev,
+          graphState.mutate({
+            _type: 'User',
+            _id: 'one',
+            name: 'John Doe',
+            key: '100',
             characteristics: {
-              ...prev.characteristics,
+              gender: 'male',
+              age: 20,
               traits: {
-                openness: false,
-                extroversion: false,
-                humility: true,
-                awareness: true,
+                openness: true,
+                extroversion: true,
+                humility: false,
+                _type: 'User',
+                _id: 'one.characteristics.traits',
               },
+              _type: 'User',
+              _id: 'one.characteristics',
             },
-          }))
+          })
         }
       >
-        Update Author One
+        Reinit author
       </button>
+      <br />
+      <h2>Rename authors</h2>
       {users.map(userKey => (
         <GraphValue key={userKey} graphState={graphState} field={userKey}>
           {(user, updateUser) => (

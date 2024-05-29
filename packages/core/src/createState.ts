@@ -16,7 +16,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const keys = options?.keys ?? {}
   // const resolvers = options?.resolvers ?? {}
   const cache = createCache()
-  const subscribes = new Map<string, ((newState: any) => any)[]>()
+  const subscribers = new Map<string, ((newState: any) => any)[]>()
   let deepIndex = 0
 
   const resolve = (input?: Entity) => {
@@ -122,7 +122,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
 
     if (key) {
       const parents = cache.getLinkedRefs(key)
-      const subs = subscribes.get(key) || []
+      const subs = subscribers.get(key) || []
 
       cache.invalidate(key)
 
@@ -146,8 +146,6 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         notify(parentKey)
       })
       subs.forEach(cb => cb(null))
-
-      subscribes.delete(key)
     }
   }
 
@@ -161,12 +159,12 @@ export const createState = (options?: CreateStateOptions): GraphState => {
 
     if (key) {
       deepIndex++
-      const subs = subscribes.get(key) || []
+      const subs = subscribers.get(key) || []
       const deps = cache.getChildren(key) || []
       const nextResult = resolve(key)
 
       if (storeKey) {
-        subscribes.get(storeKey)?.forEach(cb => {
+        subscribers.get(storeKey)?.forEach(cb => {
           cb(nextResult)
         })
       }
@@ -186,22 +184,22 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     const key = keyOfEntity(input)
 
     if (key) {
-      if (subscribes.has(key)) {
-        subscribes.set(key, [...Array.from(subscribes.get(key) || []), callback])
+      if (subscribers.has(key)) {
+        subscribers.set(key, [...Array.from(subscribers.get(key) || []), callback])
       } else {
-        subscribes.set(key, [callback])
+        subscribers.set(key, [callback])
       }
     }
 
     return () => {
       if (key) {
-        const subIndex = (subscribes.get(key) || []).findIndex(sub => sub === callback)
+        const subIndex = (subscribers.get(key) || []).findIndex(sub => sub === callback)
 
         if (subIndex !== -1) {
-          const nextSubscribers = subscribes.get(key) || []
+          const nextSubscribers = subscribers.get(key) || []
           nextSubscribers.splice(subIndex, 1)
 
-          subscribes.set(key, nextSubscribers)
+          subscribers.set(key, nextSubscribers)
         }
       }
     }
@@ -281,6 +279,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     getArgumentsForMutate,
     types: cache.types,
     cache,
+    subscribers,
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)

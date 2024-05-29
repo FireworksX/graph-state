@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react-hooks/dom'
-import { mockGraphState } from './mock'
+import { mockAuthor, mockGraphState } from './mock'
 import { useGraphFields } from '../useGraphFields'
 import { useGraph } from '../useGraph'
+import { createState } from '@graph-state/core'
 
 describe('useGraph', () => {
   it('should initialize state and update on change', () => {
@@ -50,5 +51,23 @@ describe('useGraph', () => {
     result.current[1]({ name: 'Donald M. Timm' })
 
     expect(result.current[0]).toStrictEqual({ _type: 'Author', _id: '20', name: 'John Doe', key: '100' })
+  })
+
+  it('should notify after invalidating and recreating', () => {
+    const authorKey = 'Author:20'
+    const graphState = createState()
+    graphState.mutate(mockAuthor)
+
+    const { result } = renderHook(() => useGraph(graphState, authorKey))
+
+    expect(result.current[0]).toEqual(graphState.resolve(authorKey))
+
+    graphState.invalidate(authorKey)
+
+    expect(result.current[0]).toEqual(null)
+
+    result.current[1](mockAuthor)
+
+    expect(result.current[0]).toEqual(graphState.resolve(authorKey))
   })
 })
