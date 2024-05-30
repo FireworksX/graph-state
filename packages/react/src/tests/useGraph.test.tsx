@@ -7,15 +7,30 @@ import { createState } from '@graph-state/core'
 
 describe('useGraph', () => {
   it('should initialize state and update on change', () => {
+    const initial = {
+      version: '1.0',
+    }
+    const graphState = createState({
+      initialState: initial,
+    })
+    const { result } = renderHook(() => useGraph(graphState))
+    const [state, updateState] = result.current
+
+    expect(state).toMatchObject(initial)
+    updateState({ version: '2.1' })
+    expect(result.current[0]).toMatchObject({
+      version: '2.1',
+    })
+  })
+
+  it('should initialize graph state and update on change', () => {
     const graphState = mockGraphState()
     const { result: authorEntity } = renderHook(() => useGraphFields(graphState, 'Author'))
     const { result } = renderHook(() => useGraph(graphState, authorEntity.current[0]))
     const [author, updateAuthor] = result.current
 
     expect(author).toEqual(graphState.resolve(authorEntity.current[0]))
-
     updateAuthor({ name: 'Elizabeth J. McKeon' })
-
     expect(result.current[0]).toStrictEqual({
       _type: 'Author',
       _id: '20',
@@ -34,22 +49,17 @@ describe('useGraph', () => {
     })
 
     rerender({ field: postKey })
-
     expect(result.current[0]).toEqual(graphState.resolve(postKey))
   })
 
   it("should unsubscribe when there's an unmount", () => {
     const authorKey = 'Author:20'
     const graphState = mockGraphState()
-
     const { result, unmount } = renderHook(() => useGraph(graphState, authorKey))
 
     expect(result.current[0]).toEqual(graphState.resolve(authorKey))
-
     unmount()
-
     result.current[1]({ name: 'Donald M. Timm' })
-
     expect(result.current[0]).toStrictEqual({ _type: 'Author', _id: '20', name: 'John Doe', key: '100' })
   })
 
@@ -57,17 +67,12 @@ describe('useGraph', () => {
     const authorKey = 'Author:20'
     const graphState = createState()
     graphState.mutate(mockAuthor)
-
     const { result } = renderHook(() => useGraph(graphState, authorKey))
 
     expect(result.current[0]).toEqual(graphState.resolve(authorKey))
-
     graphState.invalidate(authorKey)
-
     expect(result.current[0]).toEqual(null)
-
     result.current[1](mockAuthor)
-
     expect(result.current[0]).toEqual(graphState.resolve(authorKey))
   })
 })

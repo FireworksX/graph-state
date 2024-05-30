@@ -12,7 +12,7 @@ export const GraphValue: FC<GraphValueProps> = ({ graphState, field, children })
   if (!graphState) {
     throw new Error('Cannot find graphState.')
   }
-  const value = useGraph(graphState, field || '') || field
+  const value = useGraph(graphState, field) || field
 
   if (typeof children === 'function') {
     return children(...value)

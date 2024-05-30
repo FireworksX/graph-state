@@ -73,17 +73,19 @@ export type Plugin = (state: GraphState) => GraphState
 
 export interface CreateStateOptions {
   id?: string
-  initialState?: Graph
+  initialState?: DataFields | Graph
   plugins?: Plugin[]
   keys?: KeyingConfig
   resolvers?: ResolverConfig
 }
 
 export interface GraphState extends Graph {
+  key: LinkKey
   resolve(input: Entity): unknown | null
   mutate<TInput extends Graph | null>(graph: TInput, options?: SetOptions): string | null
   mutate<TInput extends string>(key: TInput, data: DataSetter, options?: SetOptions): string | null
   invalidate(field: Entity): void
+  subscribe(callback: (data: any) => void): () => void
   subscribe<TInput extends Graph | string>(input: TInput, callback: (data: any) => void): () => void
   inspectFields(type: string): string[]
   resolveParents(field: Entity): unknown[]

@@ -55,7 +55,7 @@ export const createCache = () => {
       }
     }
 
-    if (depKey && key) {
+    if (depKey && key && key !== depKey) {
       addRefs(key, depKey)
     }
   }

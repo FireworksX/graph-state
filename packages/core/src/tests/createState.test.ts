@@ -234,7 +234,7 @@ describe('createState', () => {
         post: avatarLayer,
       })
 
-      graphState.subscribe(graphState, spy)
+      graphState.subscribe(spy)
       graphState.invalidate(avatarLayer)
 
       expect(graphState.inspectFields('Layer')).toHaveLength(1)
@@ -302,6 +302,21 @@ describe('createState', () => {
   })
 
   describe('mutate', () => {
+    it('should mutate self State', () => {
+      const graphState = createState()
+      graphState.mutate({
+        overflow: 'hidden',
+      })
+
+      expect(graphState.resolve().overflow).toBe('hidden')
+
+      graphState.mutate({
+        overflow: 'auto',
+      })
+
+      expect(graphState.resolve().overflow).toBe('auto')
+    })
+
     it('should mutate with string key', () => {
       const graphState = createState()
       graphState.mutate('Layer:header', {
@@ -907,7 +922,7 @@ describe('createState', () => {
       const graphState = createState()
       const spy = vi.fn()
 
-      graphState.subscribe(graphState, spy)
+      graphState.subscribe(spy)
       graphState.mutate(rootLayer)
 
       expect(spy).toBeCalledTimes(1)
@@ -918,7 +933,7 @@ describe('createState', () => {
       const spy = vi.fn()
 
       let updateIndex = 0
-      graphState.subscribe(graphState, data => {
+      graphState.subscribe(data => {
         updateIndex++
         spy()
         switch (updateIndex) {
@@ -1114,6 +1129,25 @@ describe('createState', () => {
         ...rootLayer,
         children: [graphState.keyOfEntity(headerLayer)],
       })
+    })
+
+    it('should resolve State', () => {
+      const initial = {
+        about: 'Hello',
+        layers: [10],
+      }
+      const graphState = createState({
+        initialState: initial,
+      })
+
+      expect(graphState.resolve()).toMatchObject(initial)
+      expect(graphState.resolve(graphState)).toMatchObject(initial)
+      expect(graphState.resolve(graphState.key)).toMatchObject(initial)
+    })
+
+    it('should resolve State without initial state', () => {
+      const graphState = createState()
+      expect(graphState.resolve()).toBe(null)
     })
 
     it('should have unique link', () => {

@@ -10,20 +10,21 @@ import { isDev } from './utils/isDev'
 
 let ID = 0
 const DEEP_LIMIT = 100
-const STATE_TYPE = 'Instance'
+const STATE_TYPE = 'State'
+const EACH_UPDATED = '$EACH:ROOT$'
 
 export const createState = (options?: CreateStateOptions): GraphState => {
   const id = options?.id ?? `${ID++}`
   const plugins = options?.plugins ?? []
   const keys = options?.keys ?? {}
+  const stateKey = `${STATE_TYPE}:${id}`
   // const resolvers = options?.resolvers ?? {}
   const cache = createCache()
   const subscribers = new Map<string, ((newState: any) => any)[]>()
   let deepIndex = 0
 
   const resolve = (input?: Entity) => {
-    if (!input) return null
-    const inputKey = keyOfEntity(input)
+    const inputKey = keyOfEntity(input) ?? stateKey
     let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
 
     if (isObject(value) || Array.isArray(value)) {
@@ -61,7 +62,8 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   }
 
   const mutate = (entity: Entity, ...args: any[]) => {
-    const { graphKey, options, data } = getArgumentsForMutate(entity, ...args)
+    const { graphKey: entityGraphKey, options, data } = getArgumentsForMutate(entity, ...args)
+    const graphKey = entityGraphKey ?? stateKey
     const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
     const prevGraph = resolve(graphKey ?? '')
     const internal = options?.internal || { hasChange: false }
@@ -161,7 +163,6 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     }
 
     const key = keyOfEntity(entity)
-    const storeKey = keyOfEntity({ _type: STATE_TYPE, _id: id })
 
     if (key) {
       deepIndex++
@@ -169,11 +170,9 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       const deps = cache.getChildren(key) || []
       const nextResult = resolve(key)
 
-      if (storeKey) {
-        subscribers.get(storeKey)?.forEach(cb => {
-          cb(nextResult)
-        })
-      }
+      subscribers.get(EACH_UPDATED)?.forEach(cb => {
+        cb(nextResult)
+      })
 
       if (!nextResult) return
       subs.forEach(cb => {
@@ -185,8 +184,9 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     deepIndex = 0
   }
 
-  // TODO Add subscribe for all state
-  const subscribe = <TInput extends Entity | string>(input: TInput, callback: (data: any) => void) => {
+  const subscribe = <TInput extends Entity | string = string>(...args: any[]) => {
+    const input: TInput = typeof args[0] === 'function' ? EACH_UPDATED : args[0]
+    const callback = typeof args[0] === 'function' ? args[0] : args[1]
     const key = keyOfEntity(input)
 
     if (key) {
@@ -267,12 +267,13 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   }
 
   if (options?.initialState) {
-    mutate(options.initialState, { replace: true })
+    mutate(options.initialState as Entity, { replace: true })
   }
 
   const graphState: GraphState = {
     _type: STATE_TYPE,
     _id: id,
+    key: stateKey,
     mutate,
     subscribe,
     resolve,

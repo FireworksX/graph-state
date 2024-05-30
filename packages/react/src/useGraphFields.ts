@@ -11,7 +11,7 @@ export const useGraphFields = (graphState: GraphState, type: Graph['_type']): st
         nextValue.current = graphState.inspectFields(type)
         onChange()
 
-        graphState.subscribe(graphState, () => {
+        graphState.subscribe(() => {
           const nextFields = graphState.inspectFields(type)
 
           if (nextFields !== nextValue.current) {
