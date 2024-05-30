@@ -51,7 +51,7 @@ const loggerPlugin: (options?: LoggerOptions) => Plugin =
       return graphState;
     }
 
-    graphState.subscribe(graphState, nextState => {
+    graphState.subscribe(nextState => {
       const graphKey = graphState.keyOfEntity(nextState);
 
       if (graphKey && !isPartialKey(graphKey)) {
