@@ -1,5 +1,16 @@
 # @graph-state/react
 
+## 0.3.1
+
+### Patch Changes
+
+- 757f06c: Graph state have own state. Update useGraph hook.
+- Updated dependencies [388fbee]
+- Updated dependencies [9fe75c1]
+- Updated dependencies [757f06c]
+- Updated dependencies [4228c86]
+  - @graph-state/core@0.5.0
+
 ## 0.3.0
 
 ### Minor Changes

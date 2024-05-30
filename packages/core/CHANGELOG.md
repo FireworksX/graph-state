@@ -1,5 +1,17 @@
 # @graph-state/core
 
+## 0.5.0
+
+### Minor Changes
+
+- 757f06c: Graph state have own state. Update useGraph hook.
+
+### Patch Changes
+
+- 388fbee: Removed the deletion of subscribers upon invalidation
+- 9fe75c1: Implement deep detection updates for mutation.
+- 4228c86: Add dedup option to mutate
+
 ## 0.4.0
 
 ### Minor Changes
