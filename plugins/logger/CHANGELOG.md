@@ -1,5 +1,11 @@
 # @graph-state/plugin-logger
 
+## 0.2.1
+
+### Patch Changes
+
+- 5c58a8e: Update logger plugin to new subscribe method.
+
 ## 0.2.0
 
 ### Minor Changes
