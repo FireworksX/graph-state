@@ -1,5 +1,5 @@
-import type { Graph, CreateStateOptions, GraphState, SetOptions, Entity } from 'src'
-import type { DataField } from 'src'
+import { isValue } from 'src'
+import type { DataField, Graph, CreateStateOptions, GraphState, SetOptions, Entity } from 'src'
 import { isGraph, isHTMLNode, isObject, isPrimitive, shallowEqual } from './utils/checker'
 import { iterator } from './utils/iterator'
 import { createCache } from './cache'
@@ -24,7 +24,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   let deepIndex = 0
 
   const resolve = (input?: Entity) => {
-    const inputKey = keyOfEntity(input) ?? stateKey
+    const inputKey = isValue(input) ? keyOfEntity(input) : stateKey
     let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
 
     if (isObject(value) || Array.isArray(value)) {

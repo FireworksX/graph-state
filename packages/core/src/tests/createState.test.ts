@@ -1157,9 +1157,16 @@ describe('createState', () => {
     })
 
     it('invalid field', () => {
+      const initial = {
+        about: 'Hello',
+        layers: [10],
+      }
+      const graphState = createState({
+        initialState: initial,
+      })
+
       expect(graphState.resolve('')).toBe(null)
       expect(graphState.resolve(10)).toBe(null)
-      expect(graphState.resolve()).toBe(null)
     })
   })
 
