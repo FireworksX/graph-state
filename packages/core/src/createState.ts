@@ -58,7 +58,8 @@ export const createState = (options?: CreateStateOptions): GraphState => {
 
     const entityKey = isGraph(input) ? keyOfEntity(input) : null
     const childKey = entityKey ?? parentFieldKey
-    return mutate(childKey, input, options)
+    const mutateMethod = options?.overrideMutateMethod || mutate
+    return mutateMethod(childKey as any, input, options)
   }
 
   const mutate = (entity: Entity, ...args: any[]) => {
