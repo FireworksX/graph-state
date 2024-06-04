@@ -71,7 +71,11 @@ const extendPlugin: (
       });
     }
 
-    const graph = graphState.resolve(graphKey) as Graph;
+    /**
+     * When a graph is first created, it is not yet in the cache and
+     * _type = null and extenders are not triggered
+     */
+    const graph = (graphState.resolve(graphKey) ?? data) as Graph;
     const extenders = extendersStack.get(graph?._type);
 
     if (extenders && graphKey) {
