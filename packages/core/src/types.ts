@@ -79,9 +79,13 @@ export interface CreateStateOptions {
   resolvers?: ResolverConfig
 }
 
+export interface ResolveOptions {
+  deep?: boolean
+}
+
 export interface GraphState extends Graph {
   key: LinkKey
-  resolve(input: Entity): unknown | null
+  resolve(input: Entity, options?: ResolveOptions): unknown | null
   mutate<TInput extends Graph | null>(graph: TInput, options?: SetOptions): string | null
   mutate<TInput extends string>(key: TInput, data: DataSetter, options?: SetOptions): string | null
   invalidate(field: Entity): void

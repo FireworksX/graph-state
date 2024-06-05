@@ -6,6 +6,7 @@ import type { Extender } from '@graph-state/plugin-extend';
 import extendPlugin from '@graph-state/plugin-extend';
 import { Post } from './Post.tsx';
 import { Author } from './Author.tsx';
+import { expect } from 'vitest';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -39,13 +40,16 @@ const generatePost = () => ({
   description:
     'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
   author: authorOne,
+  authors: [authorOne, authorTwo, { test: 1 }],
 });
 
 const graph = {
   _type: 'Root',
   _id: 'rootId',
   authors: [authorOne, authorOne, authorOne, authorOne],
-  posts: [generatePost(), generatePost(), generatePost()],
+  posts: {
+    deepPosts: [generatePost(), generatePost(), generatePost()],
+  },
 };
 
 /**
@@ -55,11 +59,45 @@ const graph = {
  */
 
 export const graphState = createState({
+  // initialState: graph,
   initialState: {
-    posts: [generatePost(), generatePost(), generatePost()],
+    _type: 'User',
+    _id: 'id',
+    nested: [
+      authorOne,
+      authorTwo,
+      { nonGraph: 'some value' },
+      {
+        fields: {
+          _type: 'Field',
+          _id: '1',
+          nested: [
+            {
+              field: [{ deepNested: 1 }, { deepNested: 2 }, { deepNested: 3 }],
+            },
+          ],
+        },
+      },
+      {
+        fields: {
+          _type: 'Field',
+          _id: '2',
+          nested: [{ field: 2 }],
+        },
+      },
+      {
+        fields: {
+          _type: 'Field',
+          _id: '3',
+          nested: [{ field: 3 }],
+        },
+      },
+    ],
   },
   plugins: [loggerPlugin()],
 });
+
+console.log(graphState.resolve('User:id'));
 window.graphState = graphState;
 
 function App() {

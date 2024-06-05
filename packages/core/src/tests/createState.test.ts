@@ -1145,6 +1145,45 @@ describe('createState', () => {
       expect(graphState.resolve(graphState.key)).toMatchObject(initial)
     })
 
+    it('should resolve State with nested values', () => {
+      const initial = {
+        _type: 'User',
+        _id: 'id',
+        nested: [
+          {
+            fields: {
+              _type: 'Field',
+              _id: '1',
+              nested: [
+                {
+                  deepNested: [{ deepNested: 1 }, { deepNested: 2 }, { deepNested: 3 }],
+                },
+              ],
+            },
+          },
+          {
+            fields: {
+              _type: 'Field',
+              _id: '2',
+              nested: [{ field: 2 }],
+            },
+          },
+          {
+            fields: {
+              _type: 'Field',
+              _id: '3',
+              nested: [{ field: 3 }],
+            },
+          },
+        ],
+      }
+      const graphState = createState({
+        initialState: initial,
+      })
+
+      expect(graphState.resolve('User:id', { deep: true })).toMatchObject(initial)
+    })
+
     it('should resolve State without initial state', () => {
       const graphState = createState()
       expect(graphState.resolve()).toBe(null)

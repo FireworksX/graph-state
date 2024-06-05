@@ -5,7 +5,10 @@ import type { Entity, GraphState } from '@graph-state/core'
 const defaultSelector = (data: any) => data
 
 export const useGraphStack = <TState extends unknown[]>(graphState: GraphState, fields: Entity[]): TState => {
-  const getValues = useCallback((fields: Entity[]) => fields.map(graphState.resolve).filter(Boolean), [])
+  const getValues = useCallback(
+    (fields: Entity[]) => fields.map(field => graphState.resolve(field)).filter(Boolean),
+    []
+  )
   const nextValues = useRef<TState>(getValues(fields) as any as TState)
 
   const subscribe = useCallback(
