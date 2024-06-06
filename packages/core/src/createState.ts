@@ -23,34 +23,21 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const subscribers = new Map<string, ((newState: any) => any)[]>()
   let deepIndex = 0
 
-  const resolve = (input?: Entity, options?: ResolveOptions): Graph | null => {
+  const resolve = (input?: Entity, options?: ResolveOptions) => {
+    const isDeep = options?.deep ?? false
     const inputKey = isValue(input) ? keyOfEntity(input) : stateKey
     let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
 
     if (isObject(value) || Array.isArray(value)) {
       value = Object.entries(value).reduce((acc, [key, value]) => {
-        if ((isPrimitive(value) && !entityOfKey(value as any)) || !isPartOfGraph(keyOfEntity(value as any), inputKey)) {
-          if (Array.isArray(value) && !options?.deep) {
-            return {
-              ...acc,
-              [key]: value.map(v => {
-                return isPartOfGraph(keyOfEntity(v as any), inputKey) ? safeResolve(v, options) : v
-              }),
-            }
-          }
-
-          return {
-            ...acc,
-            [key]: options?.deep
-              ? Array.isArray(value)
-                ? value.map(v => safeResolve(v, options))
-                : safeResolve(value, options)
-              : value,
-          }
+        let resultValue = value
+        if (Array.isArray(value)) {
+          resultValue = value.map(v => (isPartOfGraph(v, inputKey) || isDeep ? safeResolve(v, options) : v))
+        } else if (isPartOfGraph(keyOfEntity(value as any), inputKey) || isDeep) {
+          resultValue = safeResolve(value as any, options)
         }
 
-        acc[key] = safeResolve(value as any, options)
-
+        acc[key] = resultValue
         return acc
       }, {} as Graph)
     }

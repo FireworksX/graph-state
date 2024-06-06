@@ -64,9 +64,6 @@ export const graphState = createState({
     _type: 'User',
     _id: 'id',
     nested: [
-      authorOne,
-      authorTwo,
-      { nonGraph: 'some value' },
       {
         fields: {
           _type: 'Field',
@@ -97,7 +94,11 @@ export const graphState = createState({
   plugins: [loggerPlugin()],
 });
 
-console.log(graphState.resolve('User:id'));
+console.log('----------');
+console.log(graphState.resolve('User:id', { deep: true }));
+console.log('----------');
+console.log(graphState.resolve('User:id', { deep: false }));
+
 window.graphState = graphState;
 
 function App() {
