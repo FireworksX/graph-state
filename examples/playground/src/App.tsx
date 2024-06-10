@@ -7,6 +7,7 @@ import extendPlugin from '@graph-state/plugin-extend';
 import { Post } from './Post.tsx';
 import { Author } from './Author.tsx';
 import { expect } from 'vitest';
+import { useGraphStack } from '@graph-state/react';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -58,55 +59,38 @@ const graph = {
  * @param extendsMap
  */
 
-export const graphState = createState({
-  // initialState: graph,
-  initialState: {
-    _type: 'User',
-    _id: 'id',
-    nested: [
-      {
-        fields: {
-          _type: 'Field',
-          _id: '1',
-          nested: [
-            {
-              field: [{ deepNested: 1 }, { deepNested: 2 }, { deepNested: 3 }],
-            },
-          ],
-        },
-      },
-      {
-        fields: {
-          _type: 'Field',
-          _id: '2',
-          nested: [{ field: 2 }],
-        },
-      },
-      {
-        fields: {
-          _type: 'Field',
-          _id: '3',
-          nested: [{ field: 3 }],
-        },
-      },
-    ],
-  },
-  plugins: [loggerPlugin()],
-});
+// const initial = {
+//   _type: 'Root',
+//   _id: 'id',
+//   fieldOld: { value: 1 },
+//   fieldNew: { value: 2 },
+// };
+//
+// export const graphState = createState({
+//   initialState: initial,
+//   // initialState: graph,
+//   plugins: [loggerPlugin()],
+// });
 
-console.log('----------');
-console.log(graphState.resolve('User:id', { deep: true }));
-console.log('----------');
-console.log(graphState.resolve('User:id', { deep: false }));
+const initial = {
+  _type: 'Root',
+  _id: 'id',
+  nested: 1,
+};
+
+const graphState = createState({
+  initialState: initial,
+});
 
 window.graphState = graphState;
 
 function App() {
-  const posts = useGraphFields(graphState, 'Post');
-
+  // const posts = useGraphFields(graphState, 'Post');
+  const value = useGraphStack(graphState, ['Root:id']);
+  console.log(value);
   return (
     <>
-      <br />
+      {/*<br />*/}
       {/*<h2>Rename authors</h2>*/}
       {/*{users.map(userKey => (*/}
       {/*  <GraphValue key={userKey} graphState={graphState} field={userKey}>*/}
@@ -130,9 +114,9 @@ function App() {
       {/*  </GraphValue>*/}
       {/*))}*/}
 
-      {posts.map(post => (
-        <Post key={post} postKey={post} />
-      ))}
+      {/*{posts.map(post => (*/}
+      {/*  <Post key={post} postKey={post} />*/}
+      {/*))}*/}
     </>
   );
 }

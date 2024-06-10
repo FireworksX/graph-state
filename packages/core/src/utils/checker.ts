@@ -1,12 +1,13 @@
 import type { Graph, LinkKey } from 'src'
 import type { DataField } from 'src'
+import type { AnyObject } from 'src'
 
 export const isEmptyValue = (value: unknown): value is null | undefined =>
   !value && (value === null || value === undefined)
 
 export const isValue = <T>(value: T): value is Exclude<T, null | undefined> => !isEmptyValue(value)
 
-export const isObject = (value: unknown): value is Record<PropertyKey, unknown> =>
+export const isObject = (value: unknown): value is AnyObject =>
   typeof value === 'object' && !Array.isArray(value) && isValue(value)
 
 export const isHTMLNode = (o: any) => {

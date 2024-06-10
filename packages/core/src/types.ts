@@ -47,7 +47,7 @@ export type ResolverConfig = {
     | undefined
 }
 
-export type AnyObject = Record<string, unknown>
+export type AnyObject = Record<PropertyKey, unknown>
 
 export type DataSetter<T = any> = T | ((prev: T) => T)
 
