@@ -1,5 +1,16 @@
 # @graph-state/plugin-extend
 
+## 0.3.2
+
+### Patch Changes
+
+- ce63783: Fix extender when graph creating.
+- 0d1ba14: Add option for skip partial graphs.
+- Updated dependencies [0d1ba14]
+- Updated dependencies [3619862]
+- Updated dependencies [89ae6d3]
+  - @graph-state/core@0.6.0
+
 ## 0.3.1
 
 ### Patch Changes

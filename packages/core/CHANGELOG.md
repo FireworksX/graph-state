@@ -1,5 +1,16 @@
 # @graph-state/core
 
+## 0.6.0
+
+### Minor Changes
+
+- 3619862: Added deep resolve options
+
+### Patch Changes
+
+- 0d1ba14: Use overrideMutateMethod option.
+- 89ae6d3: Pass invalid entity to resolve for get null.
+
 ## 0.5.0
 
 ### Minor Changes
