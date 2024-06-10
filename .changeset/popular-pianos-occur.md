@@ -1,5 +1,5 @@
 ---
-"@graph-state/core": patch
+"@graph-state/core": minor
 ---
 
 Added deep resolve options
