@@ -1,20 +1,25 @@
 import { useCallback, useRef } from 'react'
 import { useSyncExternalStore } from 'use-sync-external-store/shim'
 import type { DataSetter, Dispatch, Entity, GraphState } from '@graph-state/core'
+import type { ResolveOptions } from '@graph-state/core'
+
+interface GraphOptions extends ResolveOptions {}
 
 export const useGraph = <TState = any>(
   graphState: GraphState,
-  field: Entity = graphState.key
+  field: Entity = graphState.key,
+  options?: GraphOptions
 ): [TState, Dispatch<DataSetter<TState>>] => {
-  const nextValue = useRef<TState>(graphState.resolve(field) as any as TState)
+  const nextValue = useRef<TState>(graphState.resolve(field, options) as any as TState)
+  const fieldKey = graphState.keyOfEntity(field) ?? field
 
   const subscribe = useCallback(
     (onChange: any) => {
-      if (field) {
-        nextValue.current = graphState.resolve(field) as any as TState
+      if (fieldKey) {
+        nextValue.current = graphState.resolve(fieldKey, options) as any as TState
         onChange()
 
-        return graphState.subscribe(field, (data: any) => {
+        return graphState.subscribe(fieldKey, (data: any) => {
           nextValue.current = data
           return onChange()
         })
@@ -22,7 +27,7 @@ export const useGraph = <TState = any>(
 
       return () => undefined
     },
-    [graphState, field]
+    [graphState, fieldKey]
   )
 
   const updateState = useCallback(

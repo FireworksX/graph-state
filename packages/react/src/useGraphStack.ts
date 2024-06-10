@@ -1,11 +1,22 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector'
-import type { Entity, GraphState } from '@graph-state/core'
+import type { Entity, GraphState, ResolveOptions } from '@graph-state/core'
 
 const defaultSelector = (data: any) => data
 
-export const useGraphStack = <TState extends unknown[]>(graphState: GraphState, fields: Entity[]): TState => {
-  const getValues = useCallback((fields: Entity[]) => fields.map(graphState.resolve).filter(Boolean), [])
+interface GraphStackOptions extends ResolveOptions {}
+
+export const useGraphStack = <TState extends unknown[]>(
+  graphState: GraphState,
+  fields: Entity[],
+  options?: GraphStackOptions
+): TState => {
+  const getValues = useCallback(
+    (fields: Entity[]) => fields.map(field => graphState.resolve(field, options)).filter(Boolean),
+    [graphState, options]
+  )
+
+  const fieldKey = useMemo(() => fields.map(field => graphState.keyOfEntity(field) || field).join(), [fields])
   const nextValues = useRef<TState>(getValues(fields) as any as TState)
 
   const subscribe = useCallback(
@@ -17,6 +28,7 @@ export const useGraphStack = <TState extends unknown[]>(graphState: GraphState, 
         }
 
         const unSubscribers = fields.filter(Boolean).map(field => graphState.subscribe(field!, notifyAll))
+
         if (unSubscribers.length > 0) {
           notifyAll()
         }
@@ -26,7 +38,7 @@ export const useGraphStack = <TState extends unknown[]>(graphState: GraphState, 
 
       return () => undefined
     },
-    [graphState, fields]
+    [graphState, fieldKey]
   )
 
   const get = () => nextValues.current

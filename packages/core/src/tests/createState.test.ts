@@ -1145,6 +1145,65 @@ describe('createState', () => {
       expect(graphState.resolve(graphState.key)).toMatchObject(initial)
     })
 
+    it('should resolve non-graph deep values and return references for graph links', () => {
+      const graphState = createState({
+        initialState: {
+          _type: 'Root',
+          _id: 'id',
+          nested: [{ value: 1 }, headerLayer],
+          graph: { ...headerLayer },
+        },
+      })
+
+      expect(graphState.resolve('Root:id')).toStrictEqual({
+        _type: 'Root',
+        _id: 'id',
+        nested: [{ value: 1, _type: 'Root', _id: 'id.nested.0' }, 'Layer:header'],
+        graph: 'Layer:header',
+      })
+    })
+
+    it('should resolve State with nested values', () => {
+      const initial = {
+        _type: 'Root',
+        _id: 'id',
+        nested: [
+          headerLayer,
+          {
+            fields: {
+              _type: 'Field',
+              _id: '1',
+              nested: [
+                {
+                  deepNested: [{ deepNested: 1 }, { deepNested: 2 }, { deepNested: 3 }, headerLayer],
+                },
+              ],
+            },
+          },
+          {
+            fields: {
+              _type: 'Field',
+              _id: '2',
+              nested: [{ field: 2 }, headerLayer],
+            },
+          },
+          {
+            fields: {
+              _type: 'Field',
+              _id: '3',
+              nested: [{ field: 3 }, headerLayer],
+            },
+          },
+        ],
+      }
+
+      const graphState = createState({
+        initialState: initial,
+      })
+
+      expect(graphState.resolve('Root:id', { deep: true })).toMatchObject(initial)
+    })
+
     it('should resolve State without initial state', () => {
       const graphState = createState()
       expect(graphState.resolve()).toBe(null)

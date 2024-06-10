@@ -218,9 +218,10 @@ graphState.inspectFields('User')
  * User:id
  * User:id2
  */
-
-
 ```
+
+### Resolve options
+- `deep` - resolve all nested graphs (default: false)
 
 ### Observe updates
 

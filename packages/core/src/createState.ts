@@ -1,5 +1,5 @@
 import { isValue } from 'src'
-import type { DataField, Graph, CreateStateOptions, GraphState, SetOptions, Entity } from 'src'
+import type { DataField, Graph, CreateStateOptions, GraphState, SetOptions, Entity, ResolveOptions } from 'src'
 import { isGraph, isHTMLNode, isObject, isPrimitive, shallowEqual } from './utils/checker'
 import { iterator } from './utils/iterator'
 import { createCache } from './cache'
@@ -23,18 +23,21 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const subscribers = new Map<string, ((newState: any) => any)[]>()
   let deepIndex = 0
 
-  const resolve = (input?: Entity) => {
+  const resolve = (input?: Entity, options?: ResolveOptions) => {
+    const isDeep = options?.deep ?? false
     const inputKey = isValue(input) ? keyOfEntity(input) : stateKey
     let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
 
     if (isObject(value) || Array.isArray(value)) {
       value = Object.entries(value).reduce((acc, [key, value]) => {
-        if ((isPrimitive(value) && !entityOfKey(value as any)) || !isPartOfGraph(keyOfEntity(value as any), inputKey)) {
-          return { ...acc, [key]: value }
+        let resultValue = value
+        if (Array.isArray(value)) {
+          resultValue = value.map(v => (isPartOfGraph(v, inputKey) || isDeep ? safeResolve(v, options) : v))
+        } else if (isPartOfGraph(keyOfEntity(value as any), inputKey) || isDeep) {
+          resultValue = safeResolve(value as any, options)
         }
 
-        acc[key] = safeResolve(value as any)
-
+        acc[key] = resultValue
         return acc
       }, {} as Graph)
     }
@@ -42,7 +45,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     return value ? { ...value } : null
   }
 
-  const safeResolve = (input?: Entity) => resolve(input) ?? input
+  const safeResolve = (input?: Entity, options?: ResolveOptions) => resolve(input, options) ?? input
 
   const mutateField = (input: DataField, parentFieldKey?: string, options?: SetOptions): DataField => {
     if (!input || isPrimitive(input) || isHTMLNode(input)) {
@@ -217,7 +220,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const resolveParents = (field: Entity) => {
     const key = (typeof field === 'string' ? field : keyOfEntity(field)) || ''
     const refs = cache.getParents(key) ?? []
-    return refs.map(resolve)
+    return refs.map(ref => resolve(ref))
   }
 
   const keyOfEntity = (entity: Entity) => {

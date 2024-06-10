@@ -4,6 +4,7 @@ export const isPartialKey = (key?: LinkKey | null) => key && key.split('.').leng
 
 export const isPartOfGraph = (entityKey?: LinkKey | null, graphKey?: LinkKey | null) => {
   if (!entityKey || !graphKey) return false
+  if (typeof entityKey !== 'string' || typeof graphKey !== 'string') return null
   const [entityType, entityId] = entityKey.split(':')
   const [graphType, graphId] = graphKey.split(':')
   if (entityType !== graphType) return false

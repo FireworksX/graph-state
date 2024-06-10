@@ -23,6 +23,29 @@ describe('useGraph', () => {
     })
   })
 
+  it('should return resolved values with deeply nested objects, with deep option', () => {
+    const initial = {
+      _type: 'Root',
+      _id: 'id',
+      nested: [{ value: 1 }, { value: 2 }],
+    }
+    const graphState = createState({
+      initialState: initial,
+    })
+    const { result } = renderHook(() => useGraph(graphState, 'Root:id', { deep: true }))
+
+    const [state] = result.current
+
+    expect(state).toStrictEqual({
+      _type: 'Root',
+      _id: 'id',
+      nested: [
+        { value: 1, _type: 'Root', _id: 'id.nested.0' },
+        { value: 2, _type: 'Root', _id: 'id.nested.1' },
+      ],
+    })
+  })
+
   it('should initialize graph state and update on change', () => {
     const graphState = mockGraphState()
     const { result: authorEntity } = renderHook(() => useGraphFields(graphState, 'Author'))
@@ -36,6 +59,19 @@ describe('useGraph', () => {
       _id: '20',
       name: 'Elizabeth J. McKeon',
       key: '100',
+    })
+  })
+
+  it('should resolve value if pass field as Graph', () => {
+    const graphState = mockGraphState()
+    const postGraph = { _type: 'Post', _id: '0' }
+    const { result } = renderHook(() => useGraph(graphState, postGraph))
+    const [post, updatePost] = result.current
+
+    expect(post).toEqual(graphState.resolve(postGraph))
+    updatePost({ name: 'post test' })
+    expect(result.current[0]).toMatchObject({
+      name: 'post test',
     })
   })
 

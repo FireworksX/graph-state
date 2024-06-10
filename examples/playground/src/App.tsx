@@ -6,6 +6,8 @@ import type { Extender } from '@graph-state/plugin-extend';
 import extendPlugin from '@graph-state/plugin-extend';
 import { Post } from './Post.tsx';
 import { Author } from './Author.tsx';
+import { expect } from 'vitest';
+import { useGraphStack } from '@graph-state/react';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -39,13 +41,16 @@ const generatePost = () => ({
   description:
     'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
   author: authorOne,
+  authors: [authorOne, authorTwo, { test: 1 }],
 });
 
 const graph = {
   _type: 'Root',
   _id: 'rootId',
   authors: [authorOne, authorOne, authorOne, authorOne],
-  posts: [generatePost(), generatePost(), generatePost()],
+  posts: {
+    deepPosts: [generatePost(), generatePost(), generatePost()],
+  },
 };
 
 /**
@@ -54,20 +59,38 @@ const graph = {
  * @param extendsMap
  */
 
-export const graphState = createState({
-  initialState: {
-    posts: [generatePost(), generatePost(), generatePost()],
-  },
-  plugins: [loggerPlugin()],
+// const initial = {
+//   _type: 'Root',
+//   _id: 'id',
+//   fieldOld: { value: 1 },
+//   fieldNew: { value: 2 },
+// };
+//
+// export const graphState = createState({
+//   initialState: initial,
+//   // initialState: graph,
+//   plugins: [loggerPlugin()],
+// });
+
+const initial = {
+  _type: 'Root',
+  _id: 'id',
+  nested: [{ value: 1 }, { value: 2 }],
+};
+
+const graphState = createState({
+  initialState: initial,
 });
+
 window.graphState = graphState;
 
 function App() {
-  const posts = useGraphFields(graphState, 'Post');
-
+  // const posts = useGraphFields(graphState, 'Post');
+  const [value] = useGraph(graphState, { _type: 'Root', _id: 'id' });
+  console.log(value);
   return (
     <>
-      <br />
+      {/*<br />*/}
       {/*<h2>Rename authors</h2>*/}
       {/*{users.map(userKey => (*/}
       {/*  <GraphValue key={userKey} graphState={graphState} field={userKey}>*/}
@@ -91,9 +114,9 @@ function App() {
       {/*  </GraphValue>*/}
       {/*))}*/}
 
-      {posts.map(post => (
-        <Post key={post} postKey={post} />
-      ))}
+      {/*{posts.map(post => (*/}
+      {/*  <Post key={post} postKey={post} />*/}
+      {/*))}*/}
     </>
   );
 }
