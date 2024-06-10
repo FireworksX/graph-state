@@ -62,6 +62,19 @@ describe('useGraph', () => {
     })
   })
 
+  it('should resolve value if pass field as Graph', () => {
+    const graphState = mockGraphState()
+    const postGraph = { _type: 'Post', _id: '0' }
+    const { result } = renderHook(() => useGraph(graphState, postGraph))
+    const [post, updatePost] = result.current
+
+    expect(post).toEqual(graphState.resolve(postGraph))
+    updatePost({ name: 'post test' })
+    expect(result.current[0]).toMatchObject({
+      name: 'post test',
+    })
+  })
+
   it('should handle subscribing to field changes', () => {
     const authorKey = 'Author:20'
     const postKey = 'Post:0'

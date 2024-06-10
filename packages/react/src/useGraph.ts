@@ -11,14 +11,15 @@ export const useGraph = <TState = any>(
   options?: GraphOptions
 ): [TState, Dispatch<DataSetter<TState>>] => {
   const nextValue = useRef<TState>(graphState.resolve(field, options) as any as TState)
+  const fieldKey = graphState.keyOfEntity(field) ?? field
 
   const subscribe = useCallback(
     (onChange: any) => {
-      if (field) {
-        nextValue.current = graphState.resolve(field, options) as any as TState
+      if (fieldKey) {
+        nextValue.current = graphState.resolve(fieldKey, options) as any as TState
         onChange()
 
-        return graphState.subscribe(field, (data: any) => {
+        return graphState.subscribe(fieldKey, (data: any) => {
           nextValue.current = data
           return onChange()
         })
@@ -26,7 +27,7 @@ export const useGraph = <TState = any>(
 
       return () => undefined
     },
-    [graphState, field]
+    [graphState, fieldKey]
   )
 
   const updateState = useCallback(

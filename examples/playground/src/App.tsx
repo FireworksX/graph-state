@@ -75,7 +75,7 @@ const graph = {
 const initial = {
   _type: 'Root',
   _id: 'id',
-  nested: 1,
+  nested: [{ value: 1 }, { value: 2 }],
 };
 
 const graphState = createState({
@@ -86,7 +86,7 @@ window.graphState = graphState;
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const value = useGraphStack(graphState, ['Root:id']);
+  const [value] = useGraph(graphState, { _type: 'Root', _id: 'id' });
   console.log(value);
   return (
     <>
