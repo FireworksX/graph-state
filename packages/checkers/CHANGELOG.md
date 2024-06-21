@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.1.0
+
+### Minor Changes
+
+- af38861: Init
+
 ## 0.6.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.6.1
+
+### Patch Changes
+
+- 6a8c135: Add skip option
+
 ## 0.6.0
 
 ### Minor Changes
