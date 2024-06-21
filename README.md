@@ -353,6 +353,21 @@ const graphState = createState({
 
 ```
 
+## Skip
+Sometimes we need skip recursive iterate and save link on initial data.
+```jsx
+const Title = <h1>Hello</h1>
+
+const state = createState({
+  initialState: {
+    jsxNode: Title
+  },
+  skip: [() => /*check if jsx*/]
+})
+
+state.resolve().jsxNode === Title // true
+```
+
 
 ## Utility 
 

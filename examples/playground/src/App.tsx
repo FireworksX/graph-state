@@ -47,6 +47,8 @@ const generatePost = () => ({
 
 const vv = new SpringValue(0);
 
+const reactSpringPlugin = state => {};
+
 const graphState = createState({
   initialState: {
     rotate: vv,
