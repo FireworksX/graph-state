@@ -8,6 +8,7 @@ import { Post } from './Post.tsx';
 import { Author } from './Author.tsx';
 import { expect } from 'vitest';
 import { useGraphStack } from '@graph-state/react';
+import { SpringValue, animated } from '@react-spring/web';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -44,52 +45,34 @@ const generatePost = () => ({
   authors: [authorOne, authorTwo, { test: 1 }],
 });
 
-const graph = {
-  _type: 'Root',
-  _id: 'rootId',
-  authors: [authorOne, authorOne, authorOne, authorOne],
-  posts: {
-    deepPosts: [generatePost(), generatePost(), generatePost()],
-  },
-};
-
-/**
- * Сделать чтобы логер добавил метод для лога
- * getArgumentsForMutate - должен вызывать data если это функция и возвращать результат
- * @param extendsMap
- */
-
-// const initial = {
-//   _type: 'Root',
-//   _id: 'id',
-//   fieldOld: { value: 1 },
-//   fieldNew: { value: 2 },
-// };
-//
-// export const graphState = createState({
-//   initialState: initial,
-//   // initialState: graph,
-//   plugins: [loggerPlugin()],
-// });
-
-const initial = {
-  _type: 'Root',
-  _id: 'id',
-  nested: [{ value: 1 }, { value: 2 }],
-};
+const vv = new SpringValue(0);
 
 const graphState = createState({
-  initialState: initial,
+  initialState: {
+    rotate: vv,
+  },
+  skip: [v => v instanceof SpringValue],
 });
 
 window.graphState = graphState;
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [value] = useGraph(graphState, { _type: 'Root', _id: 'id' });
-  console.log(value);
+  const [{ rotate }] = useGraph(graphState);
+  // console.log(rotate);
+  // console.log(value);
   return (
     <>
+      <h1>Hello world</h1>
+      <animated.div
+        style={{
+          width: 100,
+          height: 100,
+          background: 'red',
+          rotate: rotate,
+        }}
+      />
+      <button onClick={() => rotate.start(Math.random() * 300)}>Rotate</button>
       {/*<br />*/}
       {/*<h2>Rename authors</h2>*/}
       {/*{users.map(userKey => (*/}

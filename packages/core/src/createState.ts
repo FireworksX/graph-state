@@ -18,15 +18,22 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const plugins = options?.plugins ?? []
   const keys = options?.keys ?? {}
   const stateKey = `${STATE_TYPE}:${id}`
+  const skipPredictors = options?.skip ?? []
   // const resolvers = options?.resolvers ?? {}
   const cache = createCache()
   const subscribers = new Map<string, ((newState: any) => any)[]>()
   let deepIndex = 0
 
+  const isSkipped = (entity: Entity) => {
+    return skipPredictors.some(predictor => predictor(entity))
+  }
+
   const resolve = (input?: Entity, options?: ResolveOptions) => {
     const isDeep = options?.deep ?? false
     const inputKey = isValue(input) ? keyOfEntity(input) : stateKey
     let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
+
+    if (isSkipped(value)) return value
 
     if (isObject(value) || Array.isArray(value)) {
       value = Object.entries(value).reduce((acc, [key, value]) => {
@@ -75,6 +82,10 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     let graphData: Graph = {
       ...data,
       ...entityOfKey(graphKey),
+    }
+    if (isSkipped(data)) {
+      cache.writeLink(graphKey, data, parentKey)
+      return graphKey
     }
 
     if (!options?.replace && isObject(prevGraph) && isObject(graphData)) {

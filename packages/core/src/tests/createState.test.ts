@@ -301,6 +301,25 @@ describe('createState', () => {
     })
   })
 
+  describe('skips', () => {
+    it('should skip value', () => {
+      class Test {
+        greet() {}
+      }
+
+      const state = createState({
+        initialState: {
+          value: global.document.createElement('div'),
+          classValue: new Test(),
+        },
+        skip: [isHTMLNode, v => v instanceof Test],
+      })
+
+      expect(isHTMLNode(state.resolve()?.value)).toBeTruthy()
+      expect(state.resolve()?.classValue instanceof Test).toBeTruthy()
+    })
+  })
+
   describe('mutate', () => {
     it('should mutate self State', () => {
       const graphState = createState()

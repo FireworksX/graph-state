@@ -10,14 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-spring/web": "^9.7.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "swr": "^2.2.5"
   },
   "devDependencies": {
-    "@graph-state/plugin-logger": "*",
-    "@graph-state/plugin-extend": "*",
     "@graph-state/core": "*",
+    "@graph-state/plugin-extend": "*",
+    "@graph-state/plugin-logger": "*",
     "@graph-state/react": "*",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",

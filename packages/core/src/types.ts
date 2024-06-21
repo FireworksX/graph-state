@@ -70,6 +70,7 @@ export interface SetOptions {
 }
 
 export type Plugin = (state: GraphState) => GraphState
+export type SkipGraphPredictor = (dataField: DataField) => boolean
 
 export interface CreateStateOptions {
   id?: string
@@ -77,6 +78,7 @@ export interface CreateStateOptions {
   plugins?: Plugin[]
   keys?: KeyingConfig
   resolvers?: ResolverConfig
+  skip?: SkipGraphPredictor[]
 }
 
 export interface ResolveOptions {
