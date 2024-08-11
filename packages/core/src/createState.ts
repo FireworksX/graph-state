@@ -31,7 +31,6 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     const isSafe = options?.safe ?? true
     const inputKey = isValue(input) ? keyOfEntity(input) : null
     let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
-    const resolveMethod = isSafe ? safeResolve : resolve
 
     if (isSkipped(value)) return value
 
@@ -40,18 +39,22 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         let resultValue = value
         if (Array.isArray(value)) {
           resultValue = value.map(v => {
-            return isPartOfGraph(v, inputKey) || isDeep
-              ? isLinkKey(v)
-                ? resolveMethod(v, options)
-                : safeResolve(v, options)
-              : v
+            if (isLinkKey(v) && !isSafe && !cache.hasLink(v)) {
+              return null
+            }
+
+            return isPartOfGraph(v, inputKey) || isDeep ? safeResolve(v, options) : v
           })
 
           if (!isSafe) {
             resultValue = resultValue.filter(isValue)
           }
-        } else if (isPartOfGraph(keyOfEntity(value as any), inputKey) || isDeep) {
-          resultValue = isLinkKey(value) ? resolveMethod(value as any, options) : safeResolve(value, options)
+        } else {
+          if (isLinkKey(value) && !isSafe && !cache.hasLink(value)) {
+            resultValue = null
+          } else if (isPartOfGraph(keyOfEntity(value as any), inputKey) || isDeep) {
+            resultValue = safeResolve(value, options)
+          }
         }
 
         acc[key] = resultValue
@@ -160,7 +163,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       cache.invalidate(key)
 
       parents.forEach(parentKey => {
-        const freshParent = resolve(parentKey, { deep: true, safe: false })
+        const freshParent = resolve(parentKey, { safe: false })
 
         cache.writeLink(parentKey, freshParent)
         notify(parentKey)

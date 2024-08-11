@@ -337,7 +337,6 @@ describe('createState', () => {
       })
 
       state.invalidate('Child:10')
-
       expect(state.resolve(state)?.classValue instanceof Test).toBeTruthy()
     })
   })
@@ -1238,6 +1237,7 @@ describe('createState', () => {
       const graphState = createState({
         initialState: {
           post: { _type: 'Post', _id: 'postId' },
+          layer: { _type: 'Layer', _id: '10' },
         },
       })
 
@@ -1248,6 +1248,7 @@ describe('createState', () => {
       graphState.invalidate('Post:postId')
       expect(graphState.resolve(graphState, { safe: false })).toMatchObject({
         post: null,
+        layer: 'Layer:10',
       })
     })
 

@@ -63,6 +63,8 @@ const graphState = createState({
 
 window.graphState = graphState;
 
+console.log(graphState.resolve(graphState));
+
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [{ rotate }] = useGraph(graphState);
