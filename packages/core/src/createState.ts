@@ -1,7 +1,6 @@
-import { isValue } from 'src'
+import { isLinkKey, isValue } from 'src'
 import type { DataField, Graph, CreateStateOptions, GraphState, SetOptions, Entity, ResolveOptions } from 'src'
-import { isGraph, isHTMLNode, isObject, isPrimitive, shallowEqual } from './utils/checker'
-import { iterator } from './utils/iterator'
+import { isGraph, isObject, isPrimitive, shallowEqual } from './utils/checker'
 import { createCache } from './cache'
 import { joinKeys } from './utils/joinKeys'
 import { isPartOfGraph } from './utils/isPartOfGraph'
@@ -19,7 +18,6 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const keys = options?.keys ?? {}
   const stateKey = `${STATE_TYPE}:${id}`
   const skipPredictors = options?.skip ?? []
-  // const resolvers = options?.resolvers ?? {}
   const cache = createCache()
   const subscribers = new Map<string, ((newState: any) => any)[]>()
   let deepIndex = 0
@@ -30,8 +28,10 @@ export const createState = (options?: CreateStateOptions): GraphState => {
 
   const resolve = (input?: Entity, options?: ResolveOptions) => {
     const isDeep = options?.deep ?? false
-    const inputKey = isValue(input) ? keyOfEntity(input) : stateKey
+    const isSafe = options?.safe ?? true
+    const inputKey = isValue(input) ? keyOfEntity(input) : null
     let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
+    const resolveMethod = isSafe ? safeResolve : resolve
 
     if (isSkipped(value)) return value
 
@@ -39,9 +39,19 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       value = Object.entries(value).reduce((acc, [key, value]) => {
         let resultValue = value
         if (Array.isArray(value)) {
-          resultValue = value.map(v => (isPartOfGraph(v, inputKey) || isDeep ? safeResolve(v, options) : v))
+          resultValue = value.map(v => {
+            return isPartOfGraph(v, inputKey) || isDeep
+              ? isLinkKey(v)
+                ? resolveMethod(v, options)
+                : safeResolve(v, options)
+              : v
+          })
+
+          if (!isSafe) {
+            resultValue = resultValue.filter(isValue)
+          }
         } else if (isPartOfGraph(keyOfEntity(value as any), inputKey) || isDeep) {
-          resultValue = safeResolve(value as any, options)
+          resultValue = isLinkKey(value) ? resolveMethod(value as any, options) : safeResolve(value, options)
         }
 
         acc[key] = resultValue
@@ -55,7 +65,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const safeResolve = (input?: Entity, options?: ResolveOptions) => resolve(input, options) ?? input
 
   const mutateField = (input: DataField, parentFieldKey?: string, options?: SetOptions): DataField => {
-    if (!input || isPrimitive(input) || isHTMLNode(input)) {
+    if (!input || isPrimitive(input)) {
       return input
     }
 
@@ -150,22 +160,9 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       cache.invalidate(key)
 
       parents.forEach(parentKey => {
-        const parentValue = resolve(parentKey)
-        const validate = (value: any) => entityOfKey(value) && cache.hasLink(value)
-        const freshParent = iterator(parentValue, (_: PropertyKey, value: any) => {
-          if (Array.isArray(value)) {
-            return value.filter(validate)
-          }
-
-          if (entityOfKey(value as any) && !validate(value)) {
-            return null
-          }
-
-          return value
-        })
+        const freshParent = resolve(parentKey, { deep: true, safe: false })
 
         cache.writeLink(parentKey, freshParent)
-
         notify(parentKey)
       })
       subs.forEach(cb => cb(null))

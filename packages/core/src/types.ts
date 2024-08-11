@@ -83,6 +83,7 @@ export interface CreateStateOptions {
 
 export interface ResolveOptions {
   deep?: boolean
+  safe?: boolean
 }
 
 export interface GraphState extends Graph {

@@ -51,7 +51,12 @@ const reactSpringPlugin = state => {};
 
 const graphState = createState({
   initialState: {
-    rotate: vv,
+    rotate: new SpringValue(0),
+    sections: {
+      _type: 'Section',
+      _id: '1',
+      nested: { _type: 'Nested', _id: '2' },
+    },
   },
   skip: [v => v instanceof SpringValue],
 });
@@ -66,6 +71,14 @@ function App() {
   return (
     <>
       <h1>Hello world</h1>
+      <button
+        onClick={() => {
+          graphState.invalidate('Nested:2');
+          console.log(graphState.resolve(graphState));
+        }}
+      >
+        Invalidate
+      </button>
       <animated.div
         style={{
           width: 100,

@@ -52,7 +52,9 @@ import { useGraph } from '@graph-state/react'
 import { createState } from '@graph-state/core'
 
 const grapState = createState({
-  value: 150
+  initialState: {
+    value: 150
+  }
 })
 
 const App = () => {
@@ -78,14 +80,14 @@ state.subscribe(state, (data) => {
   // state updates
 })
 
-state.resolve() // { modal: 'about', layers: [] }
+state.resolve(state) // { modal: 'about', layers: [] }
 // or state.resolve(state) or state.resolve(state.key)
 
 state.mutate({
   layers: [19]
 })
 
-state.resolve() // { modal: 'about', layers: [19] }
+state.resolve(state) // { modal: 'about', layers: [19] }
 ```
 
 ## Concept
@@ -222,6 +224,7 @@ graphState.inspectFields('User')
 
 ### Resolve options
 - `deep` - resolve all nested graphs (default: false)
+- `safe` - save link for empty graph (default: true)
 
 ### Observe updates
 
@@ -365,7 +368,7 @@ const state = createState({
   skip: [() => /*check if jsx*/]
 })
 
-state.resolve().jsxNode === Title // true
+state.resolve(state).jsxNode === Title // true
 ```
 
 

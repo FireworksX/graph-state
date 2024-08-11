@@ -315,8 +315,30 @@ describe('createState', () => {
         skip: [isHTMLNode, v => v instanceof Test],
       })
 
-      expect(isHTMLNode(state.resolve()?.value)).toBeTruthy()
-      expect(state.resolve()?.classValue instanceof Test).toBeTruthy()
+      expect(isHTMLNode(state.resolve(state)?.value)).toBeTruthy()
+      expect(state.resolve(state)?.classValue instanceof Test).toBeTruthy()
+    })
+
+    /**
+     * Когда удаляется ребёнок, обновляется родитель,
+     * важно чтобы при обновлении срабатывали skips.
+     */
+    it('should skip value after invalidate', () => {
+      class Test {
+        greet() {}
+      }
+
+      const state = createState({
+        initialState: {
+          classValue: new Test(),
+          child: { _type: 'Child', _id: 10 },
+        },
+        skip: [v => v instanceof Test],
+      })
+
+      state.invalidate('Child:10')
+
+      expect(state.resolve(state)?.classValue instanceof Test).toBeTruthy()
     })
   })
 
@@ -327,13 +349,13 @@ describe('createState', () => {
         overflow: 'hidden',
       })
 
-      expect(graphState.resolve().overflow).toBe('hidden')
+      expect(graphState.resolve(graphState).overflow).toBe('hidden')
 
       graphState.mutate({
         overflow: 'auto',
       })
 
-      expect(graphState.resolve().overflow).toBe('auto')
+      expect(graphState.resolve(graphState).overflow).toBe('auto')
     })
 
     it('should mutate with string key', () => {
@@ -651,31 +673,6 @@ describe('createState', () => {
 
       expect(Object.keys(graphState.resolve(rootLayer).options)).toEqual(expect.arrayContaining(['css', 'list']))
       expect(Object.keys(graphState.resolve(rootLayer).options.css)).toEqual(expect.arrayContaining(['list']))
-    })
-
-    it('should skip HTML node', () => {
-      const graphState = createState()
-
-      const htmlNode = global.document.createElement('div')
-      const domLayer = {
-        _type: 'Layer',
-        _id: 'dom',
-        value: htmlNode,
-      }
-
-      graphState.mutate(domLayer)
-      expect(isHTMLNode(graphState.resolve(domLayer)?.value)).toBeTruthy()
-
-      const domArrayLayer = {
-        _type: 'Layer',
-        _id: 'domArray',
-        value: [htmlNode],
-      }
-
-      graphState.mutate(domArrayLayer)
-      graphState.resolve(domArrayLayer).value.forEach(node => {
-        expect(isHTMLNode(node)).toBeTruthy()
-      })
     })
   })
 
@@ -1159,7 +1156,6 @@ describe('createState', () => {
         initialState: initial,
       })
 
-      expect(graphState.resolve()).toMatchObject(initial)
       expect(graphState.resolve(graphState)).toMatchObject(initial)
       expect(graphState.resolve(graphState.key)).toMatchObject(initial)
     })
@@ -1234,6 +1230,27 @@ describe('createState', () => {
       expect(linkOne === linkTwo).not.toBeTruthy()
     })
 
+    /**
+     * Если зарезолвить граф, которого не существует, то вернет null
+     */
+
+    it('unsafe resolve', () => {
+      const graphState = createState({
+        initialState: {
+          post: { _type: 'Post', _id: 'postId' },
+        },
+      })
+
+      expect(graphState.resolve(graphState, { safe: false, deep: true })).toMatchObject({
+        post: { _type: 'Post', _id: 'postId' },
+      })
+
+      graphState.invalidate('Post:postId')
+      expect(graphState.resolve(graphState, { safe: false })).toMatchObject({
+        post: null,
+      })
+    })
+
     it('invalid field', () => {
       const initial = {
         about: 'Hello',
@@ -1243,6 +1260,7 @@ describe('createState', () => {
         initialState: initial,
       })
 
+      expect(graphState.resolve()).toBe(null)
       expect(graphState.resolve('')).toBe(null)
       expect(graphState.resolve(10)).toBe(null)
     })
