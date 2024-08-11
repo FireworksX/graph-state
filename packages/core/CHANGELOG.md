@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.6.2
+
+### Patch Changes
+
+- d8a39ab: Fix skips when invalidating graph. Add `safe` option to `resolve` method.
+
 ## 0.6.1
 
 ### Patch Changes
