@@ -225,24 +225,65 @@ describe('createState', () => {
       expect(graphState.resolve(rootLayer).field).toStrictEqual(null)
     })
 
-    it('should notify Instance state after invalidate', () => {
-      const spy = vi.fn()
-      const graphState = createState()
-      graphState.mutate({
-        ...rootLayer,
-        children: [avatarLayer],
-        post: avatarLayer,
+    it('should notify only parents after invalidate and State', () => {
+      const stateSpy = vi.fn()
+      const rootSpy = vi.fn()
+      const postSpy = vi.fn()
+      const siblingSpy = vi.fn()
+      const listSpy = vi.fn()
+      const graphState = createState({
+        initialState: {
+          ...rootLayer,
+          list: {
+            _type: 'List',
+            _id: 1,
+            values: [avatarLayer],
+            sibling: { _type: 'Sibling', _id: 1, nested: { _type: 'Sibling', _id: 2 } },
+          },
+          post: {
+            _type: 'Post',
+            _id: 123,
+          },
+        },
       })
 
-      graphState.subscribe(spy)
+      graphState.subscribe(stateSpy)
+      graphState.subscribe(rootLayer, rootSpy)
+      graphState.subscribe('List:1', listSpy)
+      graphState.subscribe('Post:123', postSpy)
+      graphState.subscribe('Sibling:1', siblingSpy)
+      graphState.subscribe('Sibling:2', siblingSpy)
       graphState.invalidate(avatarLayer)
 
       expect(graphState.inspectFields('Layer')).toHaveLength(1)
-      /**
-       * 1st - notify parent (rootLayer)
-       * 2nd - notify store (Instance)
+
+      /*
+       Должен оповеститься только родитель,
+       вышестоящие родители должны игнорироваться
        */
-      expect(spy).toBeCalledTimes(2)
+      expect(rootSpy).toBeCalledTimes(0)
+      /**
+       * Post:123 - не должен оповеститься, т.к. у него не общий
+       * родитель с удаляемым графом
+       */
+      expect(postSpy).toBeCalledTimes(0)
+      /**
+       * State - оповещяется 3 раза. Он реагирует на каждый notify.
+       * 1- List:1 оповестился после удаления
+       * 2- Sibling:1 оповестился т.к. потомок одного родителя.
+       * 3- Sibling:2 оповестился т.к. потомок потомка одного родителя.
+       */
+      expect(stateSpy).toBeCalledTimes(3)
+
+      /**
+       * Оповещается т.к. один родилеь.
+       */
+      expect(siblingSpy).toBeCalledTimes(2)
+
+      /**
+       * Сам родитель
+       */
+      expect(listSpy).toBeCalledTimes(1)
     })
 
     it('should notify after invalidate', () => {
