@@ -52,25 +52,36 @@ const reactSpringPlugin = state => {};
 const graphState = createState({
   initialState: {
     rotate: new SpringValue(0),
-    sections: {
-      _type: 'Section',
-      _id: '1',
-      nested: { _type: 'Nested', _id: '2' },
+    route: {
+      _type: 'Route',
+      _id: 0,
+      // sections: [
+      //   {
+      //     _type: 'Section',
+      //     _id: '1',
+      //   },
+      // ],
     },
   },
   skip: [v => v instanceof SpringValue],
+  plugins: [loggerPlugin()],
 });
 
 window.graphState = graphState;
 
+console.log(graphState.resolve(graphState));
+
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [{ rotate }] = useGraph(graphState);
+  const [routeGraph] = useGraph(graphState, 'Route:0');
+  console.log(routeGraph);
   // console.log(rotate);
   // console.log(value);
   return (
     <>
       <h1>Hello world</h1>
+      <ul>{routeGraph?.sections?.map(s => <li>{s}</li>)}</ul>
       <button
         onClick={() => {
           graphState.invalidate('Nested:2');
@@ -78,6 +89,16 @@ function App() {
         }}
       >
         Invalidate
+      </button>
+      <button
+        onClick={() => {
+          graphState.mutate({ _type: 'Section', _id: '2' });
+          graphState.mutate('Route:0', {
+            sections: ['Section:2'],
+          });
+        }}
+      >
+        Add section
       </button>
       <animated.div
         style={{
