@@ -157,9 +157,8 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     const key = keyOfEntity(entity)
 
     if (key) {
-      const parents = cache.getLinkedRefs(key)
+      const parents = cache.getParents(key) || []
       const subs = subscribers.get(key) || []
-
       cache.invalidate(key)
 
       parents.forEach(parentKey => {
@@ -178,7 +177,6 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     }
 
     const key = keyOfEntity(entity)
-
     if (key) {
       deepIndex++
       const subs = subscribers.get(key) || []
