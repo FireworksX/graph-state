@@ -72,6 +72,7 @@ describe('createState', () => {
       it('should return key', () => {
         const graphState = createState()
         expect(graphState.keyOfEntity(rootLayer)).toEqual('Layer:root')
+        expect(graphState.keyOfEntity({ _type: 'Test', _id: 0 })).toEqual('Test:0')
       })
 
       it('should skip parsing', () => {
