@@ -270,6 +270,8 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     let data = typeof entity === 'string' ? args[0] : entity
     if (typeof data === 'function') {
       data = data(resolve(entity))
+    } else if (isLinkKey(data)) {
+      data = entityOfKey(data)
     }
 
     return {
