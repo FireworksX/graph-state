@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.6.4
+
+### Patch Changes
+
+- 02db1ee: Fix linking parent if pass LinkKey in mutate
+
 ## 0.6.3
 
 ### Patch Changes
