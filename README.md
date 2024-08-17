@@ -390,3 +390,12 @@ graphState.entityOfKey('User:id')
  * _id: 'id'
  */
 ```
+
+
+#### getArgumentsForMutate
+```js
+graphState.getArgumentsForMutate('User:id', { name: 'Any' }, {raplace: true})
+// graphKey - User:id
+// data - { name: 'Any' }
+// options - { raplace: true }
+```
