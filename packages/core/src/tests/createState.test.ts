@@ -756,19 +756,19 @@ describe('createState', () => {
       expect(spyHeader).toBeCalledTimes(1)
     })
 
-    test.skip('should notify if pass key as string', () => {
-      const graphState = createState()
-      const root = {
-        ...rootLayer,
-        children: [graphState.keyOfEntity(headerLayer)],
-      }
-      graphState.mutate(root)
+    it('should notify if pass key as string', () => {
+      const graphState = createState({
+        initialState: {
+          _type: 'Root',
+          _id: 10,
+          children: ['Header:20'],
+        },
+      })
 
       const spy = vi.fn()
 
-      graphState.subscribe(headerLayer, spy)
-      graphState.mutate({
-        ...rootLayer,
+      graphState.subscribe('Header:20', spy)
+      graphState.mutate('Root:10', {
         overflow: 'x-hidden',
       })
 
@@ -884,18 +884,24 @@ describe('createState', () => {
       expect(rootSpy).toBeCalledTimes(0)
     })
 
+    /**
+     * Когда изменяем родителя, оповещаем всех детей
+     */
     it('should notify nested tree', () => {
-      const header = { ...headerLayer, children: [avatarLayer] }
-      const root = { ...rootLayer, children: [header] }
-      const graphState = createState({ initialState: root })
+      const graphState = createState({
+        initialState: {
+          _type: 'Root',
+          _id: 10,
+          header: { _type: 'Header', _id: 20, children: [{ _type: 'Avatar', _id: 30 }] },
+        },
+      })
 
       const headerSpy = vi.fn()
       const avatarSpy = vi.fn()
 
-      graphState.subscribe(headerLayer, headerSpy)
-      graphState.subscribe(avatarLayer, avatarSpy)
-      graphState.mutate({
-        ...rootLayer,
+      graphState.subscribe('Header:20', headerSpy)
+      graphState.subscribe('Avatar:30', avatarSpy)
+      graphState.mutate('Root:10', {
         visible: false,
       })
 

@@ -68,7 +68,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const safeResolve = (input?: Entity, options?: ResolveOptions) => resolve(input, options) ?? input
 
   const mutateField = (input: DataField, parentFieldKey?: string, options?: SetOptions): DataField => {
-    if (!input || isPrimitive(input)) {
+    if ((!input || isPrimitive(input)) && !isLinkKey(input)) {
       return input
     }
 
@@ -79,14 +79,15 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       })
     }
 
-    const entityKey = isGraph(input) ? keyOfEntity(input) : null
+    const entityKey = isLinkKey(input) ? input : isGraph(input) ? keyOfEntity(input) : null
     const childKey = entityKey ?? parentFieldKey
     const mutateMethod = options?.overrideMutateMethod || mutate
     return mutateMethod(childKey as any, input, options)
   }
 
   const mutate = (entity: Entity, ...args: any[]) => {
-    const { graphKey: entityGraphKey, options, data } = getArgumentsForMutate(entity, ...args)
+    const { graphKey: entityGraphKey, options, data: rawData } = getArgumentsForMutate(entity, ...args)
+    const data = isLinkKey(rawData) ? entityOfKey(rawData) : rawData
     const graphKey = entityGraphKey ?? stateKey
     const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
     const prevGraph = resolve(graphKey ?? '')
