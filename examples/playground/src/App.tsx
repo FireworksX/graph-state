@@ -55,12 +55,12 @@ const graphState = createState({
     route: {
       _type: 'Route',
       _id: 0,
-      // sections: [
-      //   {
-      //     _type: 'Section',
-      //     _id: '1',
-      //   },
-      // ],
+      sections: [
+        {
+          _type: 'Section',
+          _id: '1',
+        },
+      ],
     },
   },
   skip: [v => v instanceof SpringValue],
@@ -75,7 +75,6 @@ function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [{ rotate }] = useGraph(graphState);
   const [routeGraph] = useGraph(graphState, 'Route:0');
-  console.log(routeGraph);
   // console.log(rotate);
   // console.log(value);
   return (
@@ -98,7 +97,17 @@ function App() {
           });
         }}
       >
-        Add section
+        Add section link
+      </button>
+      <button
+        onClick={() => {
+          graphState.mutate({ _type: 'Section', _id: '3' });
+          graphState.mutate('Route:0', {
+            sections: [{ _type: 'Section', _id: '3' }],
+          });
+        }}
+      >
+        Add section graph
       </button>
       <animated.div
         style={{
