@@ -114,7 +114,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       let fieldValue = value
       const prevValue = prevGraph?.[key]
 
-      if (isObject(fieldValue) || Array.isArray(fieldValue)) {
+      if (isObject(fieldValue) || Array.isArray(fieldValue) || isLinkKey(fieldValue)) {
         fieldValue = mutateField(fieldValue, fieldKey, {
           ...options,
           parent: graphKey,
