@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.6.5
+
+### Patch Changes
+
+- 284760c: Fix linkin parent if pass deep object.
+
 ## 0.6.4
 
 ### Patch Changes
