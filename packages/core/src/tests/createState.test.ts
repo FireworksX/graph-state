@@ -742,11 +742,19 @@ describe('createState', () => {
         children: [headerLayer],
       }
       graphState.mutate(root)
+      graphState.mutate(graphState.keyOfEntity(root), {
+        nested: {
+          field: 'Post:100',
+        },
+      })
+
       const spyHeader = vi.fn()
       const spyAvatar = vi.fn()
+      const spyPost = vi.fn()
 
       graphState.subscribe(headerLayer, spyHeader)
       graphState.subscribe(avatarLayer, spyAvatar)
+      graphState.subscribe('Post:100', spyPost)
       graphState.mutate({
         ...rootLayer,
         overflow: 'x-hidden',
@@ -754,6 +762,7 @@ describe('createState', () => {
 
       expect(spyAvatar).toBeCalledTimes(1)
       expect(spyHeader).toBeCalledTimes(1)
+      expect(spyPost).toBeCalledTimes(1)
     })
 
     it('should notify if pass key as string', () => {

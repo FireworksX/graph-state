@@ -27,6 +27,10 @@ export const isPrimitive = (value: any): value is string | number | boolean =>
 
 export const shallowEqual = (a: DataField, b: DataField) => {
   if (a === b) return true
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.every(val => b.includes(val))
+  }
+
   if (!isObject(a) || !isObject(b)) return false
 
   const keysA = Object.keys(a)
