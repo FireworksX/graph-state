@@ -1,5 +1,20 @@
 # @graph-state/core
 
+## 0.6.4
+
+### Patch Changes
+
+- 02db1ee: Fix linking parent if pass LinkKey in mutate
+
+## 0.6.3
+
+### Patch Changes
+
+- aca0522: Fix deep resolve after invalidate
+- d4f87c2: Notify only parents while invalidation
+- bdf1a97: Fix skip \_id if pass zero
+- 86141e3: getArgumentsForMutate resolve LinkKey in data
+
 ## 0.6.2
 
 ### Patch Changes

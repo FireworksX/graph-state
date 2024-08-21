@@ -1378,4 +1378,69 @@ describe('createState', () => {
       expect(graphState.resolveParents()).toStrictEqual([])
     })
   })
+
+  describe('getArgumentsForMutate', () => {
+    it('should collect entity arguments', () => {
+      const state = createState()
+
+      const { graphKey, data, options } = state.getArgumentsForMutate({ _type: 'Layer', _id: 'root', value: 10 })
+
+      expect(graphKey).toBe('Layer:root')
+      expect(data).toMatchObject({ _type: 'Layer', _id: 'root', value: 10 })
+      expect(options).toBeUndefined()
+    })
+
+    it('should collect entity arguments with options', () => {
+      const state = createState()
+
+      const { graphKey, data, options } = state.getArgumentsForMutate(
+        { _type: 'Layer', _id: 'root', value: 10 },
+        { replace: true }
+      )
+
+      expect(graphKey).toBe('Layer:root')
+      expect(data).toMatchObject({ _type: 'Layer', _id: 'root', value: 10 })
+      expect(options).toMatchObject({ replace: true })
+    })
+
+    it('should collect LinkKey', () => {
+      const state = createState()
+
+      const { graphKey, data, options } = state.getArgumentsForMutate('Layer:root', { value: 10 })
+
+      expect(graphKey).toBe('Layer:root')
+      expect(data).toMatchObject({ value: 10 })
+      expect(options).toBeUndefined()
+    })
+
+    it('should collect LinkKey with options', () => {
+      const state = createState()
+
+      const { graphKey, data, options } = state.getArgumentsForMutate('Layer:root', { value: 10 }, { replace: true })
+
+      expect(graphKey).toBe('Layer:root')
+      expect(data).toMatchObject({ value: 10 })
+      expect(options).toMatchObject({ replace: true })
+    })
+
+    it('should collect LinkKey with setter function', () => {
+      const callbackSpy = vi.fn()
+      const state = createState({
+        initialState: {
+          l: { _type: 'Layer', _id: 'root', value: 20 },
+        },
+      })
+
+      const { graphKey, data, options } = state.getArgumentsForMutate('Layer:root', prev => {
+        callbackSpy(prev)
+        return { value: 10 }
+      })
+
+      expect(graphKey).toBe('Layer:root')
+      expect(data).toMatchObject({ value: 10 })
+      expect(options).toBeUndefined()
+      expect(callbackSpy).toBeCalledTimes(1)
+      expect(callbackSpy).toHaveBeenCalledWith({ _type: 'Layer', _id: 'root', value: 20 })
+    })
+  })
 })

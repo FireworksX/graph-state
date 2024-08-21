@@ -179,6 +179,65 @@ graphState.mutate('User:usernameOne', prev => ({
 > By default, state deep merged. You don`t need spread every update.
 > You can use {replace: true} on mutation for replace state.
 
+You can create link between graphs
+```js
+const state = createState({
+  initialState: {
+    posts: []
+  }
+})
+
+// Now graph Post:1 have not links, he`s abstract 
+state.mutate({
+  _type: 'Post',
+  _id: 1
+})
+
+// Let`s make link
+state.mutate(state, {
+  posts: ['Post:1'] // or { _type: 'Post', _id: 1 }
+})
+
+state.resolve(state)
+/**
+ * _type: State
+ * _id: ID
+ * posts: [Post:1]
+ */
+
+```
+
+**Attention**
+If you use `replace: true` on mutate when pass LinkKey, link will
+parse into graph { _type: Type, _id: ID } and replace current value.
+```js
+const state = createState({
+  initialState: {
+    post: {
+      _type: 'Post',
+      _id: 'root',
+      value: 100
+    }
+  }
+})
+
+state.mutate(state, {
+  post: 'Post:100'
+}, {
+  replace: true
+})
+
+state.resolve('Post:root')
+/**
+ * _type: Post
+ * _id: root
+ * !without value, because field replaced!
+ */
+
+// If you use replace: true, need pass full graph
+
+```
+
 ### Mutate options
 
  - `replace` - force replace object or array (default: false)
@@ -192,6 +251,7 @@ state.mutate(
   }
 )
 ```
+
 
 ---
 
