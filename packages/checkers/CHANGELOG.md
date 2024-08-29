@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.1.2
+
+### Patch Changes
+
+- 038da9c: Add type for CreateState. Skip get all fields of inputs. Add new checkers.
+
 ## 0.1.1
 
 ### Patch Changes
