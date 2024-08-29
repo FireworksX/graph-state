@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.6.7
+
+### Patch Changes
+
+- f87d2cf: Fix \_type on State
+
 ## 0.6.6
 
 ### Patch Changes
