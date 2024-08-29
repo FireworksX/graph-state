@@ -15,99 +15,102 @@ export const generateId = () => Math.random().toString(16).slice(2);
 const random = (min: number, max: number) =>
   Math.floor(min + Math.random() * (max + 1 - min));
 
-const authorOne = {
-  _type: 'User',
-  _id: 'one',
-  name: 'John Doe',
-  key: '100',
-};
-
-const authorTwo = {
-  _type: 'User',
-  _id: 'two',
-  name: 'Sam Smith',
-  key: '200',
-};
-
-const generatePost = () => ({
-  _type: 'Post',
-  _id: generateId(),
-  review: {
-    name: 'ReviewName',
-    reviewAdmin: {
-      user: 'admin',
-    },
-  },
-  title: `Post title ${generateId()}`,
-  description:
-    'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
-  author: authorOne,
-  authors: [authorOne, authorTwo, { test: 1 }],
-});
-
-const vv = new SpringValue(0);
-
-const reactSpringPlugin = state => {};
-
-const graphState = createState({
-  initialState: {
-    rotate: new SpringValue(0),
-    route: {
-      _type: 'Route',
-      _id: 0,
-      sections: [
+const state = {
+  _type: 'Document',
+  _id: 'gdfhfdghsf',
+  children: [
+    {
+      _type: 'Breakpoint',
+      _id: 'mobile',
+      isPrimary: true,
+      width: 320,
+      children: [
         {
-          _type: 'Section',
+          _type: 'Frame',
           _id: '1',
+          parentKey: {
+            _type: '$Breakpoint',
+            _id: 'mobile',
+          },
+          children: [
+            {
+              _type: 'Text',
+              _id: '64bc371fa3b4c',
+              x: 0,
+              y: 0,
+              width: 100,
+              height: 100,
+              layoutSizingHorizontal: 'Fill',
+              layoutSizingVertical: 'Hug',
+              rotation: 0,
+              opacity: 1,
+              visible: true,
+              parentKey: {
+                _type: '$Frame',
+                _id: '1',
+              },
+              content:
+                '<p><span style="white-space: pre-wrap;">Смотри рейтинг букмекеров в Россииdas</span></p>',
+              overrides: [
+                {
+                  _type: '$Text',
+                  _id: '5cd1afa3fc027',
+                },
+              ],
+            },
+          ],
+          name: 'Content',
+          overrides: [
+            {
+              _type: '$Frame',
+              _id: 'd2d0cc5be2c8c',
+            },
+          ],
+        },
+      ],
+      parentKey: {
+        _type: '$Document',
+        _id: 'gdfhfdghsf',
+      },
+      overrides: [
+        {
+          _type: '$Breakpoint',
+          _id: 'tbalee',
         },
       ],
     },
+  ],
+};
+
+const graphState = createState({
+  initialState: {
+    rotate: state,
   },
-  skip: [v => v instanceof SpringValue],
   plugins: [loggerPlugin()],
+  skip: [
+    g => {
+      console.log(g);
+      return g && g._type === 'State';
+    },
+  ],
 });
 
 window.graphState = graphState;
 
-console.log(graphState.resolve(graphState));
+// console.log(graphState.resolve(graphState));
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [{ rotate }] = useGraph(graphState);
-  const [routeGraph] = useGraph(graphState, 'Route:0');
   // console.log(rotate);
   // console.log(value);
   return (
     <>
       <h1>Hello world</h1>
-      <ul>{routeGraph?.sections?.map(s => <li>{s}</li>)}</ul>
       <button
-        onClick={() => {
-          graphState.invalidate('Nested:2');
-          console.log(graphState.resolve(graphState));
-        }}
+        onClick={() => graphState.mutate(graphState.key, { nestedState })}
       >
-        Invalidate
-      </button>
-      <button
-        onClick={() => {
-          graphState.mutate({ _type: 'Section', _id: '2' });
-          graphState.mutate('Route:0', {
-            sections: ['Section:2'],
-          });
-        }}
-      >
-        Add section link
-      </button>
-      <button
-        onClick={() => {
-          graphState.mutate({ _type: 'Section', _id: '3' });
-          graphState.mutate('Route:0', {
-            sections: [{ _type: 'Section', _id: '3' }],
-          });
-        }}
-      >
-        Add section graph
+        Add nested state
       </button>
       <animated.div
         style={{

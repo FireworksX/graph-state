@@ -25,7 +25,9 @@
     "release": "npm publish",
     "preview": "vite preview"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@graph-state/core": "*"
+  },
   "devDependencies": {
     "tsup": "^7.2.0",
     "typescript": "^5.2.2"

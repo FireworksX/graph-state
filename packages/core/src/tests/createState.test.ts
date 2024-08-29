@@ -3,10 +3,13 @@ import { createState } from '../index'
 import { avatarLayer, headerLayer, rootLayer, sizeVariable } from './helpers'
 import { isHTMLNode } from '../utils/checker'
 import type { Plugin } from '../index'
+import { isHtmlContent } from '../../../checkers'
 
 describe('createState', () => {
   it('should create state with initial state', () => {
     const graphState = createState({
+      type: 'Test',
+      id: 10,
       initialState: {
         ...rootLayer,
         field: {
@@ -17,6 +20,7 @@ describe('createState', () => {
     })
 
     expect(graphState.resolve(headerLayer).arg).toBe(10)
+    expect(graphState.key).toBe('Test:10')
   })
 
   describe('keys', () => {
@@ -348,17 +352,20 @@ describe('createState', () => {
       class Test {
         greet() {}
       }
+      const htmlContent = '<p style="accent-color: #cccccc">content</p>'
 
       const state = createState({
         initialState: {
           value: global.document.createElement('div'),
           classValue: new Test(),
+          htmlContent,
         },
-        skip: [isHTMLNode, v => v instanceof Test],
+        skip: [isHTMLNode, isHtmlContent, v => v instanceof Test],
       })
 
       expect(isHTMLNode(state.resolve(state)?.value)).toBeTruthy()
       expect(state.resolve(state)?.classValue instanceof Test).toBeTruthy()
+      expect(state.resolve(state)?.htmlContent).toBe(htmlContent)
     })
 
     /**

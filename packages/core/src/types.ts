@@ -73,6 +73,7 @@ export type Plugin = (state: GraphState) => GraphState
 export type SkipGraphPredictor = (dataField: DataField) => boolean
 
 export interface CreateStateOptions {
+  type?: string
   id?: string
   initialState?: DataFields | Graph
   plugins?: Plugin[]

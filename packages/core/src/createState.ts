@@ -14,15 +14,16 @@ const EACH_UPDATED = '$EACH:ROOT$'
 
 export const createState = (options?: CreateStateOptions): GraphState => {
   const id = options?.id ?? `${ID++}`
+  const type = options?.type ?? STATE_TYPE
   const plugins = options?.plugins ?? []
   const keys = options?.keys ?? {}
-  const stateKey = `${STATE_TYPE}:${id}`
+  const stateKey = `${type}:${id}`
   const skipPredictors = options?.skip ?? []
   const cache = createCache()
   const subscribers = new Map<string, ((newState: any) => any)[]>()
   let deepIndex = 0
 
-  const isSkipped = (entity: Entity) => {
+  const isSkipped = (entity: DataField) => {
     return skipPredictors.some(predictor => predictor(entity))
   }
 
@@ -37,23 +38,26 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     if (isObject(value) || Array.isArray(value)) {
       value = Object.entries(value).reduce((acc, [key, value]) => {
         let resultValue = value
-        if (Array.isArray(value)) {
-          resultValue = value.map(v => {
-            if (isLinkKey(v) && !isSafe && !cache.hasLink(v)) {
-              return null
+
+        if (!isSkipped(resultValue)) {
+          if (Array.isArray(value)) {
+            resultValue = value.map(v => {
+              if (isLinkKey(v) && !isSafe && !cache.hasLink(v)) {
+                return null
+              }
+
+              return isPartOfGraph(v, inputKey) || isDeep ? safeResolve(v, options) : v
+            })
+
+            if (!isSafe) {
+              resultValue = resultValue.filter(isValue)
             }
-
-            return isPartOfGraph(v, inputKey) || isDeep ? safeResolve(v, options) : v
-          })
-
-          if (!isSafe) {
-            resultValue = resultValue.filter(isValue)
-          }
-        } else {
-          if (isLinkKey(value) && !isSafe && !cache.hasLink(value)) {
-            resultValue = null
-          } else if (isPartOfGraph(keyOfEntity(value as any), inputKey) || isDeep) {
-            resultValue = safeResolve(value, options)
+          } else {
+            if (isLinkKey(value) && !isSafe && !cache.hasLink(value)) {
+              resultValue = null
+            } else if (isPartOfGraph(keyOfEntity(value as any), inputKey) || isDeep) {
+              resultValue = safeResolve(value, options)
+            }
           }
         }
 
@@ -114,20 +118,22 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       let fieldValue = value
       const prevValue = prevGraph?.[key]
 
-      if (isObject(fieldValue) || Array.isArray(fieldValue) || isLinkKey(fieldValue)) {
-        fieldValue = mutateField(fieldValue, fieldKey, {
-          ...options,
-          parent: graphKey,
-          internal,
-        })
-      }
+      if (!isSkipped(fieldValue)) {
+        if (isObject(fieldValue) || Array.isArray(fieldValue) || isLinkKey(fieldValue)) {
+          fieldValue = mutateField(fieldValue, fieldKey, {
+            ...options,
+            parent: graphKey,
+            internal,
+          })
+        }
 
-      if (!options?.replace && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
-        fieldValue = [...prevValue, ...fieldValue]
-      }
+        if (!options?.replace && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
+          fieldValue = [...prevValue, ...fieldValue]
+        }
 
-      if (Array.isArray(fieldValue) && options?.dedup !== false) {
-        fieldValue = uniqueLinks(...fieldValue)
+        if (Array.isArray(fieldValue) && options?.dedup !== false) {
+          fieldValue = uniqueLinks(...fieldValue)
+        }
       }
 
       internal.hasChange =
