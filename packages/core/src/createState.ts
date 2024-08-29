@@ -295,7 +295,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   }
 
   const graphState: GraphState = {
-    _type: STATE_TYPE,
+    _type: type,
     _id: id,
     key: stateKey,
     mutate,
