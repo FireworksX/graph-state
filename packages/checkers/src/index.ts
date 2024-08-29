@@ -1,5 +1,25 @@
-import type { Graph } from '@graph-state/core'
-import { isGraph, isLinkKey } from '@graph-state/core'
+export const isEmptyValue = (value: unknown): value is null | undefined =>
+  !value && (value === null || value === undefined)
+
+export const isValue = <T>(value: T): value is Exclude<T, null | undefined> => !isEmptyValue(value)
+
+export const isObject = (value: unknown): value is Record<PropertyKey, unknown> =>
+  typeof value === 'object' && !Array.isArray(value) && isValue(value)
+
+export const isHTMLNode = (o: any) => {
+  return typeof Node === 'object'
+    ? o instanceof Node
+    : o && typeof o === 'object' && typeof o.nodeType === 'number' && typeof o.nodeName === 'string'
+}
+
+export const isGraphOrKey = (x: any): boolean => typeof x === 'string' || isGraph(x)
+
+export const isGraph = (x: unknown): boolean => typeof x === 'object' && typeof (x as any)._type === 'string'
+
+export const isLinkKey = (x: unknown): boolean => typeof x === 'string' && x.split(':').length >= 2
+
+export const isPrimitive = (value: any): value is string | number | boolean =>
+  (typeof value !== 'object' && typeof value !== 'function') || value === null
 
 export const isHtmlNode = (input: any) =>
   typeof Node === 'object'
@@ -21,7 +41,7 @@ export const isHtmlContent = (input: unknown): boolean =>
 
 export const isGraphOfType = (type: string) => (input: unknown) => {
   if (isLinkKey(input)) return type === (input as string).split(':').at(0)
-  if (isGraph(input)) return (input as Graph)._type === type
+  if (isGraph(input)) return (input as any)._type === type
 
   return false
 }

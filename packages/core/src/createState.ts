@@ -1,11 +1,13 @@
-import { isLinkKey, isValue } from 'src'
 import type { DataField, Graph, CreateStateOptions, GraphState, SetOptions, Entity, ResolveOptions } from 'src'
-import { isGraph, isObject, isPrimitive, shallowEqual } from './utils/checker'
+import { isObject } from 'src'
+import { isLinkKey, isGraph } from 'src'
+import { shallowEqual } from './utils/checker'
 import { createCache } from './cache'
 import { joinKeys } from './utils/joinKeys'
 import { isPartOfGraph } from './utils/isPartOfGraph'
 import { uniqueLinks } from './utils/unique'
 import { isDev } from './utils/isDev'
+import { isPrimitive, isValue } from '@graph-state/checkers'
 
 let ID = 0
 const DEEP_LIMIT = 100

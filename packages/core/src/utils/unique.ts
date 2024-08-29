@@ -1,4 +1,4 @@
-import { isLinkKey } from 'src'
+import { isLinkKey } from '@graph-state/checkers'
 
 export const unique = <T = unknown>(...values: T[]) => Array.from(new Set(values))
 

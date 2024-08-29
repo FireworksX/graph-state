@@ -1,4 +1,4 @@
-import { isValue } from 'src/utils/checker'
+import { isValue } from '@graph-state/checkers'
 
 export type Visitor<TReturn = unknown, TValue = unknown> = (
   key: PropertyKey,

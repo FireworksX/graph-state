@@ -1,9 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createState } from '../index'
 import { avatarLayer, headerLayer, rootLayer, sizeVariable } from './helpers'
-import { isHTMLNode } from '../utils/checker'
 import type { Plugin } from '../index'
-import { isHtmlContent } from '../../../checkers'
+import { isHtmlContent, isHtmlNode } from '@graph-state/checkers'
 
 describe('createState', () => {
   it('should create state with initial state', () => {
@@ -360,10 +359,10 @@ describe('createState', () => {
           classValue: new Test(),
           htmlContent,
         },
-        skip: [isHTMLNode, isHtmlContent, v => v instanceof Test],
+        skip: [isHtmlNode, isHtmlContent, v => v instanceof Test],
       })
 
-      expect(isHTMLNode(state.resolve(state)?.value)).toBeTruthy()
+      expect(isHtmlNode(state.resolve(state)?.value)).toBeTruthy()
       expect(state.resolve(state)?.classValue instanceof Test).toBeTruthy()
       expect(state.resolve(state)?.htmlContent).toBe(htmlContent)
     })
