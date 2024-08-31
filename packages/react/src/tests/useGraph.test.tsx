@@ -8,10 +8,10 @@ import { createState } from '@graph-state/core'
 describe('useGraph', () => {
   it('should initialize state and update on change', () => {
     const initial = {
-      version: '1.0',
+      version: '1.0'
     }
     const graphState = createState({
-      initialState: initial,
+      initialState: initial
     })
     const { result } = renderHook(() => useGraph(graphState))
     const [state, updateState] = result.current
@@ -19,23 +19,24 @@ describe('useGraph', () => {
     expect(state).toMatchObject(initial)
     updateState({ version: '2.1' })
     expect(result.current[0]).toMatchObject({
-      version: '2.1',
+      version: '2.1'
     })
   })
 
   it('should initialize graph state and update on change', () => {
     const graphState = mockGraphState()
     const { result: authorEntity } = renderHook(() => useGraphFields(graphState, 'Author'))
+    //@ts-ignore
     const { result } = renderHook(() => useGraph(graphState, authorEntity.current[0]))
     const [author, updateAuthor] = result.current
-
+    //@ts-ignore
     expect(author).toEqual(graphState.resolve(authorEntity.current[0]))
     updateAuthor({ name: 'Elizabeth J. McKeon' })
     expect(result.current[0]).toStrictEqual({
       _type: 'Author',
       _id: '20',
       name: 'Elizabeth J. McKeon',
-      key: '100',
+      key: '100'
     })
   })
 
@@ -44,8 +45,8 @@ describe('useGraph', () => {
     const postKey = 'Post:0'
     const graphState = mockGraphState()
 
-    const { result, rerender } = renderHook(({ field }) => useGraph(graphState, field), {
-      initialProps: { field: authorKey },
+    const { result, rerender } = renderHook(({ field }) => useGraph(graphState, field as any), {
+      initialProps: { field: authorKey }
     })
 
     rerender({ field: postKey })
@@ -53,7 +54,7 @@ describe('useGraph', () => {
   })
 
   it("should unsubscribe when there's an unmount", () => {
-    const authorKey = 'Author:20'
+    const authorKey = 'Author:20' as any
     const graphState = mockGraphState()
     const { result, unmount } = renderHook(() => useGraph(graphState, authorKey))
 
@@ -67,7 +68,7 @@ describe('useGraph', () => {
     const authorKey = 'Author:20'
     const graphState = createState()
     graphState.mutate(mockAuthor)
-    const { result } = renderHook(() => useGraph(graphState, authorKey))
+    const { result } = renderHook(() => useGraph(graphState, authorKey as any))
 
     expect(result.current[0]).toEqual(graphState.resolve(authorKey))
     graphState.invalidate(authorKey)

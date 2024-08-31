@@ -1,8 +1,8 @@
-import type { Plugin } from '@graph-state/core';
+import type { Graph, Plugin } from '@graph-state/core';
 import { isPartialKey } from '@graph-state/core';
 
 declare module '@graph-state/core' {
-  interface GraphState {
+  interface GraphState<TEntities extends Graph[]> {
     debugLog(
       eventName: DebugEventName,
       level: DebugLevel,

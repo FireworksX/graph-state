@@ -13,7 +13,9 @@ const DEEP_LIMIT = 100
 const STATE_TYPE = 'State'
 const EACH_UPDATED = '$EACH:ROOT$'
 
-export const createState = (options?: CreateStateOptions): GraphState => {
+export const createState = <TEntities extends Graph[]>(
+  options?: CreateStateOptions<TEntities[number], TEntities>
+): GraphState<TEntities> => {
   const id = options?.id ?? `${ID++}`
   const plugins = options?.plugins ?? []
   const keys = options?.keys ?? {}
@@ -23,28 +25,40 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const subscribers = new Map<string, ((newState: any) => any)[]>()
   let deepIndex = 0
 
-  const resolve = (input?: Entity) => {
+  const resolve = <K extends TEntities[number]['_type']>(
+    input?: `${K}:${string}` | Extract<TEntities[number], { _type: K }> | null | undefined
+  ): Extract<TEntities[number], { _type: K }> | null | undefined => {
     const inputKey = isValue(input) ? keyOfEntity(input) : stateKey
-    let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
+    let value = inputKey ? (cache.readLink(inputKey) as Extract<TEntities[number], { _type: K }>) : null
 
     if (isObject(value) || Array.isArray(value)) {
-      value = Object.entries(value).reduce((acc, [key, value]) => {
-        if ((isPrimitive(value) && !entityOfKey(value as any)) || !isPartOfGraph(keyOfEntity(value as any), inputKey)) {
-          return { ...acc, [key]: value }
-        }
+      value = Object.entries(value).reduce(
+        (acc, [key, value]) => {
+          if (
+            (isPrimitive(value) && !entityOfKey(value as any)) ||
+            !isPartOfGraph(keyOfEntity(value as any), inputKey)
+          ) {
+            return { ...acc, [key]: value }
+          }
+          //@ts-ignore
+          acc[key] = safeResolve(value as any)
 
-        acc[key] = safeResolve(value as any)
-
-        return acc
-      }, {} as Graph)
+          return acc
+        },
+        {} as Extract<TEntities[number], { _type: K }>
+      )
     }
 
     return value ? { ...value } : null
   }
+  //@ts-ignore
+  const safeResolve: typeof resolve = input => resolve(input) ?? input
 
-  const safeResolve = (input?: Entity) => resolve(input) ?? input
-
-  const mutateField = (input: DataField, parentFieldKey?: string, options?: SetOptions): DataField => {
+  const mutateField = <TEntities extends Graph[]>(
+    input: DataField,
+    parentFieldKey?: string,
+    options?: SetOptions<TEntities>
+  ): DataField => {
     if (!input || isPrimitive(input) || isHTMLNode(input)) {
       return input
     }
@@ -66,18 +80,18 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     const { graphKey: entityGraphKey, options, data } = getArgumentsForMutate(entity, ...args)
     const graphKey = entityGraphKey ?? stateKey
     const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
-    const prevGraph = resolve(graphKey ?? '')
+    const prevGraph = resolve((graphKey as any) ?? '')
     const internal = options?.internal || { hasChange: false }
 
     let graphData: Graph = {
       ...data,
-      ...entityOfKey(graphKey),
+      ...entityOfKey(graphKey)
     }
 
     if (!options?.replace && isObject(prevGraph) && isObject(graphData)) {
       graphData = {
         ...prevGraph,
-        ...graphData,
+        ...graphData
       }
     }
 
@@ -90,7 +104,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
         fieldValue = mutateField(fieldValue, fieldKey, {
           ...options,
           parent: graphKey,
-          internal,
+          internal
         })
       }
 
@@ -103,7 +117,8 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       }
 
       internal.hasChange =
-        internal.hasChange || !shallowEqual(prevValue, fieldKey === fieldValue ? safeResolve(fieldValue) : fieldValue)
+        internal.hasChange ||
+        !shallowEqual(prevValue, fieldKey === fieldValue ? safeResolve(fieldValue as any) : fieldValue)
 
       acc[key] = fieldValue
 
@@ -136,7 +151,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       cache.invalidate(key)
 
       parents.forEach(parentKey => {
-        const parentValue = resolve(parentKey)
+        const parentValue = resolve(parentKey as any)
         const validate = (value: any) => entityOfKey(value) && cache.hasLink(value)
         const freshParent = iterator(parentValue, (_: PropertyKey, value: any) => {
           if (Array.isArray(value)) {
@@ -169,7 +184,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       deepIndex++
       const subs = subscribers.get(key) || []
       const deps = cache.getChildren(key) || []
-      const nextResult = resolve(key)
+      const nextResult = resolve(key as any)
 
       subscribers.get(EACH_UPDATED)?.forEach(cb => {
         cb(nextResult)
@@ -217,7 +232,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   const resolveParents = (field: Entity) => {
     const key = (typeof field === 'string' ? field : keyOfEntity(field)) || ''
     const refs = cache.getParents(key) ?? []
-    return refs.map(resolve)
+    return refs.map(resolve as any)
   }
 
   const keyOfEntity = (entity: Entity) => {
@@ -250,20 +265,20 @@ export const createState = (options?: CreateStateOptions): GraphState => {
 
     return {
       _type: typeName,
-      _id: restTypes.join(':'),
+      _id: restTypes.join(':')
     }
   }
 
-  const getArgumentsForMutate = (entity: string | Entity, ...args: any[]) => {
+  const getArgumentsForMutate = <TEntities extends Graph[]>(entity: string | Entity, ...args: any[]) => {
     let data = typeof entity === 'string' ? args[0] : entity
     if (typeof data === 'function') {
-      data = data(resolve(entity))
+      data = data(resolve(entity as any))
     }
 
     return {
       graphKey: typeof entity === 'string' ? entity : keyOfEntity(entity),
-      options: typeof entity === 'string' ? args[1] : (args[0] as SetOptions | undefined),
-      data,
+      options: typeof entity === 'string' ? args[1] : (args[0] as SetOptions<TEntities> | undefined),
+      data
     }
   }
 
@@ -271,7 +286,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     mutate(options.initialState as Entity, { replace: true })
   }
 
-  const graphState: GraphState = {
+  const graphState: GraphState<TEntities> = {
     _type: STATE_TYPE,
     _id: id,
     key: stateKey,
@@ -287,7 +302,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     getArgumentsForMutate,
     types: cache.types,
     cache: isDev ? cache : undefined,
-    subscribers: isDev ? subscribers : undefined,
+    subscribers: isDev ? subscribers : undefined
   }
 
   return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)

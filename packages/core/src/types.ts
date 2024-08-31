@@ -29,9 +29,10 @@ export type KeyGenerator = (data: Graph) => string | null
 export type ResolverResult = DataField | (DataFields & { __typename?: string }) | null | undefined
 export type ResolveInfo = unknown
 
-export type Resolver<TParent = Graph, TResult = ResolverResult> = (
+// <TEntities extends Graph[]>
+export type Resolver<TEntities extends Graph[], TParent = Graph, TResult = ResolverResult> = (
   parent: TParent,
-  state: GraphState,
+  state: GraphState<TEntities>,
   info: ResolveInfo
 ) => TResult
 
@@ -39,10 +40,10 @@ export interface KeyingConfig {
   [typename: string]: KeyGenerator
 }
 
-export type ResolverConfig = {
+export type ResolverConfig<TEntities extends Graph[]> = {
   [typeName: string]:
     | {
-        [fieldName: string]: Resolver | undefined
+        [fieldName: string]: Resolver<TEntities> | undefined
       }
     | undefined
 }
@@ -53,15 +54,15 @@ export type DataSetter<T = any> = T | ((prev: T) => T)
 
 export type Dispatch<T> = (value: T) => void
 
-export type MutateField = (
+export type MutateField<TEntities extends Graph[]> = (
   graph: Graph | Graph[] | null,
   parentFieldKey?: LinkKey,
-  options?: SetOptions
+  options?: SetOptions<TEntities>
 ) => (LinkKey | LinkKey[] | null | null[])[] | LinkKey
 
-export interface SetOptions {
+export interface SetOptions<TEntities extends Graph[]> {
   replace?: boolean
-  overrideMutateMethod?: GraphState['mutate']
+  overrideMutateMethod?: GraphState<TEntities>['mutate']
   parent?: Entity
   dedup?: boolean
   internal?: {
@@ -69,21 +70,23 @@ export interface SetOptions {
   }
 }
 
-export type Plugin = (state: GraphState) => GraphState
+export type Plugin = <TEntities extends Graph[]>(state: GraphState<TEntities>) => GraphState<TEntities>
 
-export interface CreateStateOptions {
+export interface CreateStateOptions<TEntity extends Graph, TEntities extends Graph[]> {
   id?: string
-  initialState?: DataFields | Graph
+  initialState?: TEntity | Omit<TEntity, '_type' | 'id' | '_id'>
   plugins?: Plugin[]
   keys?: KeyingConfig
-  resolvers?: ResolverConfig
+  resolvers?: ResolverConfig<TEntities>
 }
 
-export interface GraphState extends Graph {
+export interface GraphState<TEntities extends Graph[]> extends Graph {
   key: LinkKey
-  resolve(input: Entity): unknown | null
-  mutate<TInput extends Graph | null>(graph: TInput, options?: SetOptions): string | null
-  mutate<TInput extends string>(key: TInput, data: DataSetter, options?: SetOptions): string | null
+  resolve<K extends TEntities[number]['_type']>(
+    input?: `${K}:${string}` | Extract<TEntities[number], { _type: K }> | null | undefined
+  ): Extract<TEntities[number], { _type: K }> | null | undefined
+  mutate<TInput extends Graph | null>(graph: TInput, options?: SetOptions<TEntities>): string | null
+  mutate<TInput extends string>(key: TInput, data: DataSetter, options?: SetOptions<TEntities>): string | null
   invalidate(field: Entity): void
   subscribe(callback: (data: any) => void): () => void
   subscribe<TInput extends Graph | string>(input: TInput, callback: (data: any) => void): () => void
@@ -93,10 +96,10 @@ export interface GraphState extends Graph {
   entityOfKey(key: LinkKey): Graph | null
   getArgumentsForMutate(
     field: string | Graph,
-    args: Parameters<GraphState['mutate']>
+    args: Parameters<GraphState<TEntities>['mutate']>
   ): {
     graphKey: string | null
-    options?: SetOptions
+    options?: SetOptions<TEntities>
     data: DataSetter
   }
   types: Map<Type, Set<LinkKey>>

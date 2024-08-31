@@ -1,14 +1,14 @@
 import type { FC, ReactElement } from 'react'
-import type { Entity, GraphState } from '@graph-state/core'
+import type { Entity, Graph, GraphState } from '@graph-state/core'
 import { useGraphStack } from './useGraphStack'
 
-interface GraphValueProps {
+interface GraphValueProps<TEntities extends Graph[]> {
   children?: (values: unknown[]) => ReactElement
-  graphState?: GraphState
+  graphState?: GraphState<TEntities>
   fields?: Entity[]
 }
 
-export const GraphValues: FC<GraphValueProps> = ({ graphState, fields = [], children }) => {
+export const GraphValues: FC<GraphValueProps<any>> = ({ graphState, fields = [], children }) => {
   if (!graphState) {
     throw new Error('Cannot find graphState.')
   }
