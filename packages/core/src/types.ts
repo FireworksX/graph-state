@@ -31,7 +31,7 @@ export type ResolveInfo = unknown
 
 export type Resolver<TParent = Graph, TResult = ResolverResult> = (
   parent: TParent,
-  state: GraphState,
+  state: GraphState<any>,
   info: ResolveInfo
 ) => TResult
 
@@ -61,7 +61,7 @@ export type MutateField = (
 
 export interface SetOptions {
   replace?: boolean
-  overrideMutateMethod?: GraphState['mutate']
+  overrideMutateMethod?: GraphState<any>['mutate']
   parent?: Entity
   dedup?: boolean
   internal?: {
@@ -69,13 +69,13 @@ export interface SetOptions {
   }
 }
 
-export type Plugin = (state: GraphState) => GraphState
+export type Plugin = <TState extends GraphState>(state: TState) => TState
 export type SkipGraphPredictor = (dataField: DataField) => boolean
 
-export interface CreateStateOptions {
-  type?: string
+export interface CreateStateOptions<TEntity extends SystemFields = SystemFields, TType extends LinkKey = LinkKey> {
+  type?: TType
   id?: string
-  initialState?: DataFields | Graph
+  initialState?: Omit<ResolveEntityByType<TEntity, { _type: TType }>, keyof SystemFields>
   plugins?: Plugin[]
   keys?: KeyingConfig
   resolvers?: ResolverConfig
@@ -87,21 +87,55 @@ export interface ResolveOptions {
   safe?: boolean
 }
 
-export interface GraphState extends Graph {
-  key: LinkKey
-  resolve(input: Entity, options?: ResolveOptions): unknown | null
-  mutate<TInput extends Graph | null>(graph: TInput, options?: SetOptions): string | null
-  mutate<TInput extends string>(key: TInput, data: DataSetter, options?: SetOptions): string | null
+type UnknownNever<T> = [T] extends [never] ? unknown : T
+
+export type ResolveEntityByType<
+  TEntity extends SystemFields,
+  TInput extends Entity,
+> = TInput extends `${infer TType}:${string}`
+  ? UnknownNever<Extract<TEntity, { _type: TType }>>
+  : TInput extends SystemFields
+    ? UnknownNever<Extract<TEntity, { _type: TInput['_type'] }>>
+    : unknown
+
+export type GetStateEntity<T> = T extends GraphState<infer TEntity> ? TEntity : never
+
+export type GetStateEntityType<T> = GetStateEntity<T>['_type']
+
+export type StateDataSetter<TEntity extends SystemFields, TInput extends Entity> = DataSetter<
+  Partial<Omit<ResolveEntityByType<TEntity, TInput>, keyof SystemFields>>
+>
+
+export interface GraphState<TEntity extends SystemFields = SystemFields, TRootType extends LinkKey = LinkKey>
+  extends Graph {
+  _type: TRootType
+  key: `${TRootType}:0`
+  resolve<const TInput extends Entity>(
+    input: TInput,
+    options?: ResolveOptions
+  ): ResolveEntityByType<TEntity, TInput> | null
+  mutate<const TInput extends Graph | null>(
+    graph: TInput & Partial<ResolveEntityByType<TEntity, TInput>>,
+    options?: SetOptions
+  ): string | null
+  mutate<TInput extends string>(
+    key: TInput,
+    data: StateDataSetter<TEntity, TInput>,
+    options?: SetOptions
+  ): string | null
   invalidate(field: Entity): void
-  subscribe(callback: (data: any) => void): () => void
-  subscribe<TInput extends Graph | string>(input: TInput, callback: (data: any) => void): () => void
+  subscribe<TData = unknown>(callback: (data: TData) => void): () => void
+  subscribe<TInput extends Graph | string>(
+    input: TInput,
+    callback: (data: ResolveEntityByType<TEntity, TInput>) => void
+  ): () => void
   inspectFields(type: string): string[]
   resolveParents(field: Entity): unknown[]
   keyOfEntity(entity: Entity): LinkKey | null
   entityOfKey(key: LinkKey): Graph | null
   getArgumentsForMutate(
     field: string | Graph,
-    args: Parameters<GraphState['mutate']>
+    args: Parameters<GraphState<TEntity>['mutate']>
   ): {
     graphKey: string | null
     options?: SetOptions

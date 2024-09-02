@@ -1,22 +1,36 @@
 import { useCallback, useRef } from 'react'
 import { useSyncExternalStore } from 'use-sync-external-store/shim'
-import type { DataSetter, Dispatch, Entity, GraphState } from '@graph-state/core'
-import type { ResolveOptions } from '@graph-state/core'
+import type {
+  ResolveOptions,
+  Dispatch,
+  Entity,
+  GraphState,
+  GetStateEntity,
+  ResolveEntityByType,
+  StateDataSetter,
+} from '@graph-state/core'
 
 interface GraphOptions extends ResolveOptions {}
 
-export const useGraph = <TState = any>(
-  graphState: GraphState,
-  field: Entity = graphState.key,
+export type StateResolve<TState extends GraphState, TEntity extends Entity> = ResolveEntityByType<
+  GetStateEntity<TState>,
+  TEntity
+>
+
+export const useGraph = <TState extends GraphState, const TEntity extends Entity>(
+  graphState: TState,
+  field: TEntity = graphState.key as TEntity,
   options?: GraphOptions
-): [TState, Dispatch<DataSetter<TState>>] => {
-  const nextValue = useRef<TState>(graphState.resolve(field, options) as any as TState)
+): [StateResolve<TState, TEntity>, Dispatch<StateDataSetter<GetStateEntity<TState>, TEntity>>] => {
+  const nextValue = useRef<StateResolve<TState, TEntity>>(
+    graphState.resolve(field, options) as any as StateResolve<TState, TEntity>
+  )
   const fieldKey = graphState.keyOfEntity(field) ?? field
 
   const subscribe = useCallback(
     (onChange: any) => {
       if (fieldKey) {
-        nextValue.current = graphState.resolve(fieldKey, options) as any as TState
+        nextValue.current = graphState.resolve(fieldKey, options) as any as StateResolve<TState, TEntity>
         onChange()
 
         return graphState.subscribe(fieldKey, (data: any) => {
@@ -31,8 +45,8 @@ export const useGraph = <TState = any>(
   )
 
   const updateState = useCallback(
-    (value: DataSetter<TState>) => {
-      const key = typeof field === 'string' ? field : graphState.keyOfEntity(field)
+    value => {
+      const key: any = typeof field === 'string' ? field : graphState.keyOfEntity(field)
 
       if (field && key) {
         graphState.mutate(key, value)

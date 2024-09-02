@@ -21,6 +21,7 @@
     "build": "tsup",
     "check": "tsc --noEmit --project .",
     "test": "vitest --run --config ./vitest.config.ts",
+    "test:types": "vitest --typecheck ./vitest.config.ts",
     "lint": "eslint --ext=js,jsx,ts,tsx . --fix",
     "release": "npm publish",
     "preview": "vite preview"
