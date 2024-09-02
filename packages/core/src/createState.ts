@@ -29,10 +29,10 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   options?: CreateStateOptions<TEntity, TRootType>
 ): GraphState<TEntity, TRootType> => {
   const id = options?.id ?? `${ID++}`
-  const type = options?.type ?? STATE_TYPE
+  const type = options?.type ?? (STATE_TYPE as TRootType)
   const plugins = options?.plugins ?? []
   const keys = options?.keys ?? {}
-  const stateKey = `${type}:${id}`
+  const stateKey = `${type}:${id}` as const
   const skipPredictors = options?.skip ?? []
   const cache = createCache()
   const subscribers = new Map<string, ((newState: any) => any)[]>()
@@ -311,9 +311,9 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   }
 
   const graphState: GraphState<TEntity, TRootType> = {
-    _type: type as TRootType,
+    _type: type,
     _id: id,
-    key: stateKey as `${TRootType}:0`,
+    key: stateKey,
     mutate,
     subscribe,
     resolve,

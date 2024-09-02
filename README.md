@@ -461,7 +461,7 @@ graphState.getArgumentsForMutate('User:id', { name: 'Any' }, {raplace: true})
 ```
 
 ## Typescript
-If you use TS 5+ then all be work automatic.
+In case you use TS 5+ everything will work automatically.
 
 ```ts
 import { createState } from '@graph-state/core'

@@ -31,7 +31,7 @@ export type ResolveInfo = unknown
 
 export type Resolver<TParent = Graph, TResult = ResolverResult> = (
   parent: TParent,
-  state: GraphState<any>,
+  state: GraphState,
   info: ResolveInfo
 ) => TResult
 
@@ -61,7 +61,7 @@ export type MutateField = (
 
 export interface SetOptions {
   replace?: boolean
-  overrideMutateMethod?: GraphState<any>['mutate']
+  overrideMutateMethod?: GraphState['mutate']
   parent?: Entity
   dedup?: boolean
   internal?: {
@@ -87,15 +87,15 @@ export interface ResolveOptions {
   safe?: boolean
 }
 
-type UnknownNever<T> = [T] extends [never] ? unknown : T
+type NeverToUnknown<T> = [T] extends [never] ? unknown : T
 
 export type ResolveEntityByType<
   TEntity extends SystemFields,
   TInput extends Entity,
 > = TInput extends `${infer TType}:${string}`
-  ? UnknownNever<Extract<TEntity, { _type: TType }>>
+  ? NeverToUnknown<Extract<TEntity, { _type: TType }>>
   : TInput extends SystemFields
-    ? UnknownNever<Extract<TEntity, { _type: TInput['_type'] }>>
+    ? NeverToUnknown<Extract<TEntity, { _type: TInput['_type'] }>>
     : unknown
 
 export type GetStateEntity<T> = T extends GraphState<infer TEntity> ? TEntity : never
@@ -109,7 +109,7 @@ export type StateDataSetter<TEntity extends SystemFields, TInput extends Entity>
 export interface GraphState<TEntity extends SystemFields = SystemFields, TRootType extends LinkKey = LinkKey>
   extends Graph {
   _type: TRootType
-  key: `${TRootType}:0`
+  key: `${TRootType}:${string}`
   resolve<const TInput extends Entity>(
     input: TInput,
     options?: ResolveOptions
