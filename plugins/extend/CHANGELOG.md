@@ -1,5 +1,16 @@
 # @graph-state/plugin-extend
 
+## 0.4.0
+
+### Minor Changes
+
+- 705b627: Add type decrations
+
+### Patch Changes
+
+- Updated dependencies [705b627]
+  - @graph-state/core@0.7.0
+
 ## 0.3.2
 
 ### Patch Changes
