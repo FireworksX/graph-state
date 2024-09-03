@@ -82,20 +82,33 @@ const state = {
   ],
 };
 
-const graphState = createState({
+interface UserGraph {
+  _type: 'User';
+  age: number;
+}
+
+interface PostGraph {
+  _type: 'Post';
+  value: string;
+}
+
+interface StateGraph {
+  _type: 'State';
+  version: string;
+}
+
+const graphState = createState<UserGraph | PostGraph | StateGraph>({
+  type: 'State',
   initialState: {
-    rotate: state,
+    value: 'hello',
   },
   plugins: [loggerPlugin()],
-  skip: [
-    g => {
-      console.log(g);
-      return g && g._type === 'State';
-    },
-  ],
 });
 
 window.graphState = graphState;
+
+const s = graphState.resolve(graphState);
+console.log(s);
 
 // console.log(graphState.resolve(graphState));
 

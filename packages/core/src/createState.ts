@@ -1,4 +1,15 @@
-import type { DataField, Graph, CreateStateOptions, GraphState, SetOptions, Entity, ResolveOptions } from 'src'
+import type {
+  DataField,
+  Graph,
+  CreateStateOptions,
+  GraphState,
+  SetOptions,
+  Entity,
+  ResolveOptions,
+  ResolveEntityByType,
+  SystemFields,
+  LinkKey,
+} from 'src'
 import { isObject } from 'src'
 import { isLinkKey, isGraph } from 'src'
 import { shallowEqual } from './utils/checker'
@@ -14,12 +25,14 @@ const DEEP_LIMIT = 100
 const STATE_TYPE = 'State'
 const EACH_UPDATED = '$EACH:ROOT$'
 
-export const createState = (options?: CreateStateOptions): GraphState => {
+export const createState = <TEntity extends SystemFields = SystemFields, TRootType extends LinkKey = LinkKey>(
+  options?: CreateStateOptions<TEntity, TRootType>
+): GraphState<TEntity, TRootType> => {
   const id = options?.id ?? `${ID++}`
-  const type = options?.type ?? STATE_TYPE
+  const type = options?.type ?? (STATE_TYPE as TRootType)
   const plugins = options?.plugins ?? []
   const keys = options?.keys ?? {}
-  const stateKey = `${type}:${id}`
+  const stateKey = `${type}:${id}` as const
   const skipPredictors = options?.skip ?? []
   const cache = createCache()
   const subscribers = new Map<string, ((newState: any) => any)[]>()
@@ -29,11 +42,14 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     return skipPredictors.some(predictor => predictor(entity))
   }
 
-  const resolve = (input?: Entity, options?: ResolveOptions) => {
+  const resolve = <TInput extends Entity>(
+    input?: TInput,
+    options?: ResolveOptions
+  ): ResolveEntityByType<TEntity, TInput> | null => {
     const isDeep = options?.deep ?? false
     const isSafe = options?.safe ?? true
     const inputKey = isValue(input) ? keyOfEntity(input) : null
-    let value = inputKey ? (cache.readLink(inputKey) as Graph) : null
+    let value = inputKey ? (cache.readLink(inputKey) as any) : null
 
     if (isSkipped(value)) return value
 
@@ -96,7 +112,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
     const data = isLinkKey(rawData) ? entityOfKey(rawData) : rawData
     const graphKey = entityGraphKey ?? stateKey
     const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
-    const prevGraph = resolve(graphKey ?? '')
+    const prevGraph: any = resolve(graphKey ?? '')
     const internal = options?.internal || { hasChange: false }
 
     let graphData: Graph = {
@@ -112,7 +128,7 @@ export const createState = (options?: CreateStateOptions): GraphState => {
       graphData = {
         ...prevGraph,
         ...graphData,
-      }
+      } as any
     }
 
     const nextGraph = Object.entries(graphData).reduce((acc, [key, value]) => {
@@ -291,10 +307,10 @@ export const createState = (options?: CreateStateOptions): GraphState => {
   }
 
   if (options?.initialState) {
-    mutate(options.initialState as Entity, { replace: true })
+    mutate(options.initialState as any, { replace: true })
   }
 
-  const graphState: GraphState = {
+  const graphState: GraphState<TEntity, TRootType> = {
     _type: type,
     _id: id,
     key: stateKey,

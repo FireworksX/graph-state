@@ -1,4 +1,4 @@
-import type { Plugin } from '@graph-state/core';
+import type { Entity, Plugin } from '@graph-state/core';
 import { isPartialKey } from '@graph-state/core';
 
 declare module '@graph-state/core' {
@@ -52,7 +52,7 @@ const loggerPlugin: (options?: LoggerOptions) => Plugin =
     }
 
     graphState.subscribe(nextState => {
-      const graphKey = graphState.keyOfEntity(nextState);
+      const graphKey = graphState.keyOfEntity(nextState as Entity);
 
       if (graphKey && !isPartialKey(graphKey)) {
         log('mutate', 'info', 'of', graphKey, 'to', nextState);

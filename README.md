@@ -459,3 +459,57 @@ graphState.getArgumentsForMutate('User:id', { name: 'Any' }, {raplace: true})
 // data - { name: 'Any' }
 // options - { raplace: true }
 ```
+
+## Typescript
+In case you use TS 5+ everything will work automatically.
+
+```ts
+import { createState } from '@graph-state/core'
+
+interface User {
+  _type: 'User' // TS version under 5+ add 'as const'
+  age: number
+}
+
+interface Post {
+  _type: 'Post'
+  text: string
+}
+
+
+const state = createState<User|Post>({
+  initialState: {
+    value: 'hello'
+  }
+})
+
+state.resolve('User:100') // User
+state.resolve({_type: 'Post'}) // Post
+state.resolve({_type: 'Layer'}) // unknown
+
+state.mutate('User:100', {
+  age: 20
+  name: 'test' // invalid
+})
+
+
+```
+
+### Types for self store
+```ts
+interface Instance {
+  _type: 'Instance'
+  text: string
+}
+
+// Need pass Type as second param of generic
+const state = createState<Instance, 'Instance'>({
+  type: 'Instance',
+  id: 200,
+  initialState: {
+    value: 'hello'
+  }
+})
+
+state.resolve(state) // Instance
+```
