@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.7.0
+
+### Minor Changes
+
+- 705b627: Add type decrations
+
 ## 0.6.7
 
 ### Patch Changes
