@@ -400,19 +400,48 @@ You can mutate user in one place and him will update in all posts.
 import { createState } from '@graph-state/core'
 
 const loggerPlugin = (graphState) => {
-  const originalMutate = graphState.mutate
-  
-  graphState.mutate = (...args) => {
-    const {entityKey, data} = getArgumentsForMutate(...args)
+  graphState.subscribe(nextState => {
+    const graphKey = graphState.keyOfEntity(nextState as Entity);
 
-    console.log(`Graph ${entityKey} was updated.`)
-    originalMutate(...args)
-  }
+    if (graphKey && !isPartialKey(graphKey)) {
+      console.log(`Graph ${entityKey} was updated.`)
+    }
+  });
 }
 
 const graphState = createState({
   plugins: [loggerPlugin]
 })
+
+```
+
+You can add override for mutate method.
+
+```ts
+import { createState } from '@graph-state/core'
+
+const toUppercase = (_, { mutateOverride }) => {
+  mutateOverride((next, ...args) => {
+    // next - call for go to next mutate
+    // args - arguments from mutate (use getArgumentsForMutate for get safe args)
+
+    const { graphKey, data, options } = state.getArgumentsForMutate(...args)
+    next(graphKey, {
+      ...data,
+      name: data.name.toUpperCase()
+    }, options)
+  })
+}
+
+const graphState = createState({
+  plugins: [loggerPlugin]
+})
+
+graphState.mutate({
+  name: 'test'
+})
+
+graphState.resolve().name // TEST
 
 ```
 
