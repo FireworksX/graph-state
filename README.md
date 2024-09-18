@@ -434,7 +434,7 @@ const toUppercase = (_, { mutateOverride }) => {
 }
 
 const graphState = createState({
-  plugins: [loggerPlugin]
+  plugins: [toUppercase]
 })
 
 graphState.mutate({
