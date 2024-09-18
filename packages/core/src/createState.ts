@@ -19,6 +19,7 @@ import { isPartOfGraph } from './utils/isPartOfGraph'
 import { uniqueLinks } from './utils/unique'
 import { isDev } from './utils/isDev'
 import { isPrimitive, isValue } from '@graph-state/checkers'
+import { createPluginsStore } from './plugins'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -30,7 +31,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 ): GraphState<TEntity, TRootType> => {
   const id = options?.id ?? `${ID++}`
   const type = options?.type ?? (STATE_TYPE as TRootType)
-  const plugins = options?.plugins ?? []
   const keys = options?.keys ?? {}
   const stateKey = `${type}:${id}` as const
   const skipPredictors = options?.skip ?? []
@@ -329,5 +329,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     subscribers: isDev ? subscribers : undefined,
   }
 
-  return plugins.reduce((graphState, plugin) => plugin(graphState) ?? graphState, graphState)
+  const pluginsStore = createPluginsStore(graphState, options?.plugins)
+
+  return pluginsStore.runPlugins()
 }

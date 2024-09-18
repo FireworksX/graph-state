@@ -69,7 +69,17 @@ export interface SetOptions {
   }
 }
 
-export type Plugin = <TState extends GraphState>(state: TState) => TState
+export type PluginDeclareOverride = (overrider: PluginOverrider) => void
+
+export interface PluginOverrides {
+  overrideMutate: PluginDeclareOverride
+}
+
+export type Plugin = <TState extends GraphState>(state: TState, overrides: PluginOverrides) => TState | void
+export type PluginOverrider = <TState extends GraphState>(
+  next: TState['mutate'],
+  ...args: Parameters<TState['mutate']>
+) => TState | void
 export type SkipGraphPredictor = (dataField: DataField) => boolean
 
 export interface CreateStateOptions<TEntity extends SystemFields = SystemFields, TType extends LinkKey = LinkKey> {

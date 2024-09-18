@@ -101,39 +101,57 @@ const graphState = createState<UserGraph | PostGraph | StateGraph>({
   type: 'State',
   initialState: {
     value: 'hello',
+    rotate: 0,
   },
-  plugins: [loggerPlugin()],
+  plugins: [
+    (state, { overrideMutate }) => {
+      overrideMutate((next, ...args) => {
+        next(...args);
+      });
+    },
+    // (state, { overrideMutate }) => {
+    //   overrideMutate((next, ...args) => {
+    //     return 'two';
+    //   });
+    // },
+  ],
 });
 
 window.graphState = graphState;
-
-const s = graphState.resolve(graphState);
-console.log(s);
 
 // console.log(graphState.resolve(graphState));
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [{ rotate }] = useGraph(graphState);
+
+  console.log(rotate);
+
   // console.log(rotate);
   // console.log(value);
   return (
     <>
       <h1>Hello world</h1>
-      <button
-        onClick={() => graphState.mutate(graphState.key, { nestedState })}
-      >
-        Add nested state
-      </button>
+
       <animated.div
         style={{
           width: 100,
           height: 100,
           background: 'red',
-          rotate: rotate,
+          rotate,
         }}
       />
-      <button onClick={() => rotate.start(Math.random() * 300)}>Rotate</button>
+      <button
+        onClick={() => {
+          const l = graphState.mutate(graphState.key, {
+            rotate: Math.random() * 300,
+          });
+
+          console.log(l);
+        }}
+      >
+        Rotate
+      </button>
       {/*<br />*/}
       {/*<h2>Rename authors</h2>*/}
       {/*{users.map(userKey => (*/}
