@@ -1,108 +1,34 @@
-import type { Entity, Graph, GraphState, LinkKey } from '@graph-state/core';
 import { createState } from '@graph-state/core';
 import { GraphValue, useGraph, useGraphFields } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
-import type { Extender } from '@graph-state/plugin-extend';
-import extendPlugin from '@graph-state/plugin-extend';
-import { Post } from './Post.tsx';
-import { Author } from './Author.tsx';
-import { expect } from 'vitest';
-import { useGraphStack } from '@graph-state/react';
 import { SpringValue, animated } from '@react-spring/web';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
-const random = (min: number, max: number) =>
-  Math.floor(min + Math.random() * (max + 1 - min));
-
-const state = {
-  _type: 'Document',
-  _id: 'gdfhfdghsf',
-  children: [
-    {
-      _type: 'Breakpoint',
-      _id: 'mobile',
-      isPrimary: true,
-      width: 320,
-      children: [
-        {
-          _type: 'Frame',
-          _id: '1',
-          parentKey: {
-            _type: '$Breakpoint',
-            _id: 'mobile',
-          },
-          children: [
-            {
-              _type: 'Text',
-              _id: '64bc371fa3b4c',
-              x: 0,
-              y: 0,
-              width: 100,
-              height: 100,
-              layoutSizingHorizontal: 'Fill',
-              layoutSizingVertical: 'Hug',
-              rotation: 0,
-              opacity: 1,
-              visible: true,
-              parentKey: {
-                _type: '$Frame',
-                _id: '1',
-              },
-              content:
-                '<p><span style="white-space: pre-wrap;">Смотри рейтинг букмекеров в Россииdas</span></p>',
-              overrides: [
-                {
-                  _type: '$Text',
-                  _id: '5cd1afa3fc027',
-                },
-              ],
-            },
-          ],
-          name: 'Content',
-          overrides: [
-            {
-              _type: '$Frame',
-              _id: 'd2d0cc5be2c8c',
-            },
-          ],
-        },
-      ],
-      parentKey: {
-        _type: '$Document',
-        _id: 'gdfhfdghsf',
-      },
-      overrides: [
-        {
-          _type: '$Breakpoint',
-          _id: 'tbalee',
-        },
-      ],
-    },
-  ],
-};
-
-interface UserGraph {
-  _type: 'User';
-  age: number;
-}
-
-interface PostGraph {
-  _type: 'Post';
-  value: string;
-}
-
-interface StateGraph {
-  _type: 'State';
-  version: string;
-}
-
-const graphState = createState<UserGraph | PostGraph | StateGraph>({
+const graphState = createState({
   type: 'State',
   initialState: {
-    value: 'hello',
+    author: {
+      _type: 'User',
+      _id: 0,
+      age: { _type: 'Age', _id: 0, value: 27 },
+      skills: ['js', 'ts', { _type: 'Skill', _id: 'Python' }],
+    },
   },
   plugins: [loggerPlugin()],
+});
+
+graphState.onRemoveLink(l => {
+  console.log(l);
+});
+
+graphState.mutate({
+  _type: 'Age',
+  _id: '0',
+  name: {
+    _type: 'Name',
+    _id: 'nameNested',
+  },
 });
 
 window.graphState = graphState;
@@ -114,16 +40,32 @@ console.log(s);
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [{ rotate }] = useGraph(graphState);
+  const [{ rotate, value }] = useGraph(graphState);
+  const [type] = useGraph(graphState, 'User:0');
+
   // console.log(rotate);
   // console.log(value);
   return (
     <>
       <h1>Hello world</h1>
+      <pre>{JSON.stringify(type)}</pre>
+      <pre>{JSON.stringify(value)}</pre>
       <button
-        onClick={() => graphState.mutate(graphState.key, { nestedState })}
+        onClick={() => {
+          graphState.mutate(
+            {
+              _type: 'User',
+              _id: '0',
+              name: 'John',
+              skills: ['go'],
+            },
+            { replace: true }
+          );
+
+          console.log(graphState.resolve('Age:0'));
+        }}
       >
-        Add nested state
+        Remove nested items
       </button>
       <animated.div
         style={{

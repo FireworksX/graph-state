@@ -571,105 +571,6 @@ describe('createState', () => {
       expect(graphState.resolve(layer).field).toStrictEqual(key)
     })
 
-    it('should replace fields', () => {
-      const graphState = createState()
-      graphState.mutate({
-        _type: 'Layer',
-        _id: 'header',
-        fields: {
-          display: 'none',
-        },
-      })
-
-      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['display', '_type', '_id'])
-
-      graphState.mutate(
-        {
-          _type: 'Layer',
-          _id: 'header',
-          fields: {
-            overflow: 'hidden',
-          },
-        },
-        { replace: true }
-      )
-      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['overflow', '_type', '_id'])
-    })
-
-    it('should replace fields with string key', () => {
-      const graphState = createState()
-      graphState.mutate({
-        _type: 'Layer',
-        _id: 'header',
-        fields: {
-          display: 'none',
-        },
-      })
-
-      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['display', '_type', '_id'])
-
-      graphState.mutate(
-        'Layer:header',
-        {
-          fields: {
-            overflow: 'hidden',
-          },
-        },
-        { replace: true }
-      )
-      expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['overflow', '_type', '_id'])
-    })
-
-    it('should replace fields in nested link', () => {
-      const graphState = createState()
-      graphState.mutate({
-        _type: 'Layer',
-        _id: 'header',
-        content: {
-          _type: 'Property',
-          _id: 'PropValue1',
-          content: [1],
-        },
-      })
-
-      expect(graphState.resolve('Property:PropValue1').content).toStrictEqual([1])
-
-      graphState.mutate(
-        {
-          _type: 'Layer',
-          _id: 'header',
-          content: {
-            _type: 'Property',
-            _id: 'PropValue1',
-            content: [2],
-          },
-        },
-        { replace: true }
-      )
-      expect(graphState.resolve('Property:PropValue1').content).toStrictEqual([2])
-    })
-
-    it('should replace array', () => {
-      const graphState = createState()
-      graphState.mutate({
-        _type: 'Layer',
-        _id: 'header',
-        children: ['a', 'b'],
-      })
-
-      expect(graphState.resolve('Layer:header').children).toStrictEqual(['a', 'b'])
-
-      graphState.mutate(
-        {
-          _type: 'Layer',
-          _id: 'header',
-          children: ['c', 'd'],
-        },
-        { replace: true }
-      )
-      expect(graphState.resolve('Layer:header').children).toStrictEqual(['c', 'd'])
-    })
-
     test.skip('should throw Error when recursive object', () => {
       const graphState = createState()
       const recursiveObject = {
@@ -720,6 +621,180 @@ describe('createState', () => {
 
       expect(Object.keys(graphState.resolve(rootLayer).options)).toEqual(expect.arrayContaining(['css', 'list']))
       expect(Object.keys(graphState.resolve(rootLayer).options.css)).toEqual(expect.arrayContaining(['list']))
+    })
+
+    describe('replace', () => {
+      it('should replace fields', () => {
+        const graphState = createState()
+        graphState.mutate({
+          _type: 'Layer',
+          _id: 'header',
+          fields: {
+            display: 'none',
+          },
+        })
+
+        expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['display', '_type', '_id'])
+
+        graphState.mutate(
+          {
+            _type: 'Layer',
+            _id: 'header',
+            fields: {
+              overflow: 'hidden',
+            },
+          },
+          { replace: true }
+        )
+        expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['overflow', '_type', '_id'])
+      })
+
+      it('should replace fields with string key', () => {
+        const graphState = createState()
+        graphState.mutate({
+          _type: 'Layer',
+          _id: 'header',
+          fields: {
+            display: 'none',
+          },
+        })
+
+        expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['display', '_type', '_id'])
+
+        graphState.mutate(
+          'Layer:header',
+          {
+            fields: {
+              overflow: 'hidden',
+            },
+          },
+          { replace: true }
+        )
+        expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['overflow', '_type', '_id'])
+      })
+
+      it('should replace fields in nested link', () => {
+        const graphState = createState()
+        graphState.mutate({
+          _type: 'Layer',
+          _id: 'header',
+          content: {
+            _type: 'Property',
+            _id: 'PropValue1',
+            content: [1],
+          },
+        })
+
+        expect(graphState.resolve('Property:PropValue1').content).toStrictEqual([1])
+
+        graphState.mutate(
+          {
+            _type: 'Layer',
+            _id: 'header',
+            content: {
+              _type: 'Property',
+              _id: 'PropValue1',
+              content: [2],
+            },
+          },
+          { replace: true }
+        )
+        expect(graphState.resolve('Property:PropValue1').content).toStrictEqual([2])
+      })
+
+      it('should replace array', () => {
+        const graphState = createState()
+        graphState.mutate({
+          _type: 'Layer',
+          _id: 'header',
+          children: ['a', 'b'],
+        })
+
+        expect(graphState.resolve('Layer:header').children).toStrictEqual(['a', 'b'])
+
+        graphState.mutate(
+          {
+            _type: 'Layer',
+            _id: 'header',
+            children: ['c', 'd'],
+          },
+          { replace: true }
+        )
+        expect(graphState.resolve('Layer:header').children).toStrictEqual(['c', 'd'])
+      })
+    })
+
+    describe('unlinking', () => {
+      it('should unlink removed Graphs with replace', () => {
+        const graphState = createState({
+          initialState: {
+            author: {
+              _type: 'User',
+              _id: 0,
+              age: { _type: 'Age', _id: 0, value: 27 },
+              skills: ['js', 'ts', { _type: 'Skill', _id: 'Python' }],
+            },
+          },
+        })
+
+        const ageSpy = vi.fn()
+        const skillSpy = vi.fn()
+
+        graphState.subscribe('Age:0', ageSpy)
+        graphState.subscribe('Skill:Python', skillSpy)
+
+        graphState.mutate('Age:0', { value: 25 })
+
+        /**
+         * Удаляем связь между Age:0 и User:0. Теперь при обновлении
+         * User:0 age не будет оповещяться, до тех пор пока не будет заново
+         * связан
+         */
+        graphState.mutate('User:0', { name: 'John', skills: ['go'] }, { replace: true })
+        graphState.mutate('User:0', { name: 'Marcha' })
+
+        expect(ageSpy).toBeCalledTimes(1)
+        expect(skillSpy).toBeCalledTimes(0)
+
+        /**
+         * GarbageCollector автоматически удалит Age:0 т.к. на него больше никто не ссылается
+         */
+
+        expect(graphState.resolve('Age:0')).toBeNull()
+        expect(graphState.resolve('Skill:Python')).toBeNull()
+      })
+
+      it('should unlink removed Graphs without replace', () => {
+        const graphState = createState({
+          initialState: {
+            author: {
+              _type: 'User',
+              _id: 0,
+              age: 10,
+            },
+          },
+        })
+
+        const userSpy = vi.fn()
+
+        graphState.subscribe('User:0', userSpy)
+        graphState.mutate(graphState.key, { value: 25 })
+
+        /**
+         * Удаляем связь между User:0 и State. После того как мы
+         * перезаписали поле author, User:0 больше не используется внутри
+         * State и соответственно при изменении State, оповещать User:0 не нужно.
+         */
+        graphState.mutate(graphState.key, { author: 'OtherUser' })
+        graphState.mutate(graphState.key, { value: 100 })
+
+        expect(userSpy).toBeCalledTimes(1)
+
+        /**
+         * Кл
+         */
+        expect(graphState.resolve('User:0')).toBeNull()
+      })
     })
   })
 
