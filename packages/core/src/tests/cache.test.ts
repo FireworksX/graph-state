@@ -18,6 +18,17 @@ describe('createCache', () => {
     expect(linkRefs.getLinkedRefs('target')).toStrictEqual(['one', 'two'])
   })
 
+  it('should remove refs', () => {
+    const linkRefs = createCache()
+
+    linkRefs.addRefs('Type:1', 'Target:0')
+    linkRefs.addRefs('Type:2', 'Target:0')
+    expect(linkRefs.getChildren('Target:0')).toStrictEqual(['Type:1', 'Type:2'])
+
+    linkRefs.removeRefs('Target:0', 'Type:2')
+    expect(linkRefs.getChildren('Target:0')).toStrictEqual(['Type:1'])
+  })
+
   it('should skip duplicates while adding new', () => {
     const linkRefs = createCache()
 

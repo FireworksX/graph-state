@@ -63,14 +63,18 @@ export interface SetOptions {
   replace?: boolean
   overrideMutateMethod?: GraphState['mutate']
   parent?: Entity
+  prevValue?: unknown
   dedup?: boolean
   internal?: {
     hasChange?: boolean
+    unlinks?: Map<LinkKey, LinkKey[]>
   }
 }
 
 export type Plugin = <TState extends GraphState>(state: TState) => TState
 export type SkipGraphPredictor = (dataField: DataField) => boolean
+
+export type CacheListener = (link: LinkKey) => void
 
 export interface CreateStateOptions<TEntity extends SystemFields = SystemFields, TType extends LinkKey = LinkKey> {
   type?: TType
@@ -133,6 +137,7 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
   resolveParents(field: Entity): unknown[]
   keyOfEntity(entity: Entity): LinkKey | null
   entityOfKey(key: LinkKey): Graph | null
+  onRemoveLink(listener: CacheListener): void
   getArgumentsForMutate(
     field: string | Graph,
     args: Parameters<GraphState<TEntity>['mutate']>

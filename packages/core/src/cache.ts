@@ -1,8 +1,9 @@
 import { unique } from './utils/unique'
-import type { LinkKey, Graph, Type } from './types'
+import type { LinkKey, Graph, Type, CacheListener } from './types'
 import { isPartialKey } from './utils/isPartOfGraph'
 
 export const createCache = () => {
+  const listeners = new Map<'onRemoveLink', CacheListener[]>()
   const types = new Map<Type, Set<LinkKey>>()
   const links = new Map<LinkKey, Graph>()
   const parentRefs = new Map<LinkKey, LinkKey[]>()
@@ -19,6 +20,18 @@ export const createCache = () => {
     updateRefCountForLink(targetKey, parentRefs.get(targetKey)?.length || 0)
   }
 
+  const removeRefs = (targetKey: string, depKey: string) => {
+    parentRefs.set(
+      depKey,
+      (parentRefs.get(depKey) || []).filter(key => key !== targetKey)
+    )
+    childrenRefs.set(
+      targetKey,
+      (childrenRefs.get(targetKey) ?? []).filter(key => key !== depKey)
+    )
+    updateRefCountForLink(depKey, parentRefs.get(depKey)?.length || 0)
+  }
+
   const getLinkedRefs = (key: string, stack: string[] = []) => {
     const deps = parentRefs.get(key) || []
     stack.push(...deps)
@@ -31,7 +44,7 @@ export const createCache = () => {
 
   const invalidate = (key: string) => {
     updateRefCountForLink(key, 0)
-    garbageCollector()
+    runGarbageCollector()
   }
 
   const readLink = (key: string | null | undefined) => {
@@ -87,7 +100,7 @@ export const createCache = () => {
 
   const getRefCount = (link: LinkKey) => refCount.get(link) ?? 0
 
-  const garbageCollector = () => {
+  const runGarbageCollector = () => {
     for (const link of gbLinks.keys()) {
       const count = getRefCount(link)
       if (count > 0) continue
@@ -109,9 +122,14 @@ export const createCache = () => {
       const [type] = link.split(':')
       if (!isPartialKey(link)) {
         types.get(type)?.delete(link)
+
+        if (!types.get(type)?.size) {
+          types.delete(type)
+        }
       }
 
       parentRefs.delete(link)
+      ;(listeners.get('onRemoveLink') ?? []).forEach(listener => listener(link))
     }
   }
 
@@ -123,6 +141,7 @@ export const createCache = () => {
     parentRefs,
     childrenRefs,
     addRefs,
+    removeRefs,
     getChildren: (key: string) => childrenRefs.get(key),
     getParents: (key: string) => parentRefs.get(key),
     getLinkedRefs,
@@ -130,6 +149,8 @@ export const createCache = () => {
     links,
     types,
     refCount,
-    runGarbageCollector: garbageCollector,
+    runGarbageCollector,
+    onRemoveLink: (callback: CacheListener) =>
+      listeners.set('onRemoveLink', [...(listeners?.get('onRemoveLink') ?? []), callback]),
   }
 }
