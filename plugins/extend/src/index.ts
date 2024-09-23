@@ -51,8 +51,7 @@ const extendPlugin =
     extendsMap: ExtendMap<TState, GetStateEntityType<TState>>,
     pluginOptions?: ExtendPluginOptions
   ): Plugin =>
-  graphState => {
-    const originalMutate = graphState.mutate;
+  (state, { overrideMutate }) => {
     const extendersStack = new Map<Type, Extender<TState, unknown>[]>();
 
     const appendExtender = (type: Type, extender: any) => {
@@ -65,14 +64,13 @@ const extendPlugin =
 
     const recheck = (mutateOptions?: SetOptions) => {
       for (const type of extendersStack.keys()) {
-        for (const link of graphState.types?.get?.(type) ?? []) {
-          graphState.mutate(graphState.resolve(link) as Graph, mutateOptions);
+        for (const link of state.types?.get?.(type) ?? []) {
+          state.mutate(state.resolve(link) as Graph, mutateOptions);
         }
       }
     };
-
-    const overrideMethod: GraphState['mutate'] = (...args: any) => {
-      const { graphKey, data, options } = graphState.getArgumentsForMutate(
+    overrideMutate((next: any, ...args: any[]) => {
+      const { graphKey, data, options } = state.getArgumentsForMutate(
         ...(args as Parameters<GraphState['getArgumentsForMutate']>)
       );
       if (
@@ -80,17 +78,14 @@ const extendPlugin =
         pluginOptions?.excludePartialGraph &&
         isPartialKey(graphKey)
       ) {
-        return originalMutate(graphKey, data, {
-          ...options,
-          overrideMutateMethod: overrideMethod,
-        });
+        return next(graphKey, data, options);
       }
 
       /**
        * When a graph is first created, it is not yet in the cache and
        * _type = null and extenders are not triggered
        */
-      const graph = (graphState.resolve(graphKey) ?? data) as Graph;
+      const graph = (state.resolve(graphKey) ?? data) as Graph;
       const extenders = extendersStack.get(graph?._type);
 
       if (extenders && graphKey) {
@@ -98,36 +93,29 @@ const extendPlugin =
         const extendData = extenders.reduce(
           (data, extender) => ({
             ...data,
-            ...(extender(data, graphState as any) as any),
+            ...(extender(data, state as any) as any),
           }),
           initialData
         );
-        return originalMutate(graphKey, extendData, {
-          ...options,
-          overrideMutateMethod: overrideMethod,
-        });
+        return next(graphKey, extendData, options);
       }
 
-      return originalMutate(...(args as Parameters<GraphState['mutate']>));
-    };
+      return next(...(args as Parameters<GraphState['mutate']>));
+    });
 
-    graphState.mutate = overrideMethod;
-    graphState.extendGraph = <TEntity extends Entity>(
+    state.extendGraph = <TEntity extends Entity>(
       entity: TEntity,
       extender: Extender<any, any>,
       mutateOptions: SetOptions
     ) => {
-      const nextGraph = extender?.(
-        graphState.resolve(entity) as Graph,
-        graphState
-      );
+      const nextGraph = extender?.(state.resolve(entity) as Graph, state);
 
       if (nextGraph) {
-        graphState.mutate(nextGraph, mutateOptions);
+        state.mutate(nextGraph, mutateOptions);
       }
     };
 
-    graphState.declareExtendGraph = <TType extends Type>(
+    state.declareExtendGraph = <TType extends Type>(
       type: TType,
       extender: Extender<any, any>,
       mutateOptions: SetOptions
@@ -141,8 +129,6 @@ const extendPlugin =
     );
 
     recheck();
-
-    return graphState;
   };
 
 export default extendPlugin;

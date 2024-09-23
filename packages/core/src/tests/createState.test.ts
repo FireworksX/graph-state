@@ -1248,6 +1248,97 @@ describe('createState', () => {
       expect(pluginMethod).toReturnWith('first')
       expect(graphState).toBeInstanceOf(Object)
     })
+
+    describe('plugin overrides', () => {
+      it('override mutate', () => {
+        const spyOverride = vi.fn()
+
+        const state = createState({
+          id: 10,
+          initialState: {
+            value: 'hello world',
+          },
+          plugins: [
+            (state, { overrideMutate }) => {
+              expect(state.key).toBe('State:10')
+
+              overrideMutate((next, ...args) => {
+                const { graphKey, data } = state.getArgumentsForMutate(...args)
+                spyOverride(next, graphKey, data)
+
+                return next(...args)
+              })
+            },
+          ],
+        })
+
+        state.mutate(state.key, {
+          value: 'test 2',
+        })
+
+        expect(spyOverride).toHaveBeenCalledTimes(1)
+        expect(spyOverride).toHaveBeenCalledWith(
+          expect.anything(),
+          state.key,
+          expect.objectContaining({ value: 'test 2' })
+        )
+      })
+
+      it('should ignore plugin override returns', () => {
+        const state = createState({
+          initialState: {
+            value: 2,
+          },
+          plugins: [
+            (_, { overrideMutate }) => {
+              overrideMutate((next, ...args) => {
+                next(...args)
+                return 'overridedMutate'
+              })
+            },
+          ],
+        })
+
+        const mutateResult = state.mutate(state.key, {
+          value: 5,
+        })
+
+        expect(mutateResult).toBe(state.key)
+      })
+
+      it('should run chain plugins', () => {
+        const state = createState({
+          initialState: {
+            value: 'post name',
+          },
+          plugins: [
+            (_, { overrideMutate }) => {
+              overrideMutate((next, ...args) => {
+                // To upper case
+                next(args[0], {
+                  ...args[1],
+                  value: args[1].value.toUpperCase(),
+                })
+              })
+            },
+            (_, { overrideMutate }) => {
+              overrideMutate((next, ...args) => {
+                next(args[0], {
+                  ...args[1],
+                  value: args[1].value.split(' ').slice(0, 2).join(' '),
+                })
+              })
+            },
+          ],
+        })
+
+        state.mutate(state.key, {
+          value: 'new post name',
+        })
+
+        expect(state.resolve(state).value).toBe('NEW POST')
+      })
+    })
   })
 
   describe('resolve', () => {

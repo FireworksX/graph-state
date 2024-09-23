@@ -15,7 +15,18 @@ const graphState = createState({
       skills: ['js', 'ts', { _type: 'Skill', _id: 'Python' }],
     },
   },
-  plugins: [loggerPlugin()],
+  plugins: [
+    (state, { overrideMutate }) => {
+      overrideMutate((next, ...args) => {
+        next(...args);
+      });
+    },
+    // (state, { overrideMutate }) => {
+    //   overrideMutate((next, ...args) => {
+    //     return 'two';
+    //   });
+    // },
+  ],
 });
 
 graphState.onRemoveLink(l => {
@@ -32,9 +43,6 @@ graphState.mutate({
 });
 
 window.graphState = graphState;
-
-const s = graphState.resolve(graphState);
-console.log(s);
 
 // console.log(graphState.resolve(graphState));
 
@@ -72,10 +80,20 @@ function App() {
           width: 100,
           height: 100,
           background: 'red',
-          rotate: rotate,
+          rotate,
         }}
       />
-      <button onClick={() => rotate.start(Math.random() * 300)}>Rotate</button>
+      <button
+        onClick={() => {
+          const l = graphState.mutate(graphState.key, {
+            rotate: Math.random() * 300,
+          });
+
+          console.log(l);
+        }}
+      >
+        Rotate
+      </button>
       {/*<br />*/}
       {/*<h2>Rename authors</h2>*/}
       {/*{users.map(userKey => (*/}
