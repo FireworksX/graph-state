@@ -66,6 +66,10 @@ const loggerPlugin: (options?: LoggerOptions) => Plugin =
       return originalInvalidate(...args);
     };
 
+    graphState.onRemoveLink(link => {
+      log('Garbage Collector', 'error', 'of', link);
+    });
+
     return graphState;
   };
 

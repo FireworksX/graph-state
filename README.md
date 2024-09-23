@@ -394,6 +394,68 @@ Document
 You can mutate user in one place and him will update in all posts.
 
 
+## Invalidate
+You have few ways to remove graph from state.
+
+**graphState.invalidate(link: LinkKey)** - remove graph form state
+**graphState.mutate()** - use automatic Garbage Collector
+
+```ts
+const state = createState({
+  type: 'State',
+  initialState: {
+    author: {
+      _type: 'User',
+      _id: 0,
+      age: { _type: 'Age', _id: 0, value: 27 },
+      skills: ['js', 'ts', { _type: 'Skill', _id: 'Python' }],
+    },
+  },
+});
+
+state.resolve('Age:0') // { _type, _id, value: 27 }
+state.resolve('Skill:Python') // { _type, _id, value: 27 }
+
+state.invalidate('Skill:Python')
+state.resolve('Skill:Python') // null
+state.resolve('User:0').skills // ['js', 'ts']
+
+// Lets use GB
+state.mutate('User:0', {
+  name: 'Johana'
+}, {
+  replace: true // replace full graph
+})
+
+// Age:0 lost dep from User:0 after mutate
+// and GB remove them
+state.resolve('Age:0') // null
+```
+
+## Garbage collector
+GB control links graph by graph. If some graphs have not links
+to other graph GB remove them.
+
+```ts
+const state = createState({
+  type: 'State',
+  initialState: {
+    author: {
+      _type: 'User',
+      _id: 0,
+      age: { _type: 'Age', _id: 0, value: 27 },
+      skills: ['js', 'ts', { _type: 'Skill', _id: 'Python' }],
+    },
+  },
+});
+
+// It will remove Age:0
+state.mutate('User:0', {
+  age: 'OtherGraph:1'
+})
+
+```
+
 ## Plugins
 
 ```jsx

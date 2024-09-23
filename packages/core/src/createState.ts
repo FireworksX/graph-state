@@ -10,6 +10,7 @@ import type {
   SystemFields,
   LinkKey,
 } from 'src'
+import { isPartialKey } from 'src'
 import { isObject } from 'src'
 import { isLinkKey, isGraph } from 'src'
 import { shallowEqual } from './utils/checker'
@@ -89,6 +90,19 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
   const safeResolve = (input?: Entity, options?: ResolveOptions) => resolve(input, options) ?? input
 
+  const unlinkGraph = (entity: Entity) => {
+    const graphKey = keyOfEntity(entity)
+
+    if (graphKey) {
+      const deps = cache.getChildren(graphKey) || []
+      deps.forEach(depLink => {
+        if (!isPartialKey(depLink)) {
+          cache.removeRefs(graphKey, depLink)
+        }
+      })
+    }
+  }
+
   const mutateField = (input: DataField, parentFieldKey?: string, options?: SetOptions): DataField => {
     if ((!input || isPrimitive(input)) && !isLinkKey(input)) {
       return input
@@ -111,7 +125,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const { graphKey: entityGraphKey, options, data: rawData } = getArgumentsForMutate(entity, ...args)
     const data = isLinkKey(rawData) ? entityOfKey(rawData) : rawData
     const graphKey = entityGraphKey ?? stateKey
-    const parentKey = options?.parent ?? keyOfEntity({ _type: STATE_TYPE, _id: id })
+    const parentKey = options?.parent
     const prevGraph: any = resolve(graphKey ?? '')
     const internal = options?.internal || { hasChange: false }
 
@@ -130,6 +144,8 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
         ...graphData,
       } as any
     }
+
+    unlinkGraph(graphKey)
 
     const nextGraph = Object.entries(graphData).reduce((acc, [key, value]) => {
       const fieldKey = joinKeys(graphKey, key)
@@ -171,6 +187,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     /**
      * When complete nested updates, call GB
      */
+
     if (!parentKey) {
       cache.runGarbageCollector()
     }
@@ -327,6 +344,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     types: cache.types,
     cache: isDev ? cache : undefined,
     subscribers: isDev ? subscribers : undefined,
+    onRemoveLink: cache.onRemoveLink,
   }
 
   const pluginsStore = createPluginsStore(graphState, options?.plugins)
