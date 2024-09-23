@@ -732,7 +732,7 @@ describe('createState', () => {
               _type: 'User',
               _id: 0,
               age: { _type: 'Age', _id: 0, value: 27 },
-              skills: ['js', 'ts', { _type: 'Skill', _id: 'Python' }],
+              skills: ['js', 'ts', { _type: 'Skill', _id: 'python' }],
             },
           },
         })
@@ -741,7 +741,7 @@ describe('createState', () => {
         const skillSpy = vi.fn()
 
         graphState.subscribe('Age:0', ageSpy)
-        graphState.subscribe('Skill:Python', skillSpy)
+        graphState.subscribe('Skill:python', skillSpy)
 
         graphState.mutate('Age:0', { value: 25 })
 
@@ -761,7 +761,7 @@ describe('createState', () => {
          */
 
         expect(graphState.resolve('Age:0')).toBeNull()
-        expect(graphState.resolve('Skill:Python')).toBeNull()
+        expect(graphState.resolve('Skill:python')).toBeNull()
       })
 
       it('should unlink removed Graphs without replace', () => {
@@ -772,6 +772,10 @@ describe('createState', () => {
               _id: 0,
               age: 10,
             },
+            skills: [
+              { _type: 'Skill', _id: 'python' },
+              { _type: 'Skill', _id: 'js' },
+            ],
           },
         })
 
@@ -789,11 +793,12 @@ describe('createState', () => {
         graphState.mutate(graphState.key, { value: 100 })
 
         expect(userSpy).toBeCalledTimes(1)
-
-        /**
-         * Кл
-         */
         expect(graphState.resolve('User:0')).toBeNull()
+
+        graphState.mutate(graphState.key, { skills: [{ _type: 'Skill', _id: 'go' }] })
+
+        expect(graphState.resolve('Skill:python')).not.toBeNull()
+        expect(graphState.resolve('Skill:js')).not.toBeNull()
       })
     })
   })
