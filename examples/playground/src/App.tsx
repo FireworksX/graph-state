@@ -12,7 +12,11 @@ const graphState = createState({
       _type: 'User',
       _id: 0,
       age: { _type: 'Age', _id: 0, value: 27 },
-      skills: ['js', 'ts', { _type: 'Skill', _id: 'Python' }],
+      skills: [
+        { _type: 'Skill', _id: 'js' },
+        { _type: 'Skill', _id: 'ts' },
+        { _type: 'Skill', _id: 'python' },
+      ],
     },
   },
   plugins: [loggerPlugin()],
@@ -20,15 +24,6 @@ const graphState = createState({
 
 graphState.onRemoveLink(l => {
   console.log(l);
-});
-
-graphState.mutate({
-  _type: 'Age',
-  _id: '0',
-  name: {
-    _type: 'Name',
-    _id: 'nameNested',
-  },
 });
 
 window.graphState = graphState;
@@ -49,24 +44,50 @@ function App() {
     <>
       <h1>Hello world</h1>
       <pre>{JSON.stringify(type)}</pre>
-      <pre>{JSON.stringify(value)}</pre>
+      <button
+        onClick={() => {
+          graphState.mutate({
+            _type: 'User',
+            _id: '0',
+            age: { _type: 'Age', _id: 10, value: 22 },
+          });
+        }}
+      >
+        Set age
+      </button>
+      <button
+        onClick={() => {
+          graphState.mutate({
+            _type: 'User',
+            _id: '0',
+            skills: [{ _type: 'Skill', _id: 'go' }],
+          });
+        }}
+      >
+        Add skill
+      </button>
+
       <button
         onClick={() => {
           graphState.mutate(
             {
               _type: 'User',
               _id: '0',
-              name: 'John',
-              skills: ['go'],
+              skills: [{ _type: 'Skill', _id: 'php' }],
             },
             { replace: true }
           );
-
-          console.log(graphState.resolve('Age:0'));
         }}
       >
-        Remove nested items
+        Replace skills
       </button>
+
+      <ul>
+        {type.skills?.map(skill => (
+          <li key={skill}>{graphState.resolve(skill)?._id ?? 'null'}</li>
+        ))}
+      </ul>
+
       <animated.div
         style={{
           width: 100,
