@@ -145,7 +145,9 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       } as any
     }
 
-    unlinkGraph(graphKey)
+    if (options?.replace) {
+      unlinkGraph(graphKey)
+    }
 
     const nextGraph = Object.entries(graphData).reduce((acc, [key, value]) => {
       const fieldKey = joinKeys(graphKey, key)
@@ -172,6 +174,10 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
       internal.hasChange =
         internal.hasChange || !shallowEqual(prevValue, fieldKey === fieldValue ? safeResolve(fieldValue) : fieldValue)
+
+      if (!options?.replace && isLinkKey(prevValue) && prevValue !== fieldValue) {
+        cache.removeRefs(graphKey, prevValue)
+      }
 
       acc[key] = fieldValue
 
