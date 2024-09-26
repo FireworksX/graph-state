@@ -14,7 +14,7 @@ export const isObject = (input: unknown): input is AnyObject => isObjectChecker(
 export const shallowEqual = (a: DataField, b: DataField) => {
   if (a === b) return true
   if (Array.isArray(a) && Array.isArray(b)) {
-    return a.every(val => b.includes(val))
+    return a.every((val, index) => b[index] === val)
   }
 
   if (!isObject(a) || !isObject(b)) return false

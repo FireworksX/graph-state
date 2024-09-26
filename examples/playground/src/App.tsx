@@ -19,22 +19,6 @@ const graphState = createState({
       ],
     },
   },
-  plugins: [
-    (state, { overrideMutate }) => {
-      overrideMutate((next, ...args) => {
-        next(...args);
-      });
-    },
-    // (state, { overrideMutate }) => {
-    //   overrideMutate((next, ...args) => {
-    //     return 'two';
-    //   });
-    // },
-  ],
-});
-
-graphState.onRemoveLink(l => {
-  console.log(l);
 });
 
 window.graphState = graphState;
@@ -65,29 +49,26 @@ function App() {
       </button>
       <button
         onClick={() => {
-          graphState.mutate({
-            _type: 'User',
-            _id: '0',
-            skills: [{ _type: 'Skill', _id: 'go' }],
-          });
-        }}
-      >
-        Add skill
-      </button>
-
-      <button
-        onClick={() => {
           graphState.mutate(
-            {
-              _type: 'User',
-              _id: '0',
-              skills: [{ _type: 'Skill', _id: 'php' }],
+            'User:0',
+            prev => {
+              const skills = prev?.skills ?? [];
+              const index = skills.indexOf('Skill:ts');
+
+              if (index !== -1) {
+                skills.splice(index, 1);
+                skills.splice(2, 0, 'Skill:ts');
+              }
+
+              return {
+                skills,
+              };
             },
             { replace: true }
           );
         }}
       >
-        Replace skills
+        Change order
       </button>
 
       <ul>
