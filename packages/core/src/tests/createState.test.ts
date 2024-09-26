@@ -722,6 +722,43 @@ describe('createState', () => {
         )
         expect(graphState.resolve('Layer:header').children).toStrictEqual(['c', 'd'])
       })
+
+      it('should change order in array', () => {
+        const updateSpy = vi.fn()
+
+        const graphState = createState()
+        graphState.mutate({
+          _type: 'Layer',
+          _id: 'header',
+          children: ['Link:1', 'Link:2', 'Link:3'],
+        })
+
+        graphState.subscribe('Layer:header', updateSpy)
+
+        expect(graphState.resolve('Layer:header').children).toStrictEqual(['Link:1', 'Link:2', 'Link:3'])
+
+        graphState.mutate(
+          'Layer:header',
+          prev => {
+            const children = prev?.children ?? []
+            const index = children.indexOf('Link:1')
+
+            if (index !== -1) {
+              children.splice(index, 1)
+              children.splice(2, 0, 'Link:1')
+            }
+
+            return {
+              children,
+            }
+          },
+          { replace: true }
+        )
+
+        expect(graphState.resolve('Layer:header').children).toStrictEqual(['Link:2', 'Link:3', 'Link:1'])
+        expect(updateSpy).toBeCalledTimes(1)
+        expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({ children: ['Link:2', 'Link:3', 'Link:1'] }))
+      })
     })
 
     describe('unlinking', () => {
