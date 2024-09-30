@@ -165,7 +165,7 @@ graphState.resolve(user)
 /**
  * _type: 'User'
  * _id: 'usernameOne'
- * name: 'James'
+ * name: 'Alie'
  * gender: 'female'
  */
 
@@ -397,8 +397,8 @@ You can mutate user in one place and him will update in all posts.
 ## Invalidate
 You have few ways to remove graph from state.
 
-**graphState.invalidate(link: LinkKey)** - remove graph form state
-**graphState.mutate()** - use automatic Garbage Collector
+- **graphState.invalidate(link: LinkKey)** - remove graph form state
+- **graphState.mutate()** - use automatic Garbage Collector
 
 ```ts
 const state = createState({
