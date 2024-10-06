@@ -120,6 +120,8 @@ export type StateDataSetter<TEntity extends SystemFields, TInput extends Entity>
   Partial<Omit<ResolveEntityByType<TEntity, TInput>, keyof SystemFields>>
 >
 
+export type SubscribeCallback = (nextValue: Graph | null, prevValue?: Graph | null) => void
+
 export interface GraphState<TEntity extends SystemFields = SystemFields, TRootType extends LinkKey = LinkKey>
   extends Graph {
   _type: TRootType

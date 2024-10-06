@@ -9,6 +9,7 @@ import type {
   ResolveEntityByType,
   SystemFields,
   LinkKey,
+  SubscribeCallback,
 } from 'src'
 import { isPartialKey } from 'src'
 import { isObject } from 'src'
@@ -36,7 +37,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   const stateKey = `${type}:${id}` as const
   const skipPredictors = options?.skip ?? []
   const cache = createCache()
-  const subscribers = new Map<string, ((newState: any) => any)[]>()
+  const subscribers = new Map<string, SubscribeCallback[]>()
   let deepIndex = 0
 
   const isSkipped = (entity: DataField) => {
@@ -187,7 +188,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     cache.writeLink(graphKey, nextGraph, parentKey)
 
     if (internal.hasChange) {
-      notify(graphKey)
+      notify(graphKey, prevGraph)
     }
 
     /**
@@ -210,16 +211,17 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       cache.invalidate(key)
 
       parents.forEach(parentKey => {
+        const prevParent = cache.readLink(parentKey)
         const freshParent = resolve(parentKey, { safe: false })
 
         cache.writeLink(parentKey, freshParent)
-        notify(parentKey)
+        notify(parentKey, prevParent)
       })
       subs.forEach(cb => cb(null))
     }
   }
 
-  const notify = (entity: Entity) => {
+  const notify = (entity: Entity, prevState: Graph | null | undefined) => {
     if (deepIndex > DEEP_LIMIT) {
       throw new Error('Too deep notify.')
     }
@@ -229,17 +231,17 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       deepIndex++
       const subs = subscribers.get(key) || []
       const deps = cache.getChildren(key) || []
-      const nextResult = resolve(key)
+      const nextResult = resolve(key) as Graph
 
       subscribers.get(EACH_UPDATED)?.forEach(cb => {
-        cb(nextResult)
+        cb(nextResult, prevState)
       })
 
       if (!nextResult) return
       subs.forEach(cb => {
-        cb(nextResult)
+        cb(nextResult, prevState)
       })
-      deps.forEach(notify)
+      deps.forEach(dep => notify(dep, prevState))
     }
 
     deepIndex = 0

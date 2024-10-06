@@ -37,6 +37,10 @@ graphState.onRemoveLink(l => {
   console.log(l);
 });
 
+graphState.subscribe('User:0', (next, prev) => {
+  console.log(next, prev);
+});
+
 window.graphState = graphState;
 
 // console.log(graphState.resolve(graphState));
