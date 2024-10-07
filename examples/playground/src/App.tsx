@@ -21,6 +21,10 @@ const graphState = createState({
   },
 });
 
+graphState.subscribe('User:0', (next, prev) => {
+  console.log(next, prev);
+});
+
 window.graphState = graphState;
 
 // console.log(graphState.resolve(graphState));

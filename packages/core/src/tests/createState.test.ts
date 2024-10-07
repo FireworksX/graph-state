@@ -1088,10 +1088,14 @@ describe('createState', () => {
       })
 
       expect(spy).toBeCalledTimes(1)
-      expect(spy).toHaveBeenCalledWith({
-        ...header,
-        display: 'none',
-      })
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          display: 'none',
+        }),
+        expect.objectContaining({
+          display: 'block',
+        })
+      )
     })
 
     it('should not return deep resolved data', () => {
@@ -1106,11 +1110,16 @@ describe('createState', () => {
         display: 'none',
       })
 
-      expect(spy).toHaveBeenCalledWith({
-        ...header,
-        display: 'none',
-        ref: graphState.keyOfEntity(rootLayer),
-      })
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          display: 'none',
+          ref: graphState.keyOfEntity(rootLayer),
+        }),
+        expect.objectContaining({
+          display: 'block',
+          ref: graphState.keyOfEntity(rootLayer),
+        })
+      )
     })
 
     it('should notify self store', () => {
