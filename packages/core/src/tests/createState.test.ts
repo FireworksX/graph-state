@@ -757,7 +757,10 @@ describe('createState', () => {
 
         expect(graphState.resolve('Layer:header').children).toStrictEqual(['Link:2', 'Link:3', 'Link:1'])
         expect(updateSpy).toBeCalledTimes(1)
-        expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({ children: ['Link:2', 'Link:3', 'Link:1'] }))
+        expect(updateSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ children: ['Link:2', 'Link:3', 'Link:1'] }),
+          expect.objectContaining({ children: ['Link:1', 'Link:2', 'Link:3'] })
+        )
       })
     })
 
