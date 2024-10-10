@@ -50,7 +50,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     options?: ResolveOptions
   ): ResolveEntityByType<TEntity, TInput> | null => {
     const isDeep = options?.deep ?? false
-    const isSafe = options?.safe ?? true
+    const isSafe = options?.safe ?? false
     const inputKey = isValue(input) ? keyOfEntity(input) : null
     let value = inputKey ? (cache.readLink(inputKey) as any) : null
 
@@ -87,7 +87,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       }, {} as Graph)
     }
 
-    return value ? { ...value } : null
+    return value ? { ...value } : isSafe ? input : null
   }
 
   const safeResolve = (input?: Entity, options?: ResolveOptions) => resolve(input, options) ?? input

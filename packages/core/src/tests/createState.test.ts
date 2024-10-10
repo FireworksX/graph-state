@@ -224,7 +224,7 @@ describe('createState', () => {
       graphState.invalidate(avatarLayer)
 
       expect(graphState.inspectFields('Layer')).not.toHaveProperty('Layer:avatar')
-      expect(graphState.resolve(avatarLayer)).toBe(null)
+      expect(graphState.resolve(avatarLayer, { safe: false })).toBe(null)
       expect(graphState.resolve(rootLayer).children).toStrictEqual([])
       expect(graphState.resolve(rootLayer).field).toStrictEqual(null)
     })
@@ -1515,7 +1515,6 @@ describe('createState', () => {
     /**
      * Если зарезолвить граф, которого не существует, то вернет null
      */
-
     it('unsafe resolve', () => {
       const graphState = createState({
         initialState: {
@@ -1546,7 +1545,11 @@ describe('createState', () => {
 
       expect(graphState.resolve()).toBe(null)
       expect(graphState.resolve('')).toBe(null)
+      expect(graphState.resolve('', { safe: true })).toBe('')
+      expect(graphState.resolve('', { safe: false })).toBe(null)
       expect(graphState.resolve(10)).toBe(null)
+      expect(graphState.resolve(10, { safe: true })).toBe(10)
+      expect(graphState.resolve(10, { safe: false })).toBe(null)
     })
   })
 
