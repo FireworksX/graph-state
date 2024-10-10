@@ -19,7 +19,7 @@ export type StateResolve<TState extends GraphState, TEntity extends Entity> = Re
 
 export const useGraph = <TState extends GraphState, const TEntity extends Entity>(
   graphState: TState,
-  field: TEntity = graphState.key as TEntity,
+  field: TEntity,
   options?: GraphOptions
 ): [StateResolve<TState, TEntity>, Dispatch<StateDataSetter<GetStateEntity<TState>, TEntity>>] => {
   const nextValue = useRef<StateResolve<TState, TEntity>>(

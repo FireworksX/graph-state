@@ -33,12 +33,23 @@ function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [{ rotate, value }] = useGraph(graphState);
   const [type] = useGraph(graphState, 'User:0');
+  const [miss] = useGraph(graphState, undefined, { safe: true });
+  console.log(miss);
 
   // console.log(rotate);
   // console.log(value);
   return (
     <>
       <h1>Hello world</h1>
+      <GraphValue
+        graphState={graphState}
+        field={undefined}
+        options={{ safe: false }}
+      >
+        {value => {
+          return <>{console.log(value)}</>;
+        }}
+      </GraphValue>
       <pre>{JSON.stringify(type)}</pre>
       <button
         onClick={() => {
