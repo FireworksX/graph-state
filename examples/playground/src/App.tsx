@@ -33,6 +33,8 @@ function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [{ rotate, value }] = useGraph(graphState);
   const [type] = useGraph(graphState, 'User:0');
+  const [miss] = useGraph(graphState, 'User:test', { safe: true });
+  console.log(miss);
 
   // console.log(rotate);
   // console.log(value);
