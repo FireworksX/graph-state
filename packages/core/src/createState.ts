@@ -22,6 +22,7 @@ import { uniqueLinks } from './utils/unique'
 import { isDev } from './utils/isDev'
 import { isPrimitive, isValue } from '@graph-state/checkers'
 import { createPluginsStore } from './plugins'
+import { debug } from './helpers/help'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -49,7 +50,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     options?: ResolveOptions
   ): ResolveEntityByType<TEntity, TInput> | null => {
     const isDeep = options?.deep ?? false
-    const isSafe = options?.safe ?? true
+    const isSafe = options?.safe ?? false
     const inputKey = isValue(input) ? keyOfEntity(input) : null
     let value = inputKey ? (cache.readLink(inputKey) as any) : null
 
@@ -86,7 +87,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       }, {} as Graph)
     }
 
-    return value ? { ...value } : null
+    return value ? { ...value } : isSafe ? input : null
   }
 
   const safeResolve = (input?: Entity, options?: ResolveOptions) => resolve(input, options) ?? input
@@ -178,6 +179,14 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
       if (!options?.replace && isLinkKey(prevValue) && prevValue !== fieldValue) {
         cache.removeRefs(graphKey, prevValue)
+        debug(
+          `Garbage Collector remove link ${prevValue} from ${graphKey}.
+Prev value: ${prevValue} (${typeof prevValue}).
+Next value: ${fieldValue} (${typeof fieldValue}).
+GraphKey: ${graphKey}.
+FieldKey: ${fieldKey}.
+`
+        )
       }
 
       acc[key] = fieldValue

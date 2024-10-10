@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import type { Dispatch, Entity, GraphState, StateDataSetter } from '@graph-state/core'
+import type { Dispatch, Entity, GraphState, ResolveOptions, StateDataSetter } from '@graph-state/core'
 import type { StateResolve } from './useGraph'
 import { useGraph } from './useGraph'
 
@@ -10,17 +10,19 @@ interface GraphValueProps<TState extends GraphState, TInput extends Entity> {
   ) => ReactElement
   graphState?: TState
   field?: TInput
+  options?: ResolveOptions
 }
 
 export const GraphValue = <TState extends GraphState, TInput extends Entity>({
   graphState,
   field,
   children,
+  options,
 }: GraphValueProps<TState, TInput>) => {
   if (!graphState) {
     throw new Error('Cannot find graphState.')
   }
-  const value = useGraph(graphState, field) || field
+  const value = useGraph(graphState, field, options) || field
 
   if (typeof children === 'function') {
     return children(...(value as any))
