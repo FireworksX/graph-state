@@ -104,6 +104,7 @@ export const createCache = () => {
     for (const link of gbLinks.keys()) {
       const count = getRefCount(link)
       if (count > 0) continue
+      const currentValue = links.get(link)
 
       gbLinks.delete(link)
       links.delete(link)
@@ -129,7 +130,7 @@ export const createCache = () => {
       }
 
       parentRefs.delete(link)
-      ;(listeners.get('onRemoveLink') ?? []).forEach(listener => listener(link))
+      ;(listeners.get('onRemoveLink') ?? []).forEach(listener => listener(link, currentValue ?? null))
     }
   }
 

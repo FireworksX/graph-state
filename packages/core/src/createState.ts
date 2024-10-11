@@ -22,6 +22,7 @@ import { uniqueLinks } from './utils/unique'
 import { isDev } from './utils/isDev'
 import { isPrimitive, isValue } from '@graph-state/checkers'
 import { createPluginsStore } from './plugins'
+import { debug } from './helpers/help'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -178,6 +179,14 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
       if (!options?.replace && isLinkKey(prevValue) && prevValue !== fieldValue) {
         cache.removeRefs(graphKey, prevValue)
+        debug(
+          `Garbage Collector remove link ${prevValue} from ${graphKey}.
+Prev value: ${prevValue} (${typeof prevValue}).
+Next value: ${fieldValue} (${typeof fieldValue}).
+GraphKey: ${graphKey}.
+FieldKey: ${fieldKey}.
+`
+        )
       }
 
       acc[key] = fieldValue
@@ -187,16 +196,18 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
     cache.writeLink(graphKey, nextGraph, parentKey)
 
-    if (internal.hasChange) {
-      notify(graphKey, prevGraph)
-    }
-
     /**
      * When complete nested updates, call GB
      */
-
     if (!parentKey) {
       cache.runGarbageCollector()
+    }
+
+    /**
+     * Notify after remove garbage
+     */
+    if (internal.hasChange) {
+      notify(graphKey, prevGraph)
     }
 
     return graphKey
@@ -207,7 +218,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
     if (key) {
       const parents = cache.getParents(key) || []
-      const subs = subscribers.get(key) || []
       cache.invalidate(key)
 
       parents.forEach(parentKey => {
@@ -217,7 +227,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
         cache.writeLink(parentKey, freshParent)
         notify(parentKey, prevParent)
       })
-      subs.forEach(cb => cb(null))
     }
   }
 
@@ -227,6 +236,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     }
 
     const key = keyOfEntity(entity)
+
     if (key) {
       deepIndex++
       const subs = subscribers.get(key) || []
@@ -237,7 +247,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
         cb(nextResult, prevState)
       })
 
-      if (!nextResult) return
       subs.forEach(cb => {
         cb(nextResult, prevState)
       })
@@ -258,6 +267,12 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       } else {
         subscribers.set(key, [callback])
       }
+
+      cache.onRemoveLink((link, prevValue) => {
+        if (link === key) {
+          notify(key, prevValue)
+        }
+      })
     }
 
     return () => {

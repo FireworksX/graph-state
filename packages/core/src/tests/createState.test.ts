@@ -302,7 +302,7 @@ describe('createState', () => {
       graphState.invalidate(avatarLayer)
 
       expect(spy).toBeCalledTimes(1)
-      expect(spy).toHaveBeenCalledWith(null)
+      expect(spy).toHaveBeenCalledWith(null, expect.objectContaining(avatarLayer))
     })
 
     it('should notify after invalidating and recreating', () => {
@@ -316,7 +316,7 @@ describe('createState', () => {
       graphState.subscribe(rootLayer, spy)
       graphState.invalidate(rootLayer)
 
-      expect(spy).toHaveBeenCalledWith(null)
+      expect(spy).toHaveBeenCalledWith(null, expect.objectContaining(rootLayer))
 
       graphState.mutate({
         ...rootLayer,
@@ -343,6 +343,27 @@ describe('createState', () => {
       })
 
       expect(spy).toBeCalledTimes(0)
+    })
+
+    it('should notify after invalidate by Garbage Collector', () => {
+      const spy = vi.fn()
+      const graphState = createState({
+        initialState: {
+          authors: [
+            {
+              _type: 'User',
+              _id: 0,
+              skill: { _type: 'Skill', _id: 'js' },
+            },
+          ],
+        },
+      })
+
+      graphState.subscribe('Skill:js', spy)
+      graphState.mutate('User:0', { skill: 'otherValue' })
+
+      expect(spy).toBeCalledTimes(1)
+      expect(spy).toBeCalledWith(null, expect.objectContaining({ _type: 'Skill', _id: 'js' }))
     })
   })
 
@@ -793,8 +814,12 @@ describe('createState', () => {
         graphState.mutate('User:0', { name: 'John', skills: ['go'] }, { replace: true })
         graphState.mutate('User:0', { name: 'Marcha' })
 
-        expect(ageSpy).toBeCalledTimes(1)
-        expect(skillSpy).toBeCalledTimes(0)
+        /**
+         * 1- когда изменили value
+         * 2- когда удалили
+         */
+        expect(ageSpy).toBeCalledTimes(2)
+        expect(skillSpy).toBeCalledTimes(1)
 
         /**
          * GarbageCollector автоматически удалит Age:0 т.к. на него больше никто не ссылается
@@ -832,7 +857,7 @@ describe('createState', () => {
         graphState.mutate(graphState.key, { author: 'OtherUser' })
         graphState.mutate(graphState.key, { value: 100 })
 
-        expect(userSpy).toBeCalledTimes(1)
+        expect(userSpy).toBeCalledTimes(2)
         expect(graphState.resolve('User:0')).toBeNull()
 
         graphState.mutate(graphState.key, { skills: [{ _type: 'Skill', _id: 'go' }] })

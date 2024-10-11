@@ -19,4 +19,12 @@ describe('useInspectFields', () => {
     graphState.invalidate('Author:20')
     expect(fields.current).toHaveLength(0)
   })
+
+  it('should return fields after invalidate by Garbage Collector', () => {
+    const graphState = mockGraphState()
+    const { result: fields } = renderHook(() => useGraphFields(graphState, 'Author'))
+
+    graphState.mutate('Post:0', { author: 'OtherAuthor' })
+    expect(fields.current).toHaveLength(0)
+  })
 })

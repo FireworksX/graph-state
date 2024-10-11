@@ -58,7 +58,7 @@ const grapState = createState({
 })
 
 const App = () => {
-  const [state, setState] = useGraph(grapState)
+  const [state, setState] = useGraph(grapState, grapState.key)
 
   return <div>
     <h1>{state.value}</h1>
@@ -284,7 +284,7 @@ graphState.inspectFields('User')
 
 ### Resolve options
 - `deep` - resolve all nested graphs (default: false)
-- `safe` - save link for empty graph (default: true)
+- `safe` - save link for empty graph (default: false)
 
 ### Observe updates
 

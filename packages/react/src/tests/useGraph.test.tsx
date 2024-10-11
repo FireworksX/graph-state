@@ -13,7 +13,7 @@ describe('useGraph', () => {
     const graphState = createState({
       initialState: initial,
     })
-    const { result } = renderHook(() => useGraph(graphState))
+    const { result } = renderHook(() => useGraph(graphState, graphState.key))
     const [state, updateState] = result.current
 
     expect(state).toMatchObject(initial)
