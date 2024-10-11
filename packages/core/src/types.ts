@@ -84,7 +84,7 @@ export type PluginOverrider = <TState extends GraphState>(
 ) => TState | void
 export type SkipGraphPredictor = (dataField: DataField) => boolean
 
-export type CacheListener = (link: LinkKey) => void
+export type CacheListener = (link: LinkKey, prevValue?: Graph | null) => void
 
 export interface CreateStateOptions<TEntity extends SystemFields = SystemFields, TType extends LinkKey = LinkKey> {
   type?: TType

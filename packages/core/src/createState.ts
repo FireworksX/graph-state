@@ -196,16 +196,18 @@ FieldKey: ${fieldKey}.
 
     cache.writeLink(graphKey, nextGraph, parentKey)
 
-    if (internal.hasChange) {
-      notify(graphKey, prevGraph)
-    }
-
     /**
      * When complete nested updates, call GB
      */
-
     if (!parentKey) {
       cache.runGarbageCollector()
+    }
+
+    /**
+     * Notify after remove garbage
+     */
+    if (internal.hasChange) {
+      notify(graphKey, prevGraph)
     }
 
     return graphKey
@@ -216,7 +218,6 @@ FieldKey: ${fieldKey}.
 
     if (key) {
       const parents = cache.getParents(key) || []
-      const subs = subscribers.get(key) || []
       cache.invalidate(key)
 
       parents.forEach(parentKey => {
@@ -226,7 +227,6 @@ FieldKey: ${fieldKey}.
         cache.writeLink(parentKey, freshParent)
         notify(parentKey, prevParent)
       })
-      subs.forEach(cb => cb(null))
     }
   }
 
@@ -236,6 +236,7 @@ FieldKey: ${fieldKey}.
     }
 
     const key = keyOfEntity(entity)
+
     if (key) {
       deepIndex++
       const subs = subscribers.get(key) || []
@@ -246,7 +247,6 @@ FieldKey: ${fieldKey}.
         cb(nextResult, prevState)
       })
 
-      if (!nextResult) return
       subs.forEach(cb => {
         cb(nextResult, prevState)
       })
@@ -267,6 +267,12 @@ FieldKey: ${fieldKey}.
       } else {
         subscribers.set(key, [callback])
       }
+
+      cache.onRemoveLink((link, prevValue) => {
+        if (link === key) {
+          notify(key, prevValue)
+        }
+      })
     }
 
     return () => {
