@@ -1,5 +1,10 @@
 import { createState } from '@graph-state/core';
-import { GraphValue, useGraph, useGraphFields } from '@graph-state/react';
+import {
+  GraphValue,
+  useGraph,
+  useGraphFields,
+  useGraphStack,
+} from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import { SpringValue, animated } from '@react-spring/web';
 
@@ -8,21 +13,22 @@ export const generateId = () => Math.random().toString(16).slice(2);
 const graphState = createState({
   type: 'State',
   initialState: {
-    author: {
-      _type: 'User',
-      _id: 0,
-      age: { _type: 'Age', _id: 0, value: 27 },
-      skills: [
-        { _type: 'Skill', _id: 'js' },
-        { _type: 'Skill', _id: 'ts' },
-        { _type: 'Skill', _id: 'python' },
-      ],
-    },
+    authors: [
+      {
+        _type: 'User',
+        _id: 0,
+        skill: { _type: 'Skill', _id: 'js' },
+      },
+    ],
   },
 });
 
-graphState.subscribe('User:0', (next, prev) => {
-  console.log(next, prev);
+graphState.subscribe('Skill:js', (next, prev) => {
+  console.log('Skill:js', next, prev);
+});
+
+graphState.subscribe((next, prev) => {
+  console.log('All state', next, prev);
 });
 
 window.graphState = graphState;
@@ -31,10 +37,11 @@ window.graphState = graphState;
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [{ rotate, value }] = useGraph(graphState);
   const [type] = useGraph(graphState, 'User:0');
   const [miss] = useGraph(graphState, undefined, { safe: true });
-  console.log(miss);
+  const allSkillsLinks = useGraphFields(graphState, 'Skill');
+  const allSkills = useGraphStack(graphState, ['Skill:js']);
+  console.log(allSkills);
 
   // console.log(rotate);
   // console.log(value);
@@ -66,6 +73,20 @@ function App() {
         onClick={() => {
           graphState.mutate(
             'User:0',
+            prev => ({
+              ...prev,
+              skill: 'OtherValue',
+            }),
+            { replace: true }
+          );
+        }}
+      >
+        Remove skill
+      </button>
+      <button
+        onClick={() => {
+          graphState.mutate(
+            'User:0',
             prev => {
               const skills = prev?.skills ?? [];
               const index = skills.indexOf('Skill:ts');
@@ -87,8 +108,8 @@ function App() {
       </button>
 
       <ul>
-        {type.skills?.map(skill => (
-          <li key={skill}>{graphState.resolve(skill)?._id ?? 'null'}</li>
+        {allSkills?.map(skill => (
+          <li key={skill?._id}>{skill?._id ?? 'null'}</li>
         ))}
       </ul>
 
@@ -97,7 +118,6 @@ function App() {
           width: 100,
           height: 100,
           background: 'red',
-          rotate,
         }}
       />
       <button

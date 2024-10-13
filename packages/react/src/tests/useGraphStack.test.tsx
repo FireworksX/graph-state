@@ -65,4 +65,23 @@ describe('useGraphStack', () => {
       ],
     })
   })
+
+  it('should return fields after invalidate by Garbage Collector', () => {
+    const graphState = createState({
+      type: 'State',
+      initialState: {
+        authors: [
+          {
+            _type: 'User',
+            _id: 0,
+            skill: { _type: 'Skill', _id: 'js' },
+          },
+        ],
+      },
+    })
+    const { result: fields } = renderHook(() => useGraphStack(graphState, ['Skill:js']))
+
+    graphState.mutate('User:0', { skill: 'OtherFiledValue' })
+    expect(fields.current).toHaveLength(0)
+  })
 })
