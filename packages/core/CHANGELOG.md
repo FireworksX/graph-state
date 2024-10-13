@@ -1,5 +1,20 @@
 # @graph-state/core
 
+## 0.8.0
+
+### Minor Changes
+
+- 4f34182: Improve plugins
+- 1b0a9aa: Make `safe` option false by default. Add options into React wrappers.
+- 7a81754: Remove useless graphs from cache. Update logger.
+
+### Patch Changes
+
+- d6a9729: Fix shallowEquals for arrays
+- d2077a3: Add prev state into subscribe
+- df9c451: Fix shallowEqual for array order.
+- 399af79: Add debug message
+
 ## 0.7.0
 
 ### Minor Changes

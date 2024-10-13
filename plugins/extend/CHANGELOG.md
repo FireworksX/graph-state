@@ -1,5 +1,22 @@
 # @graph-state/plugin-extend
 
+## 0.5.0
+
+### Minor Changes
+
+- 4f34182: Improve plugins
+
+### Patch Changes
+
+- Updated dependencies [d6a9729]
+- Updated dependencies [4f34182]
+- Updated dependencies [1b0a9aa]
+- Updated dependencies [d2077a3]
+- Updated dependencies [7a81754]
+- Updated dependencies [df9c451]
+- Updated dependencies [399af79]
+  - @graph-state/core@0.8.0
+
 ## 0.4.0
 
 ### Minor Changes
