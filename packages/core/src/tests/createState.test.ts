@@ -1044,6 +1044,26 @@ describe('createState', () => {
       expect(rootSpy).toBeCalledTimes(0)
     })
 
+    it('should notify with updates an array', () => {
+      const graphState = createState({
+        initialState: {
+          posts: [],
+        },
+      })
+
+      const postsSpy = vi.fn()
+      graphState.subscribe(graphState.key, postsSpy)
+
+      graphState.mutate(graphState.key, {
+        posts: ['postValue'],
+      })
+      graphState.mutate(graphState.key, {
+        posts: ['Link:id'],
+      })
+
+      expect(postsSpy).toBeCalledTimes(2)
+    })
+
     /**
      * Когда изменяем родителя, оповещаем всех детей
      */
