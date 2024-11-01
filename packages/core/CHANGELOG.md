@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.9.0
+
+### Minor Changes
+
+- 0e20d07: Add notify after invalidate by GB
+
 ## 0.8.0
 
 ### Minor Changes
