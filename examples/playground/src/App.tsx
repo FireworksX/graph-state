@@ -7,6 +7,7 @@ import {
 } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import { SpringValue, animated } from '@react-spring/web';
+import fragment from './fragment';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -17,18 +18,18 @@ const graphState = createState({
       {
         _type: 'User',
         _id: 0,
-        skill: { _type: 'Skill', _id: 'js' },
+        currentSkill: 'Skill:js',
+        skills: [{ _type: 'Skill', _id: 'js' }],
       },
     ],
+    fragment,
   },
-});
-
-graphState.subscribe('Skill:js', (next, prev) => {
-  console.log('Skill:js', next, prev);
-});
-
-graphState.subscribe((next, prev) => {
-  console.log('All state', next, prev);
+  skip: [
+    input => {
+      console.log(input);
+      return input?.startsWith?.('$$');
+    },
+  ],
 });
 
 window.graphState = graphState;
@@ -38,9 +39,8 @@ window.graphState = graphState;
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [type] = useGraph(graphState, 'User:0');
-  const [miss] = useGraph(graphState, undefined, { safe: true });
   const allSkillsLinks = useGraphFields(graphState, 'Skill');
-  const allSkills = useGraphStack(graphState, ['Skill:js']);
+  const allSkills = useGraphStack(graphState, allSkillsLinks);
   console.log(allSkills);
 
   // console.log(rotate);
@@ -60,51 +60,21 @@ function App() {
       <pre>{JSON.stringify(type)}</pre>
       <button
         onClick={() => {
-          graphState.mutate({
-            _type: 'User',
-            _id: '0',
-            age: { _type: 'Age', _id: 10, value: 22 },
+          graphState.mutate('User:0', {
+            skills: [{ _type: 'Skill', _id: 'python' }],
           });
         }}
       >
-        Set age
+        Append skill
       </button>
       <button
         onClick={() => {
-          graphState.mutate(
-            'User:0',
-            prev => ({
-              ...prev,
-              skill: 'OtherValue',
-            }),
-            { replace: true }
-          );
+          graphState.mutate('User:0', {
+            currentSkill: 'Skill:python',
+          });
         }}
       >
-        Remove skill
-      </button>
-      <button
-        onClick={() => {
-          graphState.mutate(
-            'User:0',
-            prev => {
-              const skills = prev?.skills ?? [];
-              const index = skills.indexOf('Skill:ts');
-
-              if (index !== -1) {
-                skills.splice(index, 1);
-                skills.splice(2, 0, 'Skill:ts');
-              }
-
-              return {
-                skills,
-              };
-            },
-            { replace: true }
-          );
-        }}
-      >
-        Change order
+        Change current skill
       </button>
 
       <ul>
