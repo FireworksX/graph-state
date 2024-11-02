@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.9.1
+
+### Patch Changes
+
+- 8042bee: Make cache is public
+
 ## 0.9.0
 
 ### Minor Changes
