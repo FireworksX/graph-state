@@ -207,34 +207,48 @@ state.resolve(state)
 
 ```
 
-**Attention**
+> **Attention**
 If you use `replace: true` on mutate when pass LinkKey, link will
 parse into graph { _type: Type, _id: ID } and replace current value.
+> Use function on replace for control level.
+
+
 ```js
 const state = createState({
   initialState: {
-    post: {
-      _type: 'Post',
-      _id: 'root',
-      value: 100
+    user: {
+      _type: 'User',
+      _id: '0',
+      age: 25,
+      skills: [
+        { _type: 'Skill', _id: 'ts', level: 80 }, 
+        { _type: 'Skill', _id: 'go', level: 40 }
+      ]
     }
   }
 })
 
-state.mutate(state, {
-  post: 'Post:100'
-}, {
-  replace: true
+state.mutate('User:0', prev => ({
+  ...prev
+  /**
+   * If replace:true then skills replace to
+   * { _type: 'Skill', _id: 'ts' },
+   * { _type: 'Skill', _id: 'go' }
+   * without self fields.
+   */
+  skills: ['Skill:go', 'Skill:ts'] 
+}), {
+  replace: (graph) => graph._type === 'User' 
 })
 
-state.resolve('Post:root')
+state.resolve('Skill:ts')
 /**
- * _type: Post
- * _id: root
- * !without value, because field replaced!
+ * _type: Skill
+ * _id: ts
+ * level: 80
+ * All fields saved
  */
 
-// If you use replace: true, need pass full graph
 
 ```
 

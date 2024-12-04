@@ -17,18 +17,15 @@ const graphState = createState({
       {
         _type: 'User',
         _id: 0,
-        skill: { _type: 'Skill', _id: 'js' },
+        age: 27,
+        skills: [
+          { _type: 'Skill', _id: 'js', level: 70 },
+          { _type: 'Skill', _id: 'php', level: 30 },
+          { _type: 'Skill', _id: 'ts', level: 75 },
+        ],
       },
     ],
   },
-});
-
-graphState.subscribe('Skill:js', (next, prev) => {
-  console.log('Skill:js', next, prev);
-});
-
-graphState.subscribe((next, prev) => {
-  console.log('All state', next, prev);
 });
 
 window.graphState = graphState;
@@ -37,11 +34,8 @@ window.graphState = graphState;
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [type] = useGraph(graphState, 'User:0');
-  const [miss] = useGraph(graphState, undefined, { safe: true });
-  const allSkillsLinks = useGraphFields(graphState, 'Skill');
+  const [type] = useGraph(graphState, 'User:0', { deep: true });
   const allSkills = useGraphStack(graphState, ['Skill:js']);
-  console.log(allSkills);
 
   // console.log(rotate);
   // console.log(value);
@@ -75,7 +69,7 @@ function App() {
             'User:0',
             prev => ({
               ...prev,
-              skill: 'OtherValue',
+              skills: ['Skill:js1'],
             }),
             { replace: true }
           );
@@ -89,18 +83,24 @@ function App() {
             'User:0',
             prev => {
               const skills = prev?.skills ?? [];
-              const index = skills.indexOf('Skill:ts');
+              const index = skills.indexOf('Skill:php');
 
               if (index !== -1) {
                 skills.splice(index, 1);
-                skills.splice(2, 0, 'Skill:ts');
+                skills.splice(0, 0, 'Skill:php');
               }
 
               return {
+                ...prev,
                 skills,
               };
             },
-            { replace: true }
+            {
+              replace: graph => {
+                console.log(graph);
+                return graph._type === 'User';
+              },
+            }
           );
         }}
       >

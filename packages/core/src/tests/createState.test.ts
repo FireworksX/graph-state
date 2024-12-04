@@ -783,6 +783,48 @@ describe('createState', () => {
           expect.objectContaining({ children: ['Link:1', 'Link:2', 'Link:3'] })
         )
       })
+
+      it('should use replace function', () => {
+        const replaceSpy = vi.fn()
+
+        const graphState = createState()
+        graphState.mutate({
+          _type: 'Layer',
+          _id: 'header',
+          children: [
+            { _type: 'Link', _id: 1, level: 10 },
+            { _type: 'Link', _id: 2, level: 55 },
+            { _type: 'Link', _id: 3, level: 73 },
+          ],
+        })
+
+        expect(graphState.resolve('Layer:header').children).toStrictEqual(['Link:1', 'Link:2', 'Link:3'])
+
+        graphState.mutate(
+          'Layer:header',
+          { children: ['Link:3', 'Link:2', 'Link:1'] },
+          {
+            replace: graph => {
+              replaceSpy(graph)
+              return graph._type === 'Layer'
+            },
+          }
+        )
+
+        expect(graphState.resolve('Layer:header', { deep: true }).children).toStrictEqual([
+          expect.objectContaining({ _type: 'Link', _id: '3', level: 73 }),
+          expect.objectContaining({ _type: 'Link', _id: '2', level: 55 }),
+          expect.objectContaining({ _type: 'Link', _id: '1', level: 10 }),
+        ])
+
+        expect(replaceSpy).toBeCalledTimes(4)
+
+        expect(replaceSpy).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ children: ['Link:3', 'Link:2', 'Link:1'] })
+        )
+        expect(replaceSpy).toHaveBeenNthCalledWith(2, expect.objectContaining({ _type: 'Link', _id: '3' }))
+      })
     })
 
     describe('unlinking', () => {

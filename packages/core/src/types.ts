@@ -60,7 +60,7 @@ export type MutateField = (
 ) => (LinkKey | LinkKey[] | null | null[])[] | LinkKey
 
 export interface SetOptions {
-  replace?: boolean
+  replace?: boolean | ((graph: Graph) => boolean)
   overrideMutateMethod?: GraphState['mutate']
   parent?: Entity
   prevValue?: unknown

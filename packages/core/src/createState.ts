@@ -130,24 +130,25 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const parentKey = options?.parent
     const prevGraph: any = resolve(graphKey ?? '')
     const internal = options?.internal || { hasChange: false }
-
     let graphData: Graph = {
       ...data,
       ...entityOfKey(graphKey),
     }
+    const isReplace = typeof options?.replace === 'function' ? options.replace(graphData) : options?.replace
+
     if (isSkipped(data)) {
       cache.writeLink(graphKey, data, parentKey)
       return graphKey
     }
 
-    if (!options?.replace && isObject(prevGraph) && isObject(graphData)) {
+    if (!isReplace && isObject(prevGraph) && isObject(graphData)) {
       graphData = {
         ...prevGraph,
         ...graphData,
       } as any
     }
 
-    if (options?.replace) {
+    if (isReplace) {
       unlinkGraph(graphKey)
     }
 
@@ -165,7 +166,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
           })
         }
 
-        if (!options?.replace && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
+        if (!isReplace && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
           fieldValue = [...prevValue, ...fieldValue]
         }
 
@@ -177,7 +178,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       internal.hasChange =
         internal.hasChange || !shallowEqual(prevValue, fieldKey === fieldValue ? safeResolve(fieldValue) : fieldValue)
 
-      if (!options?.replace && isLinkKey(prevValue) && prevValue !== fieldValue) {
+      if (!isReplace && isLinkKey(prevValue) && prevValue !== fieldValue) {
         cache.removeRefs(graphKey, prevValue)
         debug(
           `Garbage Collector remove link ${prevValue} from ${graphKey}.

@@ -33,8 +33,8 @@ export const useGraph = <TState extends GraphState, const TEntity extends Entity
         nextValue.current = graphState.resolve(fieldKey, options) as any as StateResolve<TState, TEntity>
         onChange()
 
-        return graphState.subscribe(fieldKey, (data: any) => {
-          nextValue.current = data
+        return graphState.subscribe(fieldKey, () => {
+          nextValue.current = graphState.resolve(fieldKey, options) as any as StateResolve<TState, TEntity>
           return onChange()
         })
       }
