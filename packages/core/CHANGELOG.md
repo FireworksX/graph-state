@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.9.2
+
+### Patch Changes
+
+- 7edfb91: Add function to replace. Pass options in react package.
+
 ## 0.9.1
 
 ### Patch Changes
