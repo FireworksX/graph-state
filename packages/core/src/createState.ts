@@ -366,7 +366,7 @@ FieldKey: ${fieldKey}.
     entityOfKey,
     getArgumentsForMutate,
     types: cache.types,
-    cache: isDev ? cache : undefined,
+    cache,
     subscribers: isDev ? subscribers : undefined,
     onRemoveLink: cache.onRemoveLink,
   }
