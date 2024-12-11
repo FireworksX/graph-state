@@ -7,6 +7,7 @@ import {
 } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import { SpringValue, animated } from '@react-spring/web';
+import fragmentData from './fragment.json';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -26,6 +27,20 @@ const graphState = createState({
       },
     ],
   },
+  skip: [
+    g => {
+      return typeof g === 'string' && g.startsWith('$$');
+    },
+  ],
+  plugins: [loggerPlugin()],
+});
+
+graphState.subscribe('$$Frame:214dba74ab1c5', () => {
+  console.log('update');
+});
+
+Object.values(fragmentData).forEach(node => {
+  graphState.mutate(node);
 });
 
 window.graphState = graphState;

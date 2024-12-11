@@ -106,7 +106,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   }
 
   const mutateField = (input: DataField, parentFieldKey?: string, options?: SetOptions): DataField => {
-    if ((!input || isPrimitive(input)) && !isLinkKey(input)) {
+    if (((!input || isPrimitive(input)) && !isLinkKey(input)) || isSkipped(input)) {
       return input
     }
 

@@ -408,6 +408,27 @@ describe('createState', () => {
       state.invalidate('Child:10')
       expect(state.resolve(state)?.classValue instanceof Test).toBeTruthy()
     })
+
+    it('should skip notify skip fields', () => {
+      const state = createState({
+        initialState: {},
+        skip: [v => typeof v === 'string' && v.startsWith('$$')],
+      })
+
+      const subscribeSpy = vi.fn()
+      state.subscribe('$$User:1', subscribeSpy)
+      state.subscribe('$$User:2', subscribeSpy)
+      state.subscribe('$$Field:1', subscribeSpy)
+
+      state.mutate({
+        user: {
+          parents: ['$$User:1', '$$User:2'],
+          test: '$$Field:1',
+        },
+      })
+
+      expect(subscribeSpy).toBeCalledTimes(0)
+    })
   })
 
   describe('mutate', () => {
