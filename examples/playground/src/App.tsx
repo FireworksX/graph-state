@@ -84,7 +84,7 @@ function App() {
             'User:0',
             prev => ({
               ...prev,
-              skills: ['Skill:js1'],
+              skills: ['Skill:js', 'Skill:ts'],
             }),
             { replace: true }
           );
@@ -105,16 +105,15 @@ function App() {
                 skills.splice(0, 0, 'Skill:php');
               }
 
+              console.log(skills);
+
               return {
                 ...prev,
                 skills,
               };
             },
             {
-              replace: graph => {
-                console.log(graph);
-                return graph._type === 'User';
-              },
+              replace: true,
             }
           );
         }}

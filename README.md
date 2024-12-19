@@ -390,6 +390,26 @@ graphState.mutate({
 })
 ```
 
+### Unsubscribe
+For unsubscribe call returned function from **.subscribe** method,
+or use **AbortController**
+
+```jsx
+
+import { createState } from '@graph-state/core'
+
+const abortController = new AbortController()
+const graphState = createState({ initialState: {} })
+
+const unsubscribe = graphState.subscribe(userGraph, callback,{
+  signal: abortController.signal
+})
+
+unsubscribe() 
+// or 
+abortController.abort()
+```
+
 #### Nested graph state
 
 An example above we create nested graph. You can use any nested 

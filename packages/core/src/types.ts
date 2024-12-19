@@ -71,6 +71,10 @@ export interface SetOptions {
   }
 }
 
+export interface SubscribeOptions {
+  signal?: AbortSignal
+}
+
 export type PluginDeclareOverride = (overrider: PluginOverrider) => void
 
 export interface PluginOverrides {
@@ -140,10 +144,11 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
     options?: SetOptions
   ): string | null
   invalidate(field: Entity): void
-  subscribe<TData = unknown>(callback: (data: TData) => void): () => void
+  subscribe<TData = unknown>(callback: (data: TData) => void, options?: SubscribeOptions): () => void
   subscribe<TInput extends Graph | string>(
     input: TInput,
-    callback: (data: ResolveEntityByType<TEntity, TInput>) => void
+    callback: (data: ResolveEntityByType<TEntity, TInput>) => void,
+    options?: SubscribeOptions
   ): () => void
   inspectFields(type: string): string[]
   resolveParents(field: Entity): unknown[]

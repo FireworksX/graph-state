@@ -10,6 +10,7 @@ import type {
   SystemFields,
   LinkKey,
   SubscribeCallback,
+  SubscribeOptions,
 } from 'src'
 import { isPartialKey } from 'src'
 import { isObject } from 'src'
@@ -260,6 +261,7 @@ FieldKey: ${fieldKey}.
   const subscribe = <TInput extends Entity | string = string>(...args: any[]) => {
     const input: TInput = typeof args[0] === 'function' ? EACH_UPDATED : args[0]
     const callback = typeof args[0] === 'function' ? args[0] : args[1]
+    const options: SubscribeOptions | undefined = typeof args[0] === 'function' ? args[1] : args[2]
     const key = keyOfEntity(input)
 
     if (key) {
@@ -276,7 +278,7 @@ FieldKey: ${fieldKey}.
       })
     }
 
-    return () => {
+    const unsubscribe = () => {
       if (key) {
         const subIndex = (subscribers.get(key) || []).findIndex(sub => sub === callback)
 
@@ -288,6 +290,12 @@ FieldKey: ${fieldKey}.
         }
       }
     }
+
+    if (options?.signal) {
+      options.signal.addEventListener('abort', unsubscribe, { once: true })
+    }
+
+    return unsubscribe
   }
 
   const inspectFields = (graphType: Graph['_type']) => [...(cache.types.get(graphType) ?? [])]

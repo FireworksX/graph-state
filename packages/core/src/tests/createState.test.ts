@@ -1186,6 +1186,45 @@ describe('createState', () => {
       expect(spy2).toBeCalledTimes(0)
     })
 
+    it('should unsubscribe with Abort Controller', () => {
+      const graphState = createState({
+        initialState: {
+          user: {
+            _type: 'User',
+            _id: '0',
+          },
+        },
+      })
+
+      const abortController = new AbortController()
+      const subscribeUser = vi.fn()
+      const subscribeAllState = vi.fn()
+
+      graphState.subscribe('User:0', subscribeUser, {
+        signal: abortController.signal,
+      })
+      graphState.subscribe(subscribeAllState, {
+        signal: abortController.signal,
+      })
+
+      graphState.mutate('User:0', {
+        age: 10,
+      })
+
+      expect(subscribeUser).toBeCalledTimes(1)
+      expect(subscribeAllState).toBeCalledTimes(1)
+
+      // Abort subscribes
+      abortController.abort()
+
+      graphState.mutate('User:0', {
+        age: 20,
+      })
+
+      expect(subscribeUser).toBeCalledTimes(1)
+      expect(subscribeAllState).toBeCalledTimes(1)
+    })
+
     it('should return resolved newState', () => {
       const graphState = createState()
       const header = { ...headerLayer, display: 'block' }
