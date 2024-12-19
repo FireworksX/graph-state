@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.9.4
+
+### Patch Changes
+
+- 05957f6: Add AbortSignal for unsubscribe
+
 ## 0.9.3
 
 ### Patch Changes
