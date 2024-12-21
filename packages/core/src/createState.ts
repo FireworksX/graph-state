@@ -135,7 +135,14 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       ...data,
       ...entityOfKey(graphKey),
     }
-    const isReplace = typeof options?.replace === 'function' ? options.replace(graphData) : options?.replace
+    const isTopLevelGraph = !options?.parent
+    const isReplace = options?.replace
+      ? typeof options?.replace === 'function'
+        ? options.replace(graphData)
+        : options?.replace === 'deep'
+          ? true
+          : isTopLevelGraph || isPartialKey(graphKey)
+      : false
 
     if (isSkipped(data)) {
       cache.writeLink(graphKey, data, parentKey)

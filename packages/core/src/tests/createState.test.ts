@@ -688,6 +688,7 @@ describe('createState', () => {
           },
           { replace: true }
         )
+
         expect(Object.keys(graphState.resolve('Layer:header').fields)).toStrictEqual(['overflow', '_type', '_id'])
       })
 
@@ -741,6 +742,37 @@ describe('createState', () => {
           },
           { replace: true }
         )
+
+        expect(graphState.resolve('Property:PropValue1').content).toStrictEqual([1, 2])
+      })
+
+      it('should replace with deep option', () => {
+        const graphState = createState()
+        graphState.mutate({
+          _type: 'Layer',
+          _id: 'header',
+          content: {
+            _type: 'Property',
+            _id: 'PropValue1',
+            content: [1],
+          },
+        })
+
+        expect(graphState.resolve('Property:PropValue1').content).toStrictEqual([1])
+
+        graphState.mutate(
+          {
+            _type: 'Layer',
+            _id: 'header',
+            content: {
+              _type: 'Property',
+              _id: 'PropValue1',
+              content: [2],
+            },
+          },
+          { replace: 'deep' }
+        )
+
         expect(graphState.resolve('Property:PropValue1').content).toStrictEqual([2])
       })
 
