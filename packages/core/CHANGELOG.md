@@ -1,5 +1,16 @@
 # @graph-state/core
 
+## 0.10.0
+
+### Minor Changes
+
+- 54446c3: Make state as Graph with \_type & \_id insted type & id
+- eea756e: Change signature for replace method.
+
+### Patch Changes
+
+- 05957f6: Add AbortSignal for unsubscribe
+
 ## 0.9.3
 
 ### Patch Changes
