@@ -33,8 +33,8 @@ const EACH_UPDATED = '$EACH:ROOT$'
 export const createState = <TEntity extends SystemFields = SystemFields, TRootType extends LinkKey = LinkKey>(
   options?: CreateStateOptions<TEntity, TRootType>
 ): GraphState<TEntity, TRootType> => {
-  const id = options?.id ?? `${ID++}`
-  const type = options?.type ?? (STATE_TYPE as TRootType)
+  const id = options?._id ?? `${ID++}`
+  const type = options?._type ?? (STATE_TYPE as TRootType)
   const keys = options?.keys ?? {}
   const stateKey = `${type}:${id}` as const
   const skipPredictors = options?.skip ?? []

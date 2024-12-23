@@ -91,8 +91,8 @@ export type SkipGraphPredictor = (dataField: DataField) => boolean
 export type CacheListener = (link: LinkKey, prevValue?: Graph | null) => void
 
 export interface CreateStateOptions<TEntity extends SystemFields = SystemFields, TType extends LinkKey = LinkKey> {
-  type?: TType
-  id?: string
+  _type?: TType
+  _id?: string
   initialState?: Omit<ResolveEntityByType<TEntity, { _type: TType }>, keyof SystemFields>
   plugins?: Plugin[]
   keys?: KeyingConfig

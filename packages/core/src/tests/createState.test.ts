@@ -7,8 +7,8 @@ import { isHtmlContent, isHtmlNode } from '@graph-state/checkers'
 describe('createState', () => {
   it('should create state with initial state', () => {
     const graphState = createState({
-      type: 'Test',
-      id: 10,
+      _type: 'Test',
+      _id: 10,
       initialState: {
         ...rootLayer,
         field: {
@@ -1487,7 +1487,7 @@ describe('createState', () => {
         const spyOverride = vi.fn()
 
         const state = createState({
-          id: 10,
+          _id: 10,
           initialState: {
             value: 'hello world',
           },

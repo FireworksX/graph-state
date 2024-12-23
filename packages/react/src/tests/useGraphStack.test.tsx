@@ -68,7 +68,7 @@ describe('useGraphStack', () => {
 
   it('should return fields after invalidate by Garbage Collector', () => {
     const graphState = createState({
-      type: 'State',
+      _type: 'State',
       initialState: {
         authors: [
           {
