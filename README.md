@@ -209,7 +209,7 @@ console.log(user.birthDate instanceof Date); // true
 ```
 
 ### 📘 Retrieving the own state
-State stores the relationships between graphs, but since it is a kraf itself, it can also
+State stores the relationships between graphs, but since it is a graph itself, it can also
 can store a state.
 
 ```js
@@ -220,10 +220,10 @@ const graphState = createState({
   },
 );
 
-const state = graphState.resolve(graphState);
+const state = graphState.resolve(graphState.key);
 console.log(state);
 // {
-// version: '1.1.2'
+//  version: '1.1.2'
 // }
 ```
 
@@ -248,20 +248,20 @@ The **`mutate`** method supports the following signatures:
    Updates the passed object or data in the graph.
 ---
 2. **UpdateGraph by key**:
-   ````javascript
+   ```javascript
     mutate(graphKey, updatedGraph)
    ```
    Updates graph data using GraphKey.
 ---
 3. **Conditional update via function**
-    ````javascript
+    ```javascript
       mutate(graphKey, (prevGraph) => updatedGraph)
      ```
    Performs a graph update based on the previous state.
 ---
 ### 🔹 Usage examples
 
-**📘 Example 1: Simple graph update**
+#### 📘 Example 1: Simple graph update
 Updates an object in a graph using its data:
 
 ```js
@@ -498,10 +498,10 @@ console.log(result1);
 
 // Result:
 {
-_type: 'User',
-_id: 'user-123',
-name: 'John Doe',
-age: 30
+    _type: 'User',
+    _id: 'user-123',
+    name: 'John Doe',
+    age: 30
 }
 
 // Retrieve the graph by object:
@@ -543,7 +543,8 @@ graphState.mutate({
       _type: 'Post',
       _id: '2',
       title: 'Graph-based State Management'
-    }]
+    }
+  ]
 });
 
 // Extract the graph with a dissection of nested graphs:
@@ -557,7 +558,7 @@ console.log(result);
   name: 'John Doe',
   posts: [
     { _type: 'Post', _id: '1', title: 'My First Post' }
-    { _type: 'Post', _id: '2', title: 'Graph-based State Management' }, { _type: 'Post', _id: '2', title: 'Graph-based State Management' }
+    { _type: 'Post', _id: '2', title: 'Graph-based State Management' }, 
   ]
 }
 ```
