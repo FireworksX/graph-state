@@ -24,6 +24,7 @@ import { isDev } from './utils/isDev'
 import { isPrimitive, isValue } from '@graph-state/checkers'
 import { createPluginsStore } from './plugins'
 import { debug } from './helpers/help'
+import { isGraphState } from './utils/isGraphState'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -37,7 +38,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   const type = options?._type ?? (STATE_TYPE as TRootType)
   const keys = options?.keys ?? {}
   const stateKey = `${type}:${id}` as const
-  const skipPredictors = options?.skip ?? []
+  const skipPredictors = [isGraphState, ...(options?.skip ?? [])]
   const cache = createCache()
   const subscribers = new Map<string, SubscribeCallback[]>()
   let deepIndex = 0

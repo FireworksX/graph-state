@@ -11,9 +11,16 @@ import fragmentData from './fragment.json';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
+const subState = createState({
+  initialState: {
+    version: 10,
+  },
+});
+
 const graphState = createState({
   type: 'State',
   initialState: {
+    packageState: subState,
     authors: [
       {
         _type: 'User',

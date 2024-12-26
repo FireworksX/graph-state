@@ -429,6 +429,22 @@ describe('createState', () => {
 
       expect(subscribeSpy).toBeCalledTimes(0)
     })
+
+    it('should always skip GraphState', () => {
+      const subState = createState({
+        initialState: {
+          version: 1,
+        },
+      })
+
+      const state = createState({
+        initialState: {
+          subState,
+        },
+      })
+
+      expect(state.resolve(state.key).subState.resolve(subState.key).version).toBe(1)
+    })
   })
 
   describe('mutate', () => {
