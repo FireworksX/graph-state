@@ -65,6 +65,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
         if (!isSkipped(resultValue)) {
           if (Array.isArray(value)) {
             resultValue = value.map(v => {
+              if (isSkipped(v)) return v
               if (isLinkKey(v) && !isSafe && !cache.hasLink(v)) {
                 return null
               }

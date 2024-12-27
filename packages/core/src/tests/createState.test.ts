@@ -388,6 +388,25 @@ describe('createState', () => {
       expect(state.resolve(state)?.htmlContent).toBe(htmlContent)
     })
 
+    it('should keep value while skipping', () => {
+      const state = createState({
+        initialState: {
+          fileLink: '$$File:100',
+          assets: ['$$File:200', '$$File:300'],
+        },
+        skip: [graph => typeof graph === 'string' && graph.startsWith('$$')],
+      })
+
+      expect(state.resolve(state.key).fileLink).toBe('$$File:100')
+      expect(state.resolve(state.key).assets).toStrictEqual(['$$File:200', '$$File:300'])
+
+      state.mutate('User:123', {
+        avatar: '$$File:1',
+      })
+
+      expect(state.resolve('User:123').avatar).toBe('$$File:1')
+    })
+
     /**
      * Когда удаляется ребёнок, обновляется родитель,
      * важно чтобы при обновлении срабатывали skips.

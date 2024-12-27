@@ -11,28 +11,27 @@ import fragmentData from './fragment.json';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
-const subState = createState({
-  initialState: {
-    version: 10,
-  },
-});
-
 const graphState = createState({
   type: 'State',
   initialState: {
-    packageState: subState,
-    authors: [
-      {
-        _type: 'User',
-        _id: 0,
-        age: 27,
-        skills: [
-          { _type: 'Skill', _id: 'js', level: 70 },
-          { _type: 'Skill', _id: 'php', level: 30 },
-          { _type: 'Skill', _id: 'ts', level: 75 },
-        ],
-      },
-    ],
+    user: {
+      _type: 'User',
+      _id: 0,
+      // bio: 'dev',
+      // profile: {
+      //   _type: 'Profile',
+      //   _id: 100,
+      //   link: 'User:0',
+      // },
+      // skills: [
+      //   {
+      //     _type: 'Skill',
+      //     _id: 123,
+      //     name: 'Typescript',
+      //     author: 'User:0',
+      //   },
+      // ],
+    },
   },
   skip: [
     g => {
@@ -42,13 +41,9 @@ const graphState = createState({
   plugins: [loggerPlugin()],
 });
 
-graphState.subscribe('$$Frame:214dba74ab1c5', () => {
-  console.log('update');
-});
-
-Object.values(fragmentData).forEach(node => {
-  graphState.mutate(node);
-});
+// Object.values(fragmentData).forEach(node => {
+//   graphState.mutate(node);
+// });
 
 window.graphState = graphState;
 
@@ -101,28 +96,10 @@ function App() {
       </button>
       <button
         onClick={() => {
-          graphState.mutate(
-            'User:0',
-            prev => {
-              const skills = prev?.skills ?? [];
-              const index = skills.indexOf('Skill:php');
-
-              if (index !== -1) {
-                skills.splice(index, 1);
-                skills.splice(0, 0, 'Skill:php');
-              }
-
-              console.log(skills);
-
-              return {
-                ...prev,
-                skills,
-              };
-            },
-            {
-              replace: true,
-            }
-          );
+          graphState.mutate('User:0', {
+            test: ['$$File:100'],
+            field: '$$File:200',
+          });
         }}
       >
         Change order
