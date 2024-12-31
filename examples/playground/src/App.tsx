@@ -7,7 +7,6 @@ import {
 } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import { SpringValue, animated } from '@react-spring/web';
-import fragmentData from './fragment.json';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -16,29 +15,27 @@ const graphState = createState({
   initialState: {
     user: {
       _type: 'User',
-      _id: 0,
-      // bio: 'dev',
-      // profile: {
-      //   _type: 'Profile',
-      //   _id: 100,
-      //   link: 'User:0',
-      // },
-      // skills: [
-      //   {
-      //     _type: 'Skill',
-      //     _id: 123,
-      //     name: 'Typescript',
-      //     author: 'User:0',
-      //   },
-      // ],
+      _id: '1',
+      profile: {
+        _type: 'Profile',
+        _id: 10,
+        circular: 'User:1',
+      },
+      skills: [
+        {
+          _type: 'Skill',
+          _id: 'js',
+          user: 'User:1',
+        },
+        'User:1',
+      ],
+    },
+    head: {
+      _type: 'Layer',
+      _id: 'header',
+      user: 'Layer:header',
     },
   },
-  skip: [
-    g => {
-      return typeof g === 'string' && g.startsWith('$$');
-    },
-  ],
-  plugins: [loggerPlugin()],
 });
 
 // Object.values(fragmentData).forEach(node => {
@@ -51,7 +48,7 @@ window.graphState = graphState;
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [type] = useGraph(graphState, 'User:0', { deep: true });
+  const [type] = useGraph(graphState, 'User:adm', { deep: true });
   const allSkills = useGraphStack(graphState, ['Skill:js']);
 
   // console.log(rotate);

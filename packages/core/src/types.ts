@@ -59,16 +59,21 @@ export type MutateField = (
   options?: SetOptions
 ) => (LinkKey | LinkKey[] | null | null[])[] | LinkKey
 
+export interface MutateInternal {
+  hasChange?: boolean
+  path: string[]
+  unlinks?: Map<LinkKey, LinkKey[]>
+  visitors: Map<LinkKey, LinkKey[]>
+  isPartialGraph?: boolean
+}
+
 export interface SetOptions {
   replace?: true | 'deep' | ((graph: Graph) => boolean)
   overrideMutateMethod?: GraphState['mutate']
   parent?: Entity
   prevValue?: unknown
   dedup?: boolean
-  internal?: {
-    hasChange?: boolean
-    unlinks?: Map<LinkKey, LinkKey[]>
-  }
+  internal?: MutateInternal
 }
 
 export interface SubscribeOptions {

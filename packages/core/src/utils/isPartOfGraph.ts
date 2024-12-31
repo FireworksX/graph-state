@@ -1,4 +1,5 @@
 import type { LinkKey } from 'src'
+import { isLinkKey } from 'src'
 
 export const isPartialKey = (key?: LinkKey | null) => key && key.split('.').length > 1
 
@@ -10,4 +11,14 @@ export const isPartOfGraph = (entityKey?: LinkKey | null, graphKey?: LinkKey | n
   if (entityType !== graphType) return false
 
   return entityId.startsWith(graphId)
+}
+
+export const getGraphLink = (input?: LinkKey) => {
+  if (isLinkKey(input)) {
+    if (isPartialKey(input)) {
+      return input.split('.')[0]
+    }
+  }
+
+  return input
 }
