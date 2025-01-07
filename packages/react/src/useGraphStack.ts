@@ -27,13 +27,16 @@ export const useGraphStack = <TState extends unknown[]>(
           onChange()
         }
 
-        const unSubscribers = fields.filter(Boolean).map(field => graphState.subscribe(field!, notifyAll))
+        const unsubscribeController = new AbortController()
+        fields.forEach(field => {
+          if (field) {
+            graphState.subscribe(field!, notifyAll, { signal: unsubscribeController.signal })
+          }
+        })
 
-        if (unSubscribers.length > 0) {
-          notifyAll()
-        }
+        notifyAll()
 
-        return () => unSubscribers.forEach(cb => cb())
+        return () => unsubscribeController.abort('unsubscribe')
       }
 
       return () => undefined

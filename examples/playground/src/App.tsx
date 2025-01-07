@@ -14,31 +14,40 @@ export const generateId = () => Math.random().toString(16).slice(2);
 const graphState = createState({
   type: 'State',
   initialState: {
-    user: {
-      _type: 'User',
-      _id: 0,
-      // bio: 'dev',
-      // profile: {
-      //   _type: 'Profile',
-      //   _id: 100,
-      //   link: 'User:0',
-      // },
-      // skills: [
-      //   {
-      //     _type: 'Skill',
-      //     _id: 123,
-      //     name: 'Typescript',
-      //     author: 'User:0',
-      //   },
-      // ],
-    },
+    skills: [
+      {
+        _type: 'Skill',
+        _id: 123,
+        name: 'Typescript',
+      },
+      {
+        _type: 'Skill',
+        _id: 3432,
+        name: 'JS',
+      },
+      {
+        _type: 'Skill',
+        _id: 432423,
+        name: 'PHP',
+      },
+    ],
   },
-  skip: [
-    g => {
-      return typeof g === 'string' && g.startsWith('$$');
+  plugins: [
+    loggerPlugin(),
+    state => {
+      state.remove = index => {
+        state.mutate(
+          state.key,
+          p => {
+            return {
+              skills: p.skills.toSpliced(index, 1),
+            };
+          },
+          { replace: true }
+        );
+      };
     },
   ],
-  plugins: [loggerPlugin()],
 });
 
 // Object.values(fragmentData).forEach(node => {
@@ -52,7 +61,8 @@ window.graphState = graphState;
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [type] = useGraph(graphState, 'User:0', { deep: true });
-  const allSkills = useGraphStack(graphState, ['Skill:js']);
+  const [state] = useGraph(graphState, graphState.key);
+  const allSkills = useGraphStack(graphState, state.skills);
 
   // console.log(rotate);
   // console.log(value);
@@ -106,8 +116,11 @@ function App() {
       </button>
 
       <ul>
-        {allSkills?.map(skill => (
-          <li key={skill?._id}>{skill?._id ?? 'null'}</li>
+        {allSkills?.map((skill, i) => (
+          <li key={skill?._id}>
+            {skill?.name ?? 'null'}{' '}
+            <button onClick={() => graphState.remove(i)}>remove</button>
+          </li>
         ))}
       </ul>
 
