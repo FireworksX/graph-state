@@ -1886,4 +1886,107 @@ describe('createState', () => {
       expect(callbackSpy).toHaveBeenCalledWith({ _type: 'Layer', _id: 'root', value: 20 })
     })
   })
+
+  describe('circular', () => {
+    it('should create state with circular deps', () => {
+      const state = createState({
+        _id: '100',
+        initialState: {
+          user: {
+            _type: 'User',
+            _id: '1',
+            profile: {
+              _type: 'Profile',
+              _id: 10,
+              circular: 'User:1',
+            },
+            skills: [
+              {
+                _type: 'Skill',
+                _id: 'js',
+                user: 'User:1',
+              },
+              'User:1',
+            ],
+            value: 'User:1',
+          },
+        },
+      })
+
+      expect(state.key).toBe('State:100')
+      expect(() => state.resolve(state.key, { deep: true })).not.toThrow()
+      expect(state.resolve('Profile:10')).toStrictEqual({
+        _type: 'Profile',
+        _id: '10',
+        circular: null,
+      })
+      expect(state.resolve('User:1').skills.length).toBe(1)
+    })
+
+    it('should resolve deep value with keep links', () => {
+      const state = createState({
+        _id: '100',
+        initialState: {
+          user: {
+            _type: 'User',
+            _id: '1',
+            profile: {
+              _type: 'Profile',
+              _id: 10,
+              circular: 'User:1',
+            },
+          },
+        },
+      })
+
+      expect(() => state.resolve('User:1', { deep: true })).not.toThrow()
+      expect(state.resolve('User:1', { deep: true })).toMatchObject({
+        _type: 'User',
+        _id: '1',
+        profile: {
+          _type: 'Profile',
+          _id: '10',
+          circular: null,
+        },
+      })
+
+      expect(state.resolve('Profile:10', { deep: true })).toStrictEqual({
+        _type: 'Profile',
+        _id: '10',
+        circular: null,
+      })
+    })
+
+    it('should skip circular notify', () => {
+      const state = createState({
+        _id: '100',
+        initialState: {
+          user: {
+            _type: 'User',
+            _id: '1',
+            profile: {
+              _type: 'Profile',
+              _id: 10,
+              circular: null,
+            },
+          },
+        },
+      })
+
+      const userSubscribe = vi.fn()
+      const profileSubscribe = vi.fn()
+      state.subscribe('User:1', userSubscribe)
+      state.subscribe('Profile:10', profileSubscribe)
+
+      state.mutate('User:1', { v: 1 })
+
+      expect(userSubscribe).toBeCalledTimes(1)
+      expect(profileSubscribe).toBeCalledTimes(1)
+
+      state.mutate('Profile:10', { v: 2 })
+
+      expect(userSubscribe).toBeCalledTimes(1)
+      expect(profileSubscribe).toBeCalledTimes(2)
+    })
+  })
 })

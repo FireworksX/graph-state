@@ -12,6 +12,8 @@ import type {
   SubscribeCallback,
   SubscribeOptions,
 } from 'src'
+import { isGraphOrKey } from 'src'
+import { getGraphLink } from 'src'
 import { isPartialKey } from 'src'
 import { isObject } from 'src'
 import { isLinkKey, isGraph } from 'src'
@@ -113,6 +115,21 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       return input
     }
 
+    const inputLinkKey = isGraphOrKey(input) ? keyOfEntity(input) : input
+
+    if (isLinkKey(inputLinkKey)) {
+      const parentGraph = getGraphLink(parentFieldKey) ?? ''
+      const parentPaths = options?.internal?.visitors.get(parentGraph) ?? []
+      const visitorsPaths = options?.internal?.visitors.get(inputLinkKey) ?? []
+
+      if (parentPaths.includes(inputLinkKey) || inputLinkKey === parentGraph) {
+        debug(`Catch circular depend ${parentFieldKey} while set ${inputLinkKey}`)
+        return null
+      }
+
+      options?.internal?.visitors?.set(inputLinkKey, [...visitorsPaths, parentGraph])
+    }
+
     if (Array.isArray(input)) {
       return input.map((item, index) => {
         const indexKey = parentFieldKey ? joinKeys(parentFieldKey, `${index}`) : undefined
@@ -132,7 +149,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const graphKey = entityGraphKey ?? stateKey
     const parentKey = options?.parent
     const prevGraph: any = resolve(graphKey ?? '')
-    const internal = options?.internal || { hasChange: false }
+    const internal = options?.internal || { hasChange: false, visitors: new Map([]) }
     let graphData: Graph = {
       ...data,
       ...entityOfKey(graphKey),
@@ -317,13 +334,13 @@ FieldKey: ${fieldKey}.
 
   const keyOfEntity = (entity: Entity) => {
     if (typeof entity === 'string') {
-      return entityOfKey(entity) ? entity : null
+      return entityOfKey(entity) ? (entity as LinkKey) : null
     }
     if (!entity?._type) {
       return null
     }
 
-    let entityId: string | null = null
+    let entityId: LinkKey | null = null
 
     if (entity._type in keys) {
       entityId = keys[entity._type]?.(entity) ?? null
@@ -331,7 +348,7 @@ FieldKey: ${fieldKey}.
       entityId = `${entity.id ?? entity._id}`
     }
 
-    return !entityId ? entityId : `${entity._type}:${entityId}`
+    return !entityId ? entityId : (`${entity._type}:${entityId}` as LinkKey)
   }
 
   const entityOfKey = (entity?: Entity) => {
@@ -365,7 +382,7 @@ FieldKey: ${fieldKey}.
   }
 
   if (options?.initialState) {
-    mutate(options.initialState as any, { replace: 'deep' })
+    mutate(options.initialState as any, { replace: true })
   }
 
   const graphState: GraphState<TEntity, TRootType> = {

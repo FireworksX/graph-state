@@ -7,47 +7,35 @@ import {
 } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import { SpringValue, animated } from '@react-spring/web';
-import fragmentData from './fragment.json';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
 const graphState = createState({
   type: 'State',
   initialState: {
-    skills: [
-      {
-        _type: 'Skill',
-        _id: 123,
-        name: 'Typescript',
+    user: {
+      _type: 'User',
+      _id: '1',
+      profile: {
+        _type: 'Profile',
+        _id: 10,
+        circular: 'User:1',
       },
-      {
-        _type: 'Skill',
-        _id: 3432,
-        name: 'JS',
-      },
-      {
-        _type: 'Skill',
-        _id: 432423,
-        name: 'PHP',
-      },
-    ],
-  },
-  plugins: [
-    loggerPlugin(),
-    state => {
-      state.remove = index => {
-        state.mutate(
-          state.key,
-          p => {
-            return {
-              skills: p.skills.toSpliced(index, 1),
-            };
-          },
-          { replace: true }
-        );
-      };
+      skills: [
+        {
+          _type: 'Skill',
+          _id: 'js',
+          user: 'User:1',
+        },
+        'User:1',
+      ],
     },
-  ],
+    head: {
+      _type: 'Layer',
+      _id: 'header',
+      user: 'Layer:header',
+    },
+  },
 });
 
 // Object.values(fragmentData).forEach(node => {
@@ -60,9 +48,8 @@ window.graphState = graphState;
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [type] = useGraph(graphState, 'User:0', { deep: true });
-  const [state] = useGraph(graphState, graphState.key);
-  const allSkills = useGraphStack(graphState, state.skills);
+  const [type] = useGraph(graphState, 'User:adm', { deep: true });
+  const allSkills = useGraphStack(graphState, ['Skill:js']);
 
   // console.log(rotate);
   // console.log(value);
@@ -116,11 +103,8 @@ function App() {
       </button>
 
       <ul>
-        {allSkills?.map((skill, i) => (
-          <li key={skill?._id}>
-            {skill?.name ?? 'null'}{' '}
-            <button onClick={() => graphState.remove(i)}>remove</button>
-          </li>
+        {allSkills?.map(skill => (
+          <li key={skill?._id}>{skill?._id ?? 'null'}</li>
         ))}
       </ul>
 
