@@ -1,5 +1,18 @@
 # @graph-state/core
 
+## 0.10.0
+
+### Minor Changes
+
+- 54446c3: Make state as Graph with \_type & \_id insted type & id
+- cb71a1e: Add allow circular depends
+- eea756e: Change signature for replace method.
+
+### Patch Changes
+
+- 05957f6: Add AbortSignal for unsubscribe
+- 782659b: Fix skipping for arrays
+
 ## 0.9.3
 
 ### Patch Changes
