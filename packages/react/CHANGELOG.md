@@ -1,5 +1,17 @@
 # @graph-state/react
 
+## 0.5.2
+
+### Patch Changes
+
+- 7e49acf: Fix useGraphState when got empty list
+- Updated dependencies [54446c3]
+- Updated dependencies [cb71a1e]
+- Updated dependencies [eea756e]
+- Updated dependencies [05957f6]
+- Updated dependencies [782659b]
+  - @graph-state/core@0.10.0
+
 ## 0.5.1
 
 ### Patch Changes
