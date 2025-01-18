@@ -150,9 +150,9 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
   ): string | null
   invalidate(field: Entity): void
   subscribe<TData = unknown>(callback: (data: TData) => void, options?: SubscribeOptions): () => void
-  subscribe<TInput extends Graph | string>(
+  subscribe<TInput extends Graph | string, TResult extends ResolveEntityByType<TEntity, TInput>>(
     input: TInput,
-    callback: (data: ResolveEntityByType<TEntity, TInput>) => void,
+    callback: (next: TResult, prev: TResult) => void,
     options?: SubscribeOptions
   ): () => void
   inspectFields(type: string): string[]

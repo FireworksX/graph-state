@@ -4,9 +4,11 @@ import {
   useGraph,
   useGraphFields,
   useGraphStack,
+  useGraphEffect,
 } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import { SpringValue, animated } from '@react-spring/web';
+import { useState } from 'react';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -48,31 +50,38 @@ window.graphState = graphState;
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [type] = useGraph(graphState, 'User:adm', { deep: true });
+  const [type] = useGraph(graphState, 'User:1', { deep: true });
+  const [key, setKey] = useState('User:1');
   const allSkills = useGraphStack(graphState, ['Skill:js']);
+  useGraphEffect(graphState, key, (prevValue, nextValue) => {
+    console.log(prevValue, nextValue);
+    // if (nextValue) {
+    //   graphState.mutate({
+    //     _type: 'Layer',
+    //     _id: 'header',
+    //     user: 'Layer:header',
+    //     field: '123',
+    //   });
+    // }
+  });
 
-  // console.log(rotate);
-  // console.log(value);
   return (
     <>
       <h1>Hello world</h1>
-      <GraphValue
-        graphState={graphState}
-        field={undefined}
-        options={{ safe: false }}
-      >
-        {value => {
-          return <>{console.log(value)}</>;
-        }}
-      </GraphValue>
+      {/*<GraphValue*/}
+      {/*  graphState={graphState}*/}
+      {/*  field={undefined}*/}
+      {/*  options={{ safe: false }}*/}
+      {/*>*/}
+      {/*  {value => {*/}
+      {/*    return <>{console.log(value)}</>;*/}
+      {/*  }}*/}
+      {/*</GraphValue>*/}
       <pre>{JSON.stringify(type)}</pre>
+      <button onClick={() => setKey('User:2')}>Change key</button>
       <button
         onClick={() => {
-          graphState.mutate({
-            _type: 'User',
-            _id: '0',
-            age: { _type: 'Age', _id: 10, value: 22 },
-          });
+          graphState.mutate(key, { age: Math.random() * 100 });
         }}
       >
         Set age
