@@ -39,8 +39,6 @@ yarn add @graph-state/core @graph-state/react
 ```
 
 ## 🚀 Quick Start.
-Вот простой пример, который показывает, как использовать **@graph-state**.
-
 
 **App.tsx**
 ```jsx
