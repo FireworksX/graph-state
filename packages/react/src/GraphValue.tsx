@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import type { Dispatch, Entity, GraphState, ResolveOptions, StateDataSetter } from '@graph-state/core'
-import type { StateResolve } from './useGraph'
 import { useGraph } from './useGraph'
+import type { StateResolve } from './types'
 
 interface GraphValueProps<TState extends GraphState, TInput extends Entity> {
   children?: (
