@@ -1,5 +1,22 @@
 # @graph-state/react
 
+## 0.6.0
+
+### Minor Changes
+
+- 78824a5: Added new hook useGraphEffect
+
+### Patch Changes
+
+- 7e49acf: Fix useGraphState when got empty list
+- Updated dependencies [54446c3]
+- Updated dependencies [cb71a1e]
+- Updated dependencies [eea756e]
+- Updated dependencies [78824a5]
+- Updated dependencies [05957f6]
+- Updated dependencies [782659b]
+  - @graph-state/core@0.10.0
+
 ## 0.5.1
 
 ### Patch Changes
