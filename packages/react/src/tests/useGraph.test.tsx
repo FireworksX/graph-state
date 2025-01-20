@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react-hooks/dom'
 import { mockAuthor, mockGraphState } from './mock'
@@ -6,6 +7,17 @@ import { useGraph } from '../useGraph'
 import { createState } from '@graph-state/core'
 
 describe('useGraph', () => {
+  it('should render with invalid args', () => {
+    const fullEmpty = renderHook(() => useGraph())
+    const numberArgs = renderHook(() => useGraph(10, 2))
+    const boolArgs = renderHook(() => useGraph(true, 2))
+    const objArgs = renderHook(() => useGraph({ test: 10 }, { value: 1 }))
+
+    ;[fullEmpty, numberArgs, boolArgs, objArgs].forEach(render => {
+      expect(render.result.error).toBeUndefined()
+    })
+  })
+
   it('should initialize state and update on change', () => {
     const initial = {
       version: '1.0',

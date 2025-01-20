@@ -1,10 +1,23 @@
+// @ts-nocheck
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react-hooks/dom'
 import { createState } from '@graph-state/core'
 import { useGraphEffect } from '../useGraphEffect'
 import { act } from '@testing-library/react-hooks'
+import { useGraph } from '../useGraph'
 
 describe('useGraphEffect', () => {
+  it('should render with invalid args', () => {
+    const fullEmpty = renderHook(() => useGraphEffect())
+    const numberArgs = renderHook(() => useGraph(10, 2))
+    const boolArgs = renderHook(() => useGraph(true, 2))
+    const objArgs = renderHook(() => useGraph({ test: 10 }, { value: 1 }))
+
+    ;[fullEmpty, numberArgs, boolArgs, objArgs].forEach(render => {
+      expect(render.result.error).toBeUndefined()
+    })
+  })
+
   it('should call callback with correct values and unmount correctly', () => {
     const initial = {
       _type: 'User',

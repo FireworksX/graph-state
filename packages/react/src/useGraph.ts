@@ -11,18 +11,18 @@ export const useGraph = <TState extends GraphState, const TEntity extends Entity
   options?: GraphOptions
 ): [StateResolve<TState, TEntity>, Dispatch<StateDataSetter<GetStateEntity<TState>, TEntity>>] => {
   const nextValue = useRef<StateResolve<TState, TEntity>>(
-    graphState.resolve(field, options) as any as StateResolve<TState, TEntity>
+    graphState?.resolve?.(field, options) as any as StateResolve<TState, TEntity>
   )
-  const fieldKey = graphState.keyOfEntity(field) ?? field
+  const fieldKey = graphState?.keyOfEntity?.(field) ?? field
 
   const subscribe = useCallback(
     (onChange: any) => {
       if (fieldKey) {
-        nextValue.current = graphState.resolve(fieldKey, options) as any as StateResolve<TState, TEntity>
+        nextValue.current = graphState?.resolve?.(fieldKey, options) as any as StateResolve<TState, TEntity>
         onChange()
 
-        return graphState.subscribe(fieldKey, () => {
-          nextValue.current = graphState.resolve(fieldKey, options) as any as StateResolve<TState, TEntity>
+        return graphState?.subscribe?.(fieldKey, () => {
+          nextValue.current = graphState?.resolve?.(fieldKey, options) as any as StateResolve<TState, TEntity>
           return onChange()
         })
       }
