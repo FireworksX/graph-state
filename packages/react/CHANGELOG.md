@@ -1,5 +1,11 @@
 # @graph-state/react
 
+## 0.6.1
+
+### Patch Changes
+
+- c05795f: Add catch invalid args
+
 ## 0.6.0
 
 ### Minor Changes
