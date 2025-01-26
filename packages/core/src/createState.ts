@@ -3,7 +3,7 @@ import type {
   Graph,
   CreateStateOptions,
   GraphState,
-  SetOptions,
+  MutateOptions,
   Entity,
   ResolveOptions,
   ResolveEntityByType,
@@ -24,9 +24,10 @@ import { isPartOfGraph } from './utils/isPartOfGraph'
 import { uniqueLinks } from './utils/unique'
 import { isDev } from './utils/isDev'
 import { isPrimitive, isValue } from '@graph-state/checkers'
-import { createPluginsStore } from './plugins'
-import { debug } from './helpers/help'
+import { createPluginsState } from './plugins'
+// import { debug as debugMessage } from './helpers/help'
 import { isGraphState } from './utils/isGraphState'
+import { createDebugState } from './debug'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -42,6 +43,8 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   const stateKey = `${type}:${id}` as const
   const skipPredictors = [isGraphState, ...(options?.skip ?? [])]
   const cache = createCache()
+  const debugState = createDebugState()
+  const pluginsStore = createPluginsState<GraphState<TEntity, TRootType>>(options?.plugins)
   const subscribers = new Map<string, SubscribeCallback[]>()
   let deepIndex = 0
 
@@ -56,6 +59,8 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const isDeep = options?.deep ?? false
     const isSafe = options?.safe ?? false
     const inputKey = isValue(input) ? keyOfEntity(input) : null
+    debugState.debug({ type: 'resolve', entity: input, options })
+
     let value = inputKey ? (cache.readLink(inputKey) as any) : null
 
     if (isSkipped(value)) return value
@@ -110,7 +115,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     }
   }
 
-  const mutateField = (input: DataField, parentFieldKey?: string, options?: SetOptions): DataField => {
+  const mutateField = (input: DataField, parentFieldKey?: string, options?: MutateOptions): DataField => {
     if (((!input || isPrimitive(input)) && !isLinkKey(input)) || isSkipped(input)) {
       return input
     }
@@ -123,7 +128,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       const visitorsPaths = options?.internal?.visitors.get(inputLinkKey) ?? []
 
       if (parentPaths.includes(inputLinkKey) || inputLinkKey === parentGraph) {
-        debug(`Catch circular depend ${parentFieldKey} while set ${inputLinkKey}`)
+        // debug(`Catch circular depend ${parentFieldKey} while set ${inputLinkKey}`)
         return null
       }
 
@@ -139,12 +144,15 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
     const entityKey = isLinkKey(input) ? input : isGraph(input) ? keyOfEntity(input) : null
     const childKey = entityKey ?? parentFieldKey
+
     const mutateMethod = options?.overrideMutateMethod || mutate
     return mutateMethod(childKey as any, input, options)
   }
 
   const mutate = (entity: Entity, ...args: any[]) => {
     const { graphKey: entityGraphKey, options, data: rawData } = getArgumentsForMutate(entity, ...args)
+    debugState.debug({ type: 'beforeMutate', entity: entityGraphKey, data: rawData, options })
+
     const data = isLinkKey(rawData) ? entityOfKey(rawData) : rawData
     const graphKey = entityGraphKey ?? stateKey
     const parentKey = options?.parent
@@ -207,14 +215,14 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
       if (!isReplace && isLinkKey(prevValue) && prevValue !== fieldValue) {
         cache.removeRefs(graphKey, prevValue)
-        debug(
-          `Garbage Collector remove link ${prevValue} from ${graphKey}.
-Prev value: ${prevValue} (${typeof prevValue}).
-Next value: ${fieldValue} (${typeof fieldValue}).
-GraphKey: ${graphKey}.
-FieldKey: ${fieldKey}.
-`
-        )
+        //         debug(
+        //           `Garbage Collector remove link ${prevValue} from ${graphKey}.
+        // Prev value: ${prevValue} (${typeof prevValue}).
+        // Next value: ${fieldValue} (${typeof fieldValue}).
+        // GraphKey: ${graphKey}.
+        // FieldKey: ${fieldKey}.
+        // `
+        //         )
       }
 
       acc[key] = fieldValue
@@ -238,11 +246,21 @@ FieldKey: ${fieldKey}.
       notify(graphKey, prevGraph)
     }
 
+    debugState.debug({
+      type: 'afterMutate',
+      entity: entityGraphKey,
+      data: rawData,
+      nextData: nextGraph,
+      options,
+      hasChange: internal.hasChange,
+    })
+
     return graphKey
   }
 
   const invalidate = (entity: Entity) => {
     const key = keyOfEntity(entity)
+    debugState.debug({ type: 'invalidate', entity: key })
 
     if (key) {
       const parents = cache.getParents(key) || []
@@ -264,6 +282,7 @@ FieldKey: ${fieldKey}.
     }
 
     const key = keyOfEntity(entity)
+    debugState.debug({ type: 'notify', entity: key })
 
     if (key) {
       deepIndex++
@@ -376,7 +395,7 @@ FieldKey: ${fieldKey}.
 
     return {
       graphKey: typeof entity === 'string' ? entity : keyOfEntity(entity),
-      options: typeof entity === 'string' ? args[1] : (args[0] as SetOptions | undefined),
+      options: typeof entity === 'string' ? args[1] : (args[0] as MutateOptions | undefined),
       data,
     }
   }
@@ -402,10 +421,10 @@ FieldKey: ${fieldKey}.
     types: cache.types,
     cache,
     subscribers: isDev ? subscribers : undefined,
-    onRemoveLink: cache.onRemoveLink,
+    onDebugEvent: debugState.onDebugEvent,
   }
 
-  const pluginsStore = createPluginsStore(graphState, options?.plugins)
+  cache.onRemoveLink((link, prevValue) => debugState.debug({ type: 'garbageRemove', entity: link, prevValue }))
 
-  return pluginsStore.runPlugins()
+  return pluginsStore.runPlugins(graphState)
 }
