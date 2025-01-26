@@ -4,14 +4,13 @@ import { renderHook } from '@testing-library/react-hooks/dom'
 import { createState } from '@graph-state/core'
 import { useGraphEffect } from '../useGraphEffect'
 import { act } from '@testing-library/react-hooks'
-import { useGraph } from '../useGraph'
 
 describe('useGraphEffect', () => {
   it('should render with invalid args', () => {
     const fullEmpty = renderHook(() => useGraphEffect())
-    const numberArgs = renderHook(() => useGraph(10, 2))
-    const boolArgs = renderHook(() => useGraph(true, 2))
-    const objArgs = renderHook(() => useGraph({ test: 10 }, { value: 1 }))
+    const numberArgs = renderHook(() => useGraphEffect(10, 2))
+    const boolArgs = renderHook(() => useGraphEffect(true, 2))
+    const objArgs = renderHook(() => useGraphEffect({ test: 10 }, { value: 1 }))
 
     ;[fullEmpty, numberArgs, boolArgs, objArgs].forEach(render => {
       expect(render.result.error).toBeUndefined()

@@ -1,3 +1,5 @@
+import type { DebugCallback } from './debug'
+
 export type Type = string
 
 export interface SystemFields {
@@ -56,7 +58,7 @@ export type Dispatch<T> = (value: T) => void
 export type MutateField = (
   graph: Graph | Graph[] | null,
   parentFieldKey?: LinkKey,
-  options?: SetOptions
+  options?: MutateOptions
 ) => (LinkKey | LinkKey[] | null | null[])[] | LinkKey
 
 export interface MutateInternal {
@@ -67,7 +69,7 @@ export interface MutateInternal {
   isPartialGraph?: boolean
 }
 
-export interface SetOptions {
+export interface MutateOptions {
   replace?: true | 'deep' | ((graph: Graph) => boolean)
   overrideMutateMethod?: GraphState['mutate']
   parent?: Entity
@@ -80,17 +82,8 @@ export interface SubscribeOptions {
   signal?: AbortSignal
 }
 
-export type PluginDeclareOverride = (overrider: PluginOverrider) => void
+export type Plugin = <TState extends GraphState>(state: TState) => TState | void
 
-export interface PluginOverrides {
-  overrideMutate: PluginDeclareOverride
-}
-
-export type Plugin = <TState extends GraphState>(state: TState, overrides: PluginOverrides) => TState | void
-export type PluginOverrider = <TState extends GraphState>(
-  next: TState['mutate'],
-  ...args: Parameters<TState['mutate']>
-) => TState | void
 export type SkipGraphPredictor = (dataField: DataField) => boolean
 
 export type CacheListener = (link: LinkKey, prevValue?: Graph | null) => void
@@ -141,12 +134,12 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
   ): ResolveEntityByType<TEntity, TInput> | null
   mutate<const TInput extends Graph | null>(
     graph: TInput & Partial<ResolveEntityByType<TEntity, TInput>>,
-    options?: SetOptions
+    options?: MutateOptions
   ): string | null
   mutate<TInput extends string>(
     key: TInput,
     data: StateDataSetter<TEntity, TInput>,
-    options?: SetOptions
+    options?: MutateOptions
   ): string | null
   invalidate(field: Entity): void
   subscribe<TData = unknown>(callback: (data: TData) => void, options?: SubscribeOptions): () => void
@@ -159,14 +152,14 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
   resolveParents(field: Entity): unknown[]
   keyOfEntity(entity: Entity): LinkKey | null
   entityOfKey(key: LinkKey): Graph | null
-  onRemoveLink(listener: CacheListener): void
   getArgumentsForMutate(
     field: string | Graph,
     args: Parameters<GraphState<TEntity>['mutate']>
   ): {
     graphKey: string | null
-    options?: SetOptions
+    options?: MutateOptions
     data: DataSetter
   }
+  onDebugEvent(callback: DebugCallback): void
   types: Map<Type, Set<LinkKey>>
 }

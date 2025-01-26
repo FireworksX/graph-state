@@ -26,6 +26,10 @@ export default defineConfig({
         __dirname,
         '../../plugins/extend/dist/index.js'
       ),
+      '@graph-state/plugin-profiler': path.resolve(
+        __dirname,
+        '../../plugins/profiler/dist/index.js'
+      ),
     },
   },
 });
