@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { renderHook } from '@testing-library/react-hooks/dom'
-import { mockGraphState } from './mock'
+import { mockAuthor, mockGraphState } from './mock'
 import { useGraphFields } from '../useGraphFields'
 
-describe('useInspectFields', () => {
+describe('useGraphFields', () => {
   it('should return fields', () => {
     const graphState = mockGraphState()
     const { result: authorFields } = renderHook(() => useGraphFields(graphState, 'Author'))
@@ -26,5 +26,23 @@ describe('useInspectFields', () => {
 
     graphState.mutate('Post:0', { author: 'OtherAuthor' })
     expect(fields.current).toHaveLength(0)
+  })
+
+  it('should not notify', () => {
+    const graphState = mockGraphState()
+
+    const { result: authorFields } = renderHook(() =>
+      useGraphFields(graphState, 'Author', {
+        updateSelector: (nextValue, prevValue, updatedFields) => {
+          expect(prevValue).toEqual(mockAuthor)
+          expect(nextValue).toEqual({ ...mockAuthor, age: 20 })
+          expect(updatedFields).toEqual(['age'])
+          return false
+        },
+      })
+    )
+
+    graphState.mutate('Author:20', { age: 20 })
+    expect(authorFields.all).toHaveLength(2)
   })
 })

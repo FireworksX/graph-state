@@ -46,24 +46,19 @@ const graphState = createState({
 
 window.graphState = graphState;
 
-// console.log(graphState.resolve(graphState));
+graphState.subscribe('Skill:1', () => {}, {
+  updateSelector: (nextValue, prevValue, updatedFields) => {
+    return 'age' in nextValue;
+  },
+});
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [type] = useGraph(graphState, 'User:1', { deep: true });
+  const [type] = useGraph(graphState, 'User:1', {
+    deep: true,
+  });
   const [key, setKey] = useState('User:1');
   const allSkills = useGraphStack(graphState, ['Skill:js']);
-  useGraphEffect(graphState, key, (prevValue, nextValue) => {
-    console.log(prevValue, nextValue);
-    // if (nextValue) {
-    //   graphState.mutate({
-    //     _type: 'Layer',
-    //     _id: 'header',
-    //     user: 'Layer:header',
-    //     field: '123',
-    //   });
-    // }
-  });
 
   return (
     <>
@@ -77,7 +72,7 @@ function App() {
       {/*    return <>{console.log(value)}</>;*/}
       {/*  }}*/}
       {/*</GraphValue>*/}
-      <pre>{JSON.stringify(type)}</pre>
+      <pre>{JSON.stringify(type, null, 2)}</pre>
       <button onClick={() => setKey('User:2')}>Change key</button>
       <button
         onClick={() => {
@@ -89,10 +84,22 @@ function App() {
       <button
         onClick={() => {
           graphState.mutate(
-            'User:0',
+            'User:1',
             prev => ({
               ...prev,
-              skills: ['Skill:js', 'Skill:ts'],
+              skills: [
+                'Skill:js',
+                'Skill:ts',
+                {
+                  _type: 'Skill',
+                  id: 1,
+                  name: {
+                    _type: 'Name',
+                    id: 12,
+                    label: Math.random(),
+                  },
+                },
+              ],
             }),
             { replace: true }
           );
@@ -111,11 +118,11 @@ function App() {
         Change order
       </button>
 
-      <ul>
-        {allSkills?.map(skill => (
-          <li key={skill?._id}>{skill?._id ?? 'null'}</li>
-        ))}
-      </ul>
+      {/*<ul>*/}
+      {/*  {allSkills?.map(skill => (*/}
+      {/*    <li key={skill?._id}>{skill?._id ?? 'null'}</li>*/}
+      {/*  ))}*/}
+      {/*</ul>*/}
 
       <animated.div
         style={{

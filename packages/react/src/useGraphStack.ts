@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useRef } from 'react'
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector'
-import type { Entity, GraphState, ResolveOptions } from '@graph-state/core'
+import type { Entity, GraphState, ResolveOptions, SubscribeOptions } from '@graph-state/core'
 
 const defaultSelector = (data: any) => data
 
-interface GraphStackOptions extends ResolveOptions {}
+interface GraphStackOptions extends ResolveOptions, SubscribeOptions {}
 
 export const useGraphStack = <TState extends unknown[]>(
   graphState: GraphState,
@@ -30,7 +30,7 @@ export const useGraphStack = <TState extends unknown[]>(
         const unsubscribeController = new AbortController()
         fields.forEach(field => {
           if (field) {
-            graphState.subscribe(field!, notifyAll, { signal: unsubscribeController.signal })
+            graphState.subscribe(field!, notifyAll, { signal: unsubscribeController.signal, ...options })
           }
         })
 
