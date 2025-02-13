@@ -125,12 +125,14 @@ describe('useGraphEffect', () => {
   })
 
   it('should not execute callback', () => {
+    let renderCount = 0
     const authorKey = 'Author:20'
     const graphState = createState()
     graphState.mutate(mockAuthor)
     const cb = vi.fn()
 
-    renderHook(() =>
+    renderHook(() => {
+      renderCount++
       useGraphEffect(graphState, authorKey, cb, {
         updateSelector: (nextValue, prevValue, updatedFields) => {
           expect(prevValue).toEqual(mockAuthor)
@@ -139,9 +141,10 @@ describe('useGraphEffect', () => {
           return false
         },
       })
-    )
+    })
 
     graphState.mutate(authorKey, { age: 20 })
     expect(cb).toBeCalledTimes(0)
+    expect(renderCount).toEqual(1)
   })
 })

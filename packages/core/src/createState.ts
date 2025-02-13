@@ -207,7 +207,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       internal.hasChange = internal.hasChange || !isEqual
 
       if (!parentKey && !isEqual) {
-        internal.updatedFields = [...internal.updatedFields, key]
+        internal.updatedFields.push(key)
       }
 
       if (!isReplace && isLinkKey(prevValue) && prevValue !== fieldValue) {
