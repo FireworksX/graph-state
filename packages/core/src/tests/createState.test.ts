@@ -1381,6 +1381,42 @@ describe('createState', () => {
 
       expect(spy).toBeCalledTimes(9)
     })
+
+    it('should execute callback by condition', () => {
+      const initialState = { _type: 'Root', _id: '10', header: 'Header:20' }
+
+      const graphState = createState({
+        initialState,
+      })
+
+      const truthySpy = vi.fn()
+      const falsySpy = vi.fn()
+
+      graphState.subscribe('Root:10', truthySpy, {
+        updateSelector: (nextValue, prevValue, updatedFields) => {
+          expect(prevValue).toEqual(initialState)
+          expect(nextValue).toEqual({ ...initialState, footer: 'Footer:30' })
+          expect(updatedFields).toEqual(['footer'])
+          return 'footer' in nextValue && updatedFields.includes('footer')
+        },
+      })
+
+      graphState.subscribe('Root:10', falsySpy, {
+        updateSelector: (nextValue, prevValue, updatedFields) => {
+          return 'footer' in nextValue && updatedFields.includes('Root')
+        },
+      })
+
+      graphState.mutate('Root:10', {
+        footer: {
+          _type: 'Footer',
+          _id: 30,
+        },
+      })
+
+      expect(truthySpy).toBeCalledTimes(1)
+      expect(falsySpy).toBeCalledTimes(0)
+    })
   })
 
   describe('plugins', () => {
