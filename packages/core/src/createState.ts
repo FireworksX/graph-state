@@ -157,7 +157,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const graphKey = entityGraphKey ?? stateKey
     const parentKey = options?.parent
     const prevGraph: any = resolve(graphKey ?? '')
-    const internal = options?.internal || { hasChange: false, visitors: new Map([]) }
+    const internal = options?.internal || { hasChange: false, visitors: new Map([]), updatedFields: [] }
     let graphData: Graph = {
       ...data,
       ...entityOfKey(graphKey),
@@ -210,8 +210,13 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
         }
       }
 
-      internal.hasChange =
-        internal.hasChange || !shallowEqual(prevValue, fieldKey === fieldValue ? safeResolve(fieldValue) : fieldValue)
+      const isEqual = shallowEqual(prevValue, fieldKey === fieldValue ? safeResolve(fieldValue) : fieldValue)
+
+      internal.hasChange = internal.hasChange || !isEqual
+
+      if (!parentKey && !isEqual) {
+        internal.updatedFields.push(key)
+      }
 
       if (!isReplace && isLinkKey(prevValue) && prevValue !== fieldValue) {
         cache.removeRefs(graphKey, prevValue)
@@ -243,7 +248,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
      * Notify after remove garbage
      */
     if (internal.hasChange) {
-      notify(graphKey, prevGraph)
+      notify(graphKey, prevGraph, internal.updatedFields)
     }
 
     debugState.debug({
@@ -276,7 +281,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     }
   }
 
-  const notify = (entity: Entity, prevState: Graph | null | undefined) => {
+  const notify = (entity: Entity, prevState: Graph | null | undefined, updatedFields: string[] = []) => {
     if (deepIndex > DEEP_LIMIT) {
       throw new Error('Too deep notify.')
     }
@@ -290,13 +295,18 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       const deps = cache.getChildren(key) || []
       const nextResult = resolve(key) as Graph
 
-      subscribers.get(EACH_UPDATED)?.forEach(cb => {
-        cb(nextResult, prevState)
+      subscribers.get(EACH_UPDATED)?.forEach(({ callback, updateSelector }) => {
+        if (!updateSelector || updateSelector?.(nextResult, prevState, updatedFields)) {
+          callback(nextResult, prevState)
+        }
       })
 
-      subs.forEach(cb => {
-        cb(nextResult, prevState)
+      subs.forEach(({ callback, updateSelector }) => {
+        if (!updateSelector || updateSelector?.(nextResult, prevState, updatedFields)) {
+          callback(nextResult, prevState)
+        }
       })
+
       deps.forEach(dep => notify(dep, prevState))
     }
 
@@ -308,12 +318,13 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const callback = typeof args[0] === 'function' ? args[0] : args[1]
     const options: SubscribeOptions | undefined = typeof args[0] === 'function' ? args[1] : args[2]
     const key = keyOfEntity(input)
+    const updateSelector = options?.updateSelector
 
     if (key) {
       if (subscribers.has(key)) {
-        subscribers.set(key, [...Array.from(subscribers.get(key) || []), callback])
+        subscribers.set(key, [...Array.from(subscribers.get(key) || []), { callback, updateSelector }])
       } else {
-        subscribers.set(key, [callback])
+        subscribers.set(key, [{ callback, updateSelector }])
       }
 
       cache.onRemoveLink((link, prevValue) => {
@@ -325,7 +336,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
     const unsubscribe = () => {
       if (key) {
-        const subIndex = (subscribers.get(key) || []).findIndex(sub => sub === callback)
+        const subIndex = (subscribers.get(key) || []).findIndex(sub => sub.callback === callback)
 
         if (subIndex !== -1) {
           const nextSubscribers = subscribers.get(key) || []

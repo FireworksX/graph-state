@@ -84,4 +84,29 @@ describe('useGraphStack', () => {
     graphState.mutate('User:0', { skill: 'OtherFiledValue' })
     expect(fields.current).toHaveLength(0)
   })
+
+  it('should not handle subscribing to field changes', () => {
+    const initial = {
+      _type: 'Root',
+      _id: 'id',
+      fieldOld: { value: 1 },
+      fieldNew: { value: 2 },
+    }
+
+    const graphState = createState({
+      initialState: initial,
+    })
+
+    const { result } = renderHook(() =>
+      useGraphStack(graphState, ['Root:id.fieldOld', 'Root:id.fieldNew'], {
+        updateSelector: () => false,
+      })
+    )
+
+    graphState.mutate('Root:id.fieldOld', { value: 20 })
+    graphState.mutate('Root:id.fieldNew', { value: 30 })
+
+    expect(result.current[0]).toEqual({ value: 1, _type: 'Root', _id: 'id.fieldOld' })
+    expect(result.current[1]).toEqual({ value: 2, _type: 'Root', _id: 'id.fieldNew' })
+  })
 })

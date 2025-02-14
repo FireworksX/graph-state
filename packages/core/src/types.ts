@@ -67,6 +67,7 @@ export interface MutateInternal {
   unlinks?: Map<LinkKey, LinkKey[]>
   visitors: Map<LinkKey, LinkKey[]>
   isPartialGraph?: boolean
+  updatedFields?: string[]
 }
 
 export interface MutateOptions {
@@ -78,8 +79,9 @@ export interface MutateOptions {
   internal?: MutateInternal
 }
 
-export interface SubscribeOptions {
+export interface SubscribeOptions<TResult = any> {
   signal?: AbortSignal
+  updateSelector?: SubscribeCallback<TResult>['updateSelector']
 }
 
 export type Plugin = <TState extends GraphState>(state: TState) => TState | void
@@ -122,7 +124,10 @@ export type StateDataSetter<TEntity extends SystemFields, TInput extends Entity>
   Partial<Omit<ResolveEntityByType<TEntity, TInput>, keyof SystemFields>>
 >
 
-export type SubscribeCallback = (nextValue: Graph | null, prevValue?: Graph | null) => void
+export type SubscribeCallback<T = any> = {
+  callback: (nextValue: Graph | null, prevValue?: Graph | null) => void
+  updateSelector?: (nextValue: T, prevValue?: T, updatedFields?: string[]) => boolean
+}
 
 export interface GraphState<TEntity extends SystemFields = SystemFields, TRootType extends LinkKey = LinkKey>
   extends Graph {
@@ -146,7 +151,7 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
   subscribe<TInput extends Graph | string, TResult extends ResolveEntityByType<TEntity, TInput>>(
     input: TInput,
     callback: (next: TResult, prev: TResult) => void,
-    options?: SubscribeOptions
+    options?: SubscribeOptions<TResult>
   ): () => void
   inspectFields(type: string): string[]
   resolveParents(field: Entity): unknown[]
