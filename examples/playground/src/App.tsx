@@ -28,8 +28,26 @@ const graphState = createState({
           _type: 'Skill',
           _id: 'js',
           user: 'User:1',
+          value: { level: 1 },
         },
-        'User:1',
+        {
+          _type: 'Skill',
+          _id: 'ts',
+          user: 'User:1',
+          value: { level: 1 },
+        },
+        {
+          _type: 'Skill',
+          _id: 'php',
+          user: 'User:1',
+          value: { level: 1 },
+        },
+        {
+          _type: 'Skill',
+          _id: 'c',
+          user: 'User:1',
+          value: { level: 1 },
+        },
       ],
     },
     head: {
@@ -53,16 +71,8 @@ function App() {
   const [type] = useGraph(graphState, 'User:1', { deep: true });
   const [key, setKey] = useState('User:1');
   const allSkills = useGraphStack(graphState, ['Skill:js']);
-  useGraphEffect(graphState, key, (prevValue, nextValue) => {
-    console.log(prevValue, nextValue);
-    // if (nextValue) {
-    //   graphState.mutate({
-    //     _type: 'Layer',
-    //     _id: 'header',
-    //     user: 'Layer:header',
-    //     field: '123',
-    //   });
-    // }
+  useGraphEffect(graphState, 'Skill:js', (prevValue, nextValue, index) => {
+    console.log(prevValue, nextValue, index);
   });
 
   return (
@@ -85,6 +95,21 @@ function App() {
         }}
       >
         Set age
+      </button>
+      <button
+        onClick={() => {
+          graphState.mutate('Skill:js', {
+            value: { level: Math.random() * 100 },
+          });
+          graphState.mutate('Skill:ts', {
+            value: { level: Math.random() * 100 },
+          });
+          graphState.mutate('Skill:php', {
+            value: { level: Math.random() * 100 },
+          });
+        }}
+      >
+        Set skill level
       </button>
       <button
         onClick={() => {

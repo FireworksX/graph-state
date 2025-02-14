@@ -3,7 +3,6 @@ import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react-hooks/dom'
 import { createState } from '@graph-state/core'
 import { useGraphEffect } from '../useGraphEffect'
-import { act } from '@testing-library/react-hooks'
 import { useGraph } from '../useGraph'
 
 describe('useGraphEffect', () => {
@@ -19,51 +18,34 @@ describe('useGraphEffect', () => {
   })
 
   it('should call callback with correct values and unmount correctly', () => {
+    let renderCount = 0
     const initial = {
       _type: 'User',
       _id: '1',
-      age: {
-        _type: 'Age',
-        _id: 1,
-        value: 16,
-      },
+      age: 16,
     }
 
     const nextValue = {
       _type: 'User',
       _id: '1',
-      age: {
-        _type: 'Age',
-        _id: 1,
-        value: 18,
-      },
+      age: 18,
     }
 
     const graphState = createState({
       initialState: initial,
     })
 
-    // @ts-ignore
-    graphState.subscribe = vi.fn((_key, cb) => {
-      graphState.subscribeCallback = cb
-      return () => {
-        graphState.unsubscribeCalled = true
-      }
-    })
-
     const cb = vi.fn()
-    const render = renderHook(() => useGraphEffect(graphState, 'User:1', cb))
-    expect(graphState.subscribe).toHaveBeenCalledTimes(1)
-
-    act(() => {
-      // @ts-ignore
-      graphState.subscribeCallback?.(nextValue, initial)
+    const render = renderHook(() => {
+      renderCount++
+      return useGraphEffect(graphState, 'User:1', cb)
     })
 
-    expect(cb).toHaveBeenCalledWith(nextValue, initial)
-
+    graphState.mutate('User:1', nextValue)
+    expect(cb).toHaveBeenCalledWith(nextValue, initial, undefined)
     render.unmount()
-    expect(graphState.unsubscribeCalled).toBe(true)
+    graphState.mutate('User:1', initial)
+    expect(renderCount).toEqual(1)
   })
 
   it('Should call the callback with updated state when the key changes and track the correct data', () => {
@@ -89,7 +71,7 @@ describe('useGraphEffect', () => {
       { initialProps: { key: userOne } }
     )
     graphState.mutate(userOne, { age: 18 })
-    expect(cb).toHaveBeenCalledWith({ ...initial, age: 18 }, initial)
+    expect(cb).toHaveBeenCalledWith({ ...initial, age: 18 }, initial, undefined)
     render.rerender({ key: userTwo })
     graphState.mutate(userOne, { age: 19 })
     expect(cb).toHaveBeenCalledTimes(1)
@@ -100,7 +82,8 @@ describe('useGraphEffect', () => {
         _id: '2',
         age: 21,
       },
-      null
+      null,
+      undefined
     )
     expect(callCout).toBe(2)
   })
@@ -120,6 +103,61 @@ describe('useGraphEffect', () => {
 
     renderHook(() => useGraphEffect(graphState, initial, cb))
     graphState.mutate({ ...initial, age: 18 })
-    expect(cb).toHaveBeenCalledWith({ ...initial, age: 18 }, initial)
+    expect(cb).toHaveBeenCalledWith({ ...initial, age: 18 }, initial, undefined)
+  })
+
+  it('Should work correctly with array', () => {
+    let renderCount = 0
+    const userOne = {
+      _type: 'User',
+      _id: '1',
+      age: 16,
+    }
+    const userTwo = {
+      _type: 'User',
+      _id: '2',
+      age: 14,
+    }
+    const userThree = {
+      _type: 'User',
+      _id: '3',
+      age: 25,
+    }
+
+    const initial = {
+      _type: 'Product',
+      _id: '1',
+      users: [userOne, userTwo, userThree],
+    }
+
+    const graphState = createState({
+      initialState: initial,
+    })
+    const cb = vi.fn()
+
+    const render = renderHook(() => {
+      renderCount++
+      return useGraphEffect(graphState, [userOne, userTwo, userThree], cb)
+    })
+    ;[
+      { id: 1, age: 14 },
+      { id: 2, age: 25 },
+      { id: 3, age: 36 },
+    ].forEach(({ id, age }) => {
+      graphState.mutate(`User:${id}`, { age })
+    })
+
+    expect(cb).toHaveBeenCalledTimes(3)
+    ;[
+      [userOne, { ...userOne, age: 14 }],
+      [userTwo, { ...userTwo, age: 25 }],
+      [userThree, { ...userThree, age: 36 }],
+    ].forEach(([prev, next], index) => {
+      expect(cb).toHaveBeenCalledWith(next, prev, index)
+    })
+
+    render.unmount()
+    graphState.mutate('User:1', { age: 67 })
+    expect(renderCount).toEqual(1)
   })
 })
