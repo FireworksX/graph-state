@@ -1,5 +1,4 @@
-import type { Entity, Plugin } from '@graph-state/core';
-import { isPartialKey } from '@graph-state/core';
+import type { Plugin } from '@graph-state/core';
 
 declare module '@graph-state/core' {
   interface GraphState {
@@ -11,11 +10,12 @@ declare module '@graph-state/core' {
   }
 }
 
-type DebugEventName = 'mutate' | 'invalidate' | string;
+type DebugEventName = 'mutate' | 'invalidate' | 'notify' | 'resolve' | string;
 type DebugLevel = 'error' | 'warning' | 'info' | string;
 
 interface LoggerOptions {
   onlyBrowser?: boolean;
+  events: DebugEventName[];
 }
 
 const isBrowser = typeof window !== 'undefined';
@@ -44,30 +44,35 @@ const debugLog = (
 
 const loggerPlugin: (options?: LoggerOptions) => Plugin =
   options => graphState => {
-    const originalInvalidate = graphState.invalidate;
-    const log = (graphState.debugLog = debugLog);
-
     if (options?.onlyBrowser && !isBrowser) {
       return graphState;
     }
 
-    graphState.subscribe(nextState => {
-      const graphKey = graphState.keyOfEntity(nextState as Entity);
+    const log = (graphState.debugLog = debugLog);
 
-      if (graphKey && !isPartialKey(graphKey)) {
-        log('mutate', 'info', 'of', graphKey, 'to', nextState);
+    graphState.onDebugEvent(event => {
+      if (!!options?.events && !options?.events?.includes(event.type)) return;
+
+      switch (event.type) {
+        case 'beforeMutate':
+          log('before mutate', 'info', 'of', event.entity);
+          return;
+        case 'afterMutate':
+          log('after mutate', 'info', 'of', event.entity, 'to', event.nextData);
+          return;
+        case 'invalidate':
+          log('invalidate', 'error', 'of', event.entity);
+          return;
+        case 'notify':
+          log('notify', 'info', 'of', event.entity);
+          return;
+        case 'resolve':
+          log('resolve', 'info', 'of', event.entity);
+          return;
+        case 'garbageRemove':
+          log('Garbage Collector', 'warning', 'of', event.entity);
+          return;
       }
-    });
-
-    graphState.invalidate = (...args: any) => {
-      log('invalidate', 'error', 'of', ...args);
-
-      // @ts-ignore
-      return originalInvalidate(...args);
-    };
-
-    graphState.onRemoveLink(link => {
-      log('Garbage Collector', 'error', 'of', link);
     });
 
     return graphState;
