@@ -6,7 +6,7 @@ import type {
   GraphState,
   Plugin,
   ResolveEntityByType,
-  SetOptions,
+  MutateOptions,
   Type,
 } from '@graph-state/core';
 import { isPartialKey } from '@graph-state/core';
@@ -36,12 +36,12 @@ declare module '@graph-state/core' {
     extendGraph<TEntity extends Entity>(
       entity: TEntity,
       extender: Extender<this, TEntity>,
-      mutateOptions?: SetOptions
+      mutateOptions?: MutateOptions
     ): void;
     declareExtendGraph<TType extends Type>(
       type: TType,
       extender: Extender<this, TType>,
-      mutateOptions?: SetOptions
+      mutateOptions?: MutateOptions
     ): void;
   }
 }
@@ -51,7 +51,7 @@ const extendPlugin =
     extendsMap: ExtendMap<TState, GetStateEntityType<TState>>,
     pluginOptions?: ExtendPluginOptions
   ): Plugin =>
-  (state, { overrideMutate }) => {
+  state => {
     const extendersStack = new Map<Type, Extender<TState, unknown>[]>();
 
     const appendExtender = (type: Type, extender: any) => {
@@ -62,14 +62,17 @@ const extendPlugin =
       }
     };
 
-    const recheck = (mutateOptions?: SetOptions) => {
+    const recheck = (mutateOptions?: MutateOptions) => {
       for (const type of extendersStack.keys()) {
         for (const link of state.types?.get?.(type) ?? []) {
           state.mutate(state.resolve(link) as Graph, mutateOptions);
         }
       }
     };
-    overrideMutate((next: any, ...args: any[]) => {
+
+    const originalMutate = state.mutate;
+
+    state.mutate = (...args: any[]): any => {
       const { graphKey, data, options } = state.getArgumentsForMutate(
         ...(args as Parameters<GraphState['getArgumentsForMutate']>)
       );
@@ -78,7 +81,7 @@ const extendPlugin =
         pluginOptions?.excludePartialGraph &&
         isPartialKey(graphKey)
       ) {
-        return next(graphKey, data, options);
+        return originalMutate(graphKey, data, options);
       }
 
       /**
@@ -97,16 +100,14 @@ const extendPlugin =
           }),
           initialData
         );
-        return next(graphKey, extendData, options);
+        return originalMutate(graphKey, extendData, options);
       }
-
-      return next(...(args as Parameters<GraphState['mutate']>));
-    });
+    };
 
     state.extendGraph = <TEntity extends Entity>(
       entity: TEntity,
       extender: Extender<any, any>,
-      mutateOptions: SetOptions
+      mutateOptions: MutateOptions
     ) => {
       const nextGraph = extender?.(state.resolve(entity) as Graph, state);
 
@@ -118,7 +119,7 @@ const extendPlugin =
     state.declareExtendGraph = <TType extends Type>(
       type: TType,
       extender: Extender<any, any>,
-      mutateOptions: SetOptions
+      mutateOptions: MutateOptions
     ) => {
       appendExtender(type, extender);
       recheck(mutateOptions);
