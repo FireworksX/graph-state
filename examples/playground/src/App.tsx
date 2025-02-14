@@ -28,26 +28,8 @@ const graphState = createState({
           _type: 'Skill',
           _id: 'js',
           user: 'User:1',
-          value: { level: 1 },
         },
-        {
-          _type: 'Skill',
-          _id: 'ts',
-          user: 'User:1',
-          value: { level: 1 },
-        },
-        {
-          _type: 'Skill',
-          _id: 'php',
-          user: 'User:1',
-          value: { level: 1 },
-        },
-        {
-          _type: 'Skill',
-          _id: 'c',
-          user: 'User:1',
-          value: { level: 1 },
-        },
+        'User:1',
       ],
     },
     head: {
@@ -64,16 +46,19 @@ const graphState = createState({
 
 window.graphState = graphState;
 
-// console.log(graphState.resolve(graphState));
+graphState.subscribe('Skill:1', () => {}, {
+  updateSelector: (nextValue, prevValue, updatedFields) => {
+    return 'age' in nextValue;
+  },
+});
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [type] = useGraph(graphState, 'User:1', { deep: true });
+  const [type] = useGraph(graphState, 'User:1', {
+    deep: true,
+  });
   const [key, setKey] = useState('User:1');
   const allSkills = useGraphStack(graphState, ['Skill:js']);
-  useGraphEffect(graphState, 'Skill:js', (prevValue, nextValue, index) => {
-    console.log(prevValue, nextValue, index);
-  });
 
   return (
     <>
@@ -87,7 +72,7 @@ function App() {
       {/*    return <>{console.log(value)}</>;*/}
       {/*  }}*/}
       {/*</GraphValue>*/}
-      <pre>{JSON.stringify(type)}</pre>
+      <pre>{JSON.stringify(type, null, 2)}</pre>
       <button onClick={() => setKey('User:2')}>Change key</button>
       <button
         onClick={() => {
@@ -98,26 +83,23 @@ function App() {
       </button>
       <button
         onClick={() => {
-          graphState.mutate('Skill:js', {
-            value: { level: Math.random() * 100 },
-          });
-          graphState.mutate('Skill:ts', {
-            value: { level: Math.random() * 100 },
-          });
-          graphState.mutate('Skill:php', {
-            value: { level: Math.random() * 100 },
-          });
-        }}
-      >
-        Set skill level
-      </button>
-      <button
-        onClick={() => {
           graphState.mutate(
-            'User:0',
+            'User:1',
             prev => ({
               ...prev,
-              skills: ['Skill:js', 'Skill:ts'],
+              skills: [
+                'Skill:js',
+                'Skill:ts',
+                {
+                  _type: 'Skill',
+                  id: 1,
+                  name: {
+                    _type: 'Name',
+                    id: 12,
+                    label: Math.random(),
+                  },
+                },
+              ],
             }),
             { replace: true }
           );
@@ -136,11 +118,11 @@ function App() {
         Change order
       </button>
 
-      <ul>
-        {allSkills?.map(skill => (
-          <li key={skill?._id}>{skill?._id ?? 'null'}</li>
-        ))}
-      </ul>
+      {/*<ul>*/}
+      {/*  {allSkills?.map(skill => (*/}
+      {/*    <li key={skill?._id}>{skill?._id ?? 'null'}</li>*/}
+      {/*  ))}*/}
+      {/*</ul>*/}
 
       <animated.div
         style={{

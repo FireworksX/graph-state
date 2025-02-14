@@ -1,11 +1,12 @@
-import type { Entity, GraphState } from '@graph-state/core'
+import type { Entity, GraphState, SubscribeOptions } from '@graph-state/core'
 import { useEffect } from 'react'
 import type { StateResolve } from './types'
 
 export function useGraphEffect<TState extends GraphState, const TEntity extends Entity>(
   graphState?: TState | null,
   field?: TEntity | null,
-  cb?: ((nextValue: StateResolve<TState, TEntity>, prevValue: StateResolve<TState, TEntity>) => void) | null
+  cb?: ((nextValue: StateResolve<TState, TEntity>, prevValue: StateResolve<TState, TEntity>) => void) | null,
+  options?: SubscribeOptions
 ): void
 
 export function useGraphEffect<TState extends GraphState, const TEntity extends Entity>(
@@ -13,7 +14,8 @@ export function useGraphEffect<TState extends GraphState, const TEntity extends 
   field?: TEntity[] | null,
   cb?:
     | ((nextValue: StateResolve<TState, TEntity>, prevValue: StateResolve<TState, TEntity>, index?: number) => void)
-    | null
+    | null,
+  options?: SubscribeOptions
 ): void
 
 export function useGraphEffect<TState extends GraphState, const TEntity extends Entity>(
@@ -21,7 +23,8 @@ export function useGraphEffect<TState extends GraphState, const TEntity extends 
   field?: TEntity | TEntity[] | null,
   cb?:
     | ((nextValue: StateResolve<TState, TEntity>, prevValue: StateResolve<TState, TEntity>, index?: number) => void)
-    | null
+    | null,
+  options?: SubscribeOptions
 ) {
   useEffect(() => {
     if (!field || !cb || !graphState) return
@@ -40,6 +43,7 @@ export function useGraphEffect<TState extends GraphState, const TEntity extends 
           },
           {
             signal: controller.signal,
+            ...options,
           }
         )
       }

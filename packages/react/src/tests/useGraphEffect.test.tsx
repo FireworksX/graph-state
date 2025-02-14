@@ -4,6 +4,7 @@ import { renderHook } from '@testing-library/react-hooks/dom'
 import { createState } from '@graph-state/core'
 import { useGraphEffect } from '../useGraphEffect'
 import { useGraph } from '../useGraph'
+import { mockAuthor } from './mock'
 
 describe('useGraphEffect', () => {
   it('should render with invalid args', () => {
@@ -49,7 +50,7 @@ describe('useGraphEffect', () => {
   })
 
   it('Should call the callback with updated state when the key changes and track the correct data', () => {
-    let callCout = 0
+    let callCount = 0
     const userOne = 'User:1'
     const userTwo = 'User:2'
     const initial = {
@@ -65,7 +66,7 @@ describe('useGraphEffect', () => {
     const cb = vi.fn()
     const render = renderHook(
       ({ key }) => {
-        callCout++
+        callCount++
         return useGraphEffect(graphState, key, cb)
       },
       { initialProps: { key: userOne } }
@@ -85,7 +86,7 @@ describe('useGraphEffect', () => {
       null,
       undefined
     )
-    expect(callCout).toBe(2)
+    expect(callCount).toBe(2)
   })
 
   it('Should work correctly with Object key', () => {
@@ -158,6 +159,30 @@ describe('useGraphEffect', () => {
 
     render.unmount()
     graphState.mutate('User:1', { age: 67 })
+    expect(renderCount).toEqual(1)
+  })
+
+  it('should not execute callback', () => {
+    let renderCount = 0
+    const authorKey = 'Author:20'
+    const graphState = createState()
+    graphState.mutate(mockAuthor)
+    const cb = vi.fn()
+
+    renderHook(() => {
+      renderCount++
+      useGraphEffect(graphState, authorKey, cb, {
+        updateSelector: (nextValue, prevValue, updatedFields) => {
+          expect(prevValue).toEqual(mockAuthor)
+          expect(nextValue).toEqual({ ...mockAuthor, age: 20 })
+          expect(updatedFields).toEqual(['age'])
+          return false
+        },
+      })
+    })
+
+    graphState.mutate(authorKey, { age: 20 })
+    expect(cb).toBeCalledTimes(0)
     expect(renderCount).toEqual(1)
   })
 })

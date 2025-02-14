@@ -123,4 +123,27 @@ describe('useGraph', () => {
     result.current[1](mockAuthor)
     expect(result.current[0]).toEqual(graphState.resolve(authorKey))
   })
+
+  it('should notify by condition', () => {
+    const authorKey = 'Author:20'
+    const graphState = createState()
+    graphState.mutate(mockAuthor)
+
+    const { result } = renderHook(() => {
+      return useGraph(graphState, authorKey, {
+        updateSelector: (nextValue, prevValue, updatedFields) => {
+          expect(prevValue).toEqual(mockAuthor)
+          expect(nextValue).toEqual({ ...mockAuthor, age: 20 })
+          expect(updatedFields).toEqual(['age'])
+          return false
+        },
+      })
+    })
+    const [author, updateAuthor] = result.current
+    updateAuthor(prev => ({ ...prev, age: 20 }))
+
+    expect(author).toEqual(mockAuthor)
+    // rerender count
+    expect(result.all).toHaveLength(2)
+  })
 })
