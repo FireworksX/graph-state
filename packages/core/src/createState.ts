@@ -59,6 +59,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   ): TSelector extends AnyObject ? TSelector : ResolveEntityByType<TEntity, TInput> | null => {
     const isDeep = options?.deep ?? false
     const isSafe = options?.safe ?? false
+    const selector = options?.selector
     const inputKey = isValue(input) ? keyOfEntity(input) : null
     debugState.debug({ type: 'resolve', entity: input, options })
 
@@ -97,8 +98,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
         return acc
       }, {} as Graph)
     }
-
-    const selector = options?.selector
 
     return value ? (selector ? selector({ ...value }) : { ...value }) : isSafe ? input : null
   }
@@ -301,23 +300,29 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       const deps = cache.getChildren(key) || []
       const nextResult = resolve(key) as Graph
 
-      subscribers.get(EACH_UPDATED)?.forEach(({ callback, selector }) => {
-        const nextSelectorGraph = selector?.(nextResult)
-        const prevSelectorGraph = selector?.(prevState)
-        const hasChange = updatedFields.some(key => !!nextSelectorGraph?.[key])
+      const getSelectedValues = (selector: SubscribeOptions['selector']) => {
+        const next = selector?.(nextResult)
+        const prev = selector?.(prevState)
+        const hasChange = updatedFields.some(key => !!next?.[key])
 
-        if (!selector || (nextSelectorGraph && hasChange)) {
-          callback(nextSelectorGraph ?? nextResult, prevSelectorGraph ?? prevState)
+        return { next, prev, hasChange }
+      }
+
+      subscribers.get(EACH_UPDATED)?.forEach(({ callback, selector }) => {
+        if (selector) {
+          const { next, prev, hasChange } = getSelectedValues(selector)
+          if (hasChange) callback(next, prev)
+        } else {
+          callback(nextResult, prevState)
         }
       })
 
       subs.forEach(({ callback, selector }) => {
-        const nextSelectorGraph = selector?.(nextResult)
-        const prevSelectorGraph = selector?.(prevState)
-        const hasChange = updatedFields.some(key => !!nextSelectorGraph?.[key])
-
-        if (!selector || (nextSelectorGraph && hasChange)) {
-          callback(nextSelectorGraph ?? nextResult, prevSelectorGraph ?? prevState)
+        if (selector) {
+          const { next, prev, hasChange } = getSelectedValues(selector)
+          if (hasChange) callback(next, prev)
+        } else {
+          callback(nextResult, prevState)
         }
       })
 

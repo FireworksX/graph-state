@@ -79,9 +79,9 @@ export interface MutateOptions {
   internal?: MutateInternal
 }
 
-export interface SubscribeOptions {
+export interface SubscribeOptions<TEntity extends SystemFields = any, TInput extends Entity = any, TSelector = any> {
   signal?: AbortSignal
-  selector?: (graph: any) => any
+  selector?: (graph: ResolveEntityByType<TEntity, TInput>) => TSelector
 }
 
 export type Plugin = <TState extends GraphState>(state: TState) => TState | void
@@ -159,10 +159,10 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
   ): string | null
   invalidate(field: Entity): void
   subscribe<TData = unknown>(callback: (data: TData) => void, options?: SubscribeOptions): () => void
-  subscribe<TInput extends Graph | string, TResult extends ResolveEntityByType<TEntity, TInput>>(
+  subscribe<TInput extends Graph | string, TResult extends ResolveEntityByType<TEntity, TInput>, TSelector>(
     input: TInput,
     callback: (next: TResult, prev: TResult) => void,
-    options?: SubscribeOptions
+    options?: SubscribeOptions<TEntity, TInput, TSelector>
   ): () => void
   inspectFields(type: string): string[]
   resolveParents(field: Entity): unknown[]
