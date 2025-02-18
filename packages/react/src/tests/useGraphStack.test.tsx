@@ -99,14 +99,14 @@ describe('useGraphStack', () => {
 
     const { result } = renderHook(() =>
       useGraphStack(graphState, ['Root:id.fieldOld', 'Root:id.fieldNew'], {
-        updateSelector: () => false,
+        selector: graph => ({ value: graph.value }),
       })
     )
 
     graphState.mutate('Root:id.fieldOld', { value: 20 })
     graphState.mutate('Root:id.fieldNew', { value: 30 })
 
-    expect(result.current[0]).toEqual({ value: 1, _type: 'Root', _id: 'id.fieldOld' })
-    expect(result.current[1]).toEqual({ value: 2, _type: 'Root', _id: 'id.fieldNew' })
+    expect(result.current[0]).toEqual({ value: 20 })
+    expect(result.current[1]).toEqual({ value: 30 })
   })
 })

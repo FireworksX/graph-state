@@ -79,9 +79,9 @@ export interface MutateOptions {
   internal?: MutateInternal
 }
 
-export interface SubscribeOptions<TResult = any> {
+export interface SubscribeOptions<TEntity extends SystemFields = any, TInput extends Entity = any, TSelector = any> {
   signal?: AbortSignal
-  updateSelector?: SubscribeCallback<TResult>['updateSelector']
+  selector?: (graph: ResolveEntityByType<TEntity, TInput>) => TSelector
 }
 
 export type Plugin = <TState extends GraphState>(state: TState) => TState | void
@@ -100,20 +100,29 @@ export interface CreateStateOptions<TEntity extends SystemFields = SystemFields,
   skip?: SkipGraphPredictor[]
 }
 
-export interface ResolveOptions {
+export interface ResolveOptions<TEntity extends SystemFields = any, TInput extends Entity = any, TSelector = any> {
   deep?: boolean
   safe?: boolean
+  selector?: (graph: ResolveEntityByType<TEntity, TInput>) => TSelector
 }
 
 type NeverToUnknown<T> = [T] extends [never] ? unknown : T
+
+type ExtractByType<TEntity extends SystemFields, TType extends string> = TEntity extends { _type: TType }
+  ? TEntity
+  : TEntity extends Record<any, any>
+    ? {
+        [Key in keyof TEntity]: TEntity[Key] extends SystemFields ? ExtractByType<TEntity[Key], TType> : never
+      }[keyof TEntity]
+    : never
 
 export type ResolveEntityByType<
   TEntity extends SystemFields,
   TInput extends Entity,
 > = TInput extends `${infer TType}:${string}`
-  ? NeverToUnknown<Extract<TEntity, { _type: TType }>>
+  ? NeverToUnknown<ExtractByType<TEntity, TType>>
   : TInput extends SystemFields
-    ? NeverToUnknown<Extract<TEntity, { _type: TInput['_type'] }>>
+    ? NeverToUnknown<ExtractByType<TEntity, TInput['_type']>>
     : unknown
 
 export type GetStateEntity<T> = T extends GraphState<infer TEntity> ? TEntity : never
@@ -124,19 +133,21 @@ export type StateDataSetter<TEntity extends SystemFields, TInput extends Entity>
   Partial<Omit<ResolveEntityByType<TEntity, TInput>, keyof SystemFields>>
 >
 
-export type SubscribeCallback<T = any> = {
+export type SubscribeCallback = {
   callback: (nextValue: Graph | null, prevValue?: Graph | null) => void
-  updateSelector?: (nextValue: T, prevValue?: T, updatedFields?: string[]) => boolean
+  selector?: <TEntity extends SystemFields = any, TInput extends Entity = any, TSelector = any>(
+    graph: ResolveEntityByType<TEntity, TInput>
+  ) => TSelector
 }
 
 export interface GraphState<TEntity extends SystemFields = SystemFields, TRootType extends LinkKey = LinkKey>
   extends Graph {
   _type: TRootType
   key: `${TRootType}:${string}`
-  resolve<const TInput extends Entity>(
+  resolve<const TInput extends Entity, TSelector>(
     input: TInput,
-    options?: ResolveOptions
-  ): ResolveEntityByType<TEntity, TInput> | null
+    options?: ResolveOptions<TEntity, TInput, TSelector>
+  ): TSelector extends AnyObject ? TSelector : ResolveEntityByType<TEntity, TInput> | null
   mutate<const TInput extends Graph | null>(
     graph: TInput & Partial<ResolveEntityByType<TEntity, TInput>>,
     options?: MutateOptions
@@ -148,10 +159,10 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
   ): string | null
   invalidate(field: Entity): void
   subscribe<TData = unknown>(callback: (data: TData) => void, options?: SubscribeOptions): () => void
-  subscribe<TInput extends Graph | string, TResult extends ResolveEntityByType<TEntity, TInput>>(
+  subscribe<TInput extends Graph | string, TResult extends ResolveEntityByType<TEntity, TInput>, TSelector>(
     input: TInput,
     callback: (next: TResult, prev: TResult) => void,
-    options?: SubscribeOptions<TResult>
+    options?: SubscribeOptions<TEntity, TInput, TSelector>
   ): () => void
   inspectFields(type: string): string[]
   resolveParents(field: Entity): unknown[]

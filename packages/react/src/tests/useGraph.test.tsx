@@ -131,19 +131,14 @@ describe('useGraph', () => {
 
     const { result } = renderHook(() => {
       return useGraph(graphState, authorKey, {
-        updateSelector: (nextValue, prevValue, updatedFields) => {
-          expect(prevValue).toEqual(mockAuthor)
-          expect(nextValue).toEqual({ ...mockAuthor, age: 20 })
-          expect(updatedFields).toEqual(['age'])
-          return false
-        },
+        selector: graph => ({ name: graph.name }),
       })
     })
     const [author, updateAuthor] = result.current
-    updateAuthor(prev => ({ ...prev, age: 20 }))
-
-    expect(author).toEqual(mockAuthor)
+    updateAuthor(prev => ({ ...prev, name: 'John Wick' }))
+    expect(author).toEqual({ name: 'John Doe' })
+    updateAuthor(prev => ({ ...prev, age: 'John Wick' }))
     // rerender count
-    expect(result.all).toHaveLength(2)
+    expect(result.all).toHaveLength(3)
   })
 })
