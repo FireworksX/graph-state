@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.10.2
+
+### Patch Changes
+
+- c0b1ee9: replaced updateSelector with selector
+
 ## 0.10.1
 
 ### Patch Changes

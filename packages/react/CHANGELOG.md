@@ -1,5 +1,13 @@
 # @graph-state/react
 
+## 0.6.3
+
+### Patch Changes
+
+- c0b1ee9: replaced updateSelector with selector
+- Updated dependencies [c0b1ee9]
+  - @graph-state/core@0.10.2
+
 ## 0.6.2
 
 ### Patch Changes
