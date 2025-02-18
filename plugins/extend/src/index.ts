@@ -35,12 +35,12 @@ declare module '@graph-state/core' {
   interface GraphState {
     extendGraph<TEntity extends Entity>(
       entity: TEntity,
-      extender: Extender<this, TEntity>,
+      extender: Extender<any, TEntity>,
       mutateOptions?: MutateOptions
     ): void;
     declareExtendGraph<TType extends Type>(
       type: TType,
-      extender: Extender<this, TType>,
+      extender: Extender<any, TType>,
       mutateOptions?: MutateOptions
     ): void;
   }

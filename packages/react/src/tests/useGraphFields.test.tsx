@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { renderHook } from '@testing-library/react-hooks/dom'
-import { mockAuthor, mockGraphState } from './mock'
+import { mockGraphState } from './mock'
 import { useGraphFields } from '../useGraphFields'
 
 describe('useGraphFields', () => {
@@ -31,18 +31,15 @@ describe('useGraphFields', () => {
   it('should not notify', () => {
     const graphState = mockGraphState()
 
-    const { result: authorFields } = renderHook(() =>
+    const { result } = renderHook(() =>
       useGraphFields(graphState, 'Author', {
-        updateSelector: (nextValue, prevValue, updatedFields) => {
-          expect(prevValue).toEqual(mockAuthor)
-          expect(nextValue).toEqual({ ...mockAuthor, age: 20 })
-          expect(updatedFields).toEqual(['age'])
-          return false
+        selector: graph => {
+          return { name: graph.name }
         },
       })
     )
 
     graphState.mutate('Author:20', { age: 20 })
-    expect(authorFields.all).toHaveLength(2)
+    expect(result.all).toHaveLength(2)
   })
 })

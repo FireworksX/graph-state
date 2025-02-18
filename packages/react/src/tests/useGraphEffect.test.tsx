@@ -171,15 +171,9 @@ describe('useGraphEffect', () => {
     renderHook(() => {
       renderCount++
       useGraphEffect(graphState, authorKey, cb, {
-        updateSelector: (nextValue, prevValue, updatedFields) => {
-          expect(prevValue).toEqual(mockAuthor)
-          expect(nextValue).toEqual({ ...mockAuthor, age: 20 })
-          expect(updatedFields).toEqual(['age'])
-          return false
-        },
+        selector: graph => ({ name: graph.name }),
       })
     })
-
     graphState.mutate(authorKey, { age: 20 })
     expect(cb).toBeCalledTimes(0)
     expect(renderCount).toEqual(1)

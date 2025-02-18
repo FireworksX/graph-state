@@ -1382,40 +1382,39 @@ describe('createState', () => {
       expect(spy).toBeCalledTimes(9)
     })
 
-    it('should execute callback by condition', () => {
-      const initialState = { _type: 'Root', _id: '10', header: 'Header:20' }
+    it('should notify only when selected values change', () => {
+      const initialState = {
+        _type: 'Root',
+        _id: '10',
+        header: {
+          _type: 'Header',
+          _id: '20',
+          width: 20,
+          height: 20,
+        },
+      }
 
       const graphState = createState({
         initialState,
       })
+      const results = []
+      const spy = vi.fn()
 
-      const truthySpy = vi.fn()
-      const falsySpy = vi.fn()
-
-      graphState.subscribe('Root:10', truthySpy, {
-        updateSelector: (nextValue, prevValue, updatedFields) => {
-          expect(prevValue).toEqual(initialState)
-          expect(nextValue).toEqual({ ...initialState, footer: 'Footer:30' })
-          expect(updatedFields).toEqual(['footer'])
-          return 'footer' in nextValue && updatedFields.includes('footer')
+      graphState.subscribe('Header:20', spy, {
+        selector: graph => {
+          results.push(graph)
+          return { width: graph.width, height: graph.height }
         },
       })
-
-      graphState.subscribe('Root:10', falsySpy, {
-        updateSelector: (nextValue, prevValue, updatedFields) => {
-          return 'footer' in nextValue && updatedFields.includes('Root')
-        },
+      graphState.mutate('Header:20', {
+        height: 30,
       })
-
-      graphState.mutate('Root:10', {
-        footer: {
-          _type: 'Footer',
-          _id: 30,
-        },
+      graphState.mutate('Header:20', {
+        padding: 30,
       })
-
-      expect(truthySpy).toBeCalledTimes(1)
-      expect(falsySpy).toBeCalledTimes(0)
+      expect(spy).toHaveBeenNthCalledWith(1, { width: 20, height: 30 }, { width: 20, height: 20 })
+      expect(results[1]).toEqual({ ...initialState.header, height: 20 })
+      expect(results[0]).toEqual({ ...initialState.header, height: 30 })
     })
   })
 

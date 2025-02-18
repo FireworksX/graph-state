@@ -11,6 +11,7 @@ import type {
   LinkKey,
   SubscribeCallback,
   SubscribeOptions,
+  AnyObject,
 } from 'src'
 import { isGraphOrKey } from 'src'
 import { getGraphLink } from 'src'
@@ -44,7 +45,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   const skipPredictors = [isGraphState, ...(options?.skip ?? [])]
   const cache = createCache()
   const debugState = createDebugState()
-  const pluginsStore = createPluginsState<GraphState<TEntity, TRootType>>(options?.plugins)
+  const pluginsStore = createPluginsState(options?.plugins)
   const subscribers = new Map<string, SubscribeCallback[]>()
   let deepIndex = 0
 
@@ -52,10 +53,10 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     return skipPredictors.some(predictor => predictor(entity))
   }
 
-  const resolve = <TInput extends Entity>(
+  const resolve = <TInput extends Entity, TSelector>(
     input?: TInput,
-    options?: ResolveOptions
-  ): ResolveEntityByType<TEntity, TInput> | null => {
+    options?: ResolveOptions<TEntity, TInput, TSelector>
+  ): TSelector extends AnyObject ? TSelector : ResolveEntityByType<TEntity, TInput> | null => {
     const isDeep = options?.deep ?? false
     const isSafe = options?.safe ?? false
     const inputKey = isValue(input) ? keyOfEntity(input) : null
@@ -97,10 +98,15 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       }, {} as Graph)
     }
 
-    return value ? { ...value } : isSafe ? input : null
+    const selector = options?.selector
+
+    return value ? (selector ? selector({ ...value }) : { ...value }) : isSafe ? input : null
   }
 
-  const safeResolve = (input?: Entity, options?: ResolveOptions) => resolve(input, options) ?? input
+  const safeResolve = <TInput extends Entity, TSelector>(
+    input?: TInput,
+    options?: ResolveOptions<TEntity, TInput, TSelector>
+  ) => resolve(input, options) ?? input
 
   const unlinkGraph = (entity: Entity) => {
     const graphKey = keyOfEntity(entity)
@@ -295,15 +301,23 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       const deps = cache.getChildren(key) || []
       const nextResult = resolve(key) as Graph
 
-      subscribers.get(EACH_UPDATED)?.forEach(({ callback, updateSelector }) => {
-        if (!updateSelector || updateSelector?.(nextResult, prevState, updatedFields)) {
-          callback(nextResult, prevState)
+      subscribers.get(EACH_UPDATED)?.forEach(({ callback, selector }) => {
+        const nextSelectorGraph = selector?.(nextResult)
+        const prevSelectorGraph = selector?.(prevState)
+        const hasChange = updatedFields.some(key => !!nextSelectorGraph?.[key])
+
+        if (!selector || (nextSelectorGraph && hasChange)) {
+          callback(nextSelectorGraph ?? nextResult, prevSelectorGraph ?? prevState)
         }
       })
 
-      subs.forEach(({ callback, updateSelector }) => {
-        if (!updateSelector || updateSelector?.(nextResult, prevState, updatedFields)) {
-          callback(nextResult, prevState)
+      subs.forEach(({ callback, selector }) => {
+        const nextSelectorGraph = selector?.(nextResult)
+        const prevSelectorGraph = selector?.(prevState)
+        const hasChange = updatedFields.some(key => !!nextSelectorGraph?.[key])
+
+        if (!selector || (nextSelectorGraph && hasChange)) {
+          callback(nextSelectorGraph ?? nextResult, prevSelectorGraph ?? prevState)
         }
       })
 
@@ -318,13 +332,13 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const callback = typeof args[0] === 'function' ? args[0] : args[1]
     const options: SubscribeOptions | undefined = typeof args[0] === 'function' ? args[1] : args[2]
     const key = keyOfEntity(input)
-    const updateSelector = options?.updateSelector
+    const selector = options?.selector
 
     if (key) {
       if (subscribers.has(key)) {
-        subscribers.set(key, [...Array.from(subscribers.get(key) || []), { callback, updateSelector }])
+        subscribers.set(key, [...Array.from(subscribers.get(key) || []), { callback, selector }])
       } else {
-        subscribers.set(key, [{ callback, updateSelector }])
+        subscribers.set(key, [{ callback, selector }])
       }
 
       cache.onRemoveLink((link, prevValue) => {
@@ -437,5 +451,5 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
   cache.onRemoveLink((link, prevValue) => debugState.debug({ type: 'garbageRemove', entity: link, prevValue }))
 
-  return pluginsStore.runPlugins(graphState)
+  return pluginsStore.runPlugins(graphState as any) as GraphState<TEntity, TRootType>
 }
