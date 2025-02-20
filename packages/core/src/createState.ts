@@ -303,7 +303,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       const getSelectedValues = (selector: SubscribeOptions['selector']) => {
         const next = selector?.(nextResult)
         const prev = selector?.(prevState)
-        const hasChange = updatedFields.some(key => !!next?.[key])
+        const hasChange = updatedFields.some(key => key in next)
 
         return { next, prev, hasChange }
       }

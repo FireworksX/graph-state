@@ -1391,6 +1391,7 @@ describe('createState', () => {
           _id: '20',
           width: 20,
           height: 20,
+          field: true,
         },
       }
 
@@ -1403,7 +1404,7 @@ describe('createState', () => {
       graphState.subscribe('Header:20', spy, {
         selector: graph => {
           results.push(graph)
-          return { width: graph.width, height: graph.height }
+          return { width: graph.width, height: graph.height, field: graph.field }
         },
       })
       graphState.mutate('Header:20', {
@@ -1412,9 +1413,25 @@ describe('createState', () => {
       graphState.mutate('Header:20', {
         padding: 30,
       })
-      expect(spy).toHaveBeenNthCalledWith(1, { width: 20, height: 30 }, { width: 20, height: 20 })
+      expect(spy).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ width: 20, height: 30 }),
+        expect.objectContaining({ width: 20, height: 20 })
+      )
       expect(results[1]).toEqual({ ...initialState.header, height: 20 })
       expect(results[0]).toEqual({ ...initialState.header, height: 30 })
+
+      /*
+      Проверяем что булевые значения влияют на notify
+       */
+      graphState.mutate('Header:20', {
+        field: false,
+      })
+      graphState.mutate('Header:20', {
+        field: true,
+      })
+
+      expect(spy).toBeCalledTimes(3)
     })
   })
 
