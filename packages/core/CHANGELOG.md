@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.10.3
+
+### Patch Changes
+
+- c7fe78e: Fix boolean values with selector
+
 ## 0.10.2
 
 ### Patch Changes
