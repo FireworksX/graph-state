@@ -59,7 +59,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   ): TSelector extends AnyObject ? TSelector : ResolveEntityByType<TEntity, TInput> | null => {
     const isDeep = options?.deep ?? false
     const isSafe = options?.safe ?? false
-    const selector = options?.selector
+    const { selector, ...coreOptions } = options || {}
     const inputKey = isValue(input) ? keyOfEntity(input) : null
     debugState.debug({ type: 'resolve', entity: input, options })
 
@@ -79,7 +79,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
                 return null
               }
 
-              return isPartOfGraph(v, inputKey) || isDeep ? safeResolve(v, options) : v
+              return isPartOfGraph(v, inputKey) || isDeep ? safeResolve(v, coreOptions) : v
             })
 
             if (!isSafe) {
@@ -89,7 +89,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
             if (isLinkKey(value) && !isSafe && !cache.hasLink(value)) {
               resultValue = null
             } else if (isPartOfGraph(keyOfEntity(value as any), inputKey) || isDeep) {
-              resultValue = safeResolve(value, options)
+              resultValue = safeResolve(value, coreOptions)
             }
           }
         }
@@ -160,6 +160,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
     const data = isLinkKey(rawData) ? entityOfKey(rawData) : rawData
     const graphKey = entityGraphKey ?? stateKey
+    const partialKey = isPartialKey?.(graphKey)
     const parentKey = options?.parent
     const prevGraph: any = resolve(graphKey ?? '')
     const internal = options?.internal || { hasChange: false, visitors: new Map([]), updatedFields: [] }
@@ -173,7 +174,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
         ? options.replace(graphData)
         : options?.replace === 'deep'
           ? true
-          : isTopLevelGraph || isPartialKey(graphKey)
+          : isTopLevelGraph || partialKey
       : false
 
     if (isSkipped(data)) {
@@ -219,7 +220,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
       internal.hasChange = internal.hasChange || !isEqual
 
-      if (!parentKey && !isEqual) {
+      if ((!parentKey || partialKey) && !isEqual) {
         internal.updatedFields.push(key)
       }
 
@@ -301,9 +302,9 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       const nextResult = resolve(key) as Graph
 
       const getSelectedValues = (selector: SubscribeOptions['selector']) => {
-        const next = selector?.(nextResult)
-        const prev = selector?.(prevState)
-        const hasChange = updatedFields.some(key => key in next)
+        const next = nextResult && selector?.(nextResult)
+        const prev = prevState && selector?.(prevState)
+        const hasChange = !!next !== !!prev || updatedFields.some(key => key in next)
 
         return { next, prev, hasChange }
       }
