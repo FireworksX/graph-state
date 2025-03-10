@@ -1433,6 +1433,43 @@ describe('createState', () => {
 
       expect(spy).toBeCalledTimes(3)
     })
+
+    it('should notify after invalidate and selector should return only graph', () => {
+      const initialState = {
+        _type: 'Root',
+        _id: '10',
+        header: {
+          _type: 'Header',
+          _id: '20',
+          width: 20,
+          height: 20,
+          field: true,
+          properties: [{ type: 'string' }, { value: 'string' }],
+        },
+      }
+
+      const graphState = createState({
+        initialState,
+      })
+      const spy = vi.fn()
+      const selectorSpy = vi.fn()
+
+      graphState.subscribe(initialState, spy, {
+        selector: graph => {
+          selectorSpy(graph)
+          return graph.header
+        },
+      })
+
+      graphState.invalidate('Header:20')
+      expect(spy).toHaveBeenNthCalledWith(1, expect.objectContaining(null), expect.stringContaining('Header:20'))
+      graphState.mutate(initialState)
+      expect(spy.mock.calls[1]).toEqual(['Header:20', null])
+      selectorSpy.mock.calls.forEach(args => {
+        expect(args[0]).not.toBeNull()
+        expect(args[0]).not.toBeUndefined()
+      })
+    })
   })
 
   describe('plugins', () => {
@@ -1736,6 +1773,33 @@ describe('createState', () => {
       expect(graphState.resolve(10)).toBe(null)
       expect(graphState.resolve(10, { safe: true })).toBe(10)
       expect(graphState.resolve(10, { safe: false })).toBe(null)
+    })
+
+    it('should resolve selected value with deep option', () => {
+      const initialState = {
+        _type: 'Root',
+        _id: '10',
+        header: {
+          _type: 'Header',
+          _id: '20',
+          width: 20,
+          height: 20,
+          field: true,
+        },
+      }
+
+      const graphState = createState({
+        initialState,
+      })
+
+      const result = graphState.resolve(initialState, {
+        deep: true,
+        selector: graph => {
+          return graph.header
+        },
+      })
+
+      expect(result).toEqual(initialState.header)
     })
   })
 
