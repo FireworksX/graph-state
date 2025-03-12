@@ -19,7 +19,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "check": "tsc -v && tsc --noEmit --project .",
+    "check": "./node_modules/.bin/tsc -v && tsc --noEmit --project .",
     "test": "vitest --run --config ./vitest.config.ts",
     "test:types": "vitest --typecheck ./vitest.config.ts",
     "lint": "eslint --ext=js,jsx,ts,tsx . --fix",
@@ -31,6 +31,6 @@
   },
   "devDependencies": {
     "tsup": "^7.2.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.8.2"
   }
 }

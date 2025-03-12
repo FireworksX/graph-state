@@ -99,7 +99,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       }, {} as Graph)
     }
 
-    return value ? (selector ? selector({ ...value }) : { ...value }) : isSafe ? input : null
+    return value ? (selector ? (selector({ ...value }) as any) : { ...value }) : isSafe ? (input as any) : (null as any)
   }
 
   const safeResolve = <TInput extends Entity, TSelector>(
