@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.11.0
+
+### Minor Changes
+
+- 9e947ef: Add use method for register plugins & update shallow equals
+
 ## 0.10.4
 
 ### Patch Changes
