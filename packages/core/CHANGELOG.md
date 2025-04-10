@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.11.1
+
+### Patch Changes
+
+- 6d45f30: Fix shallowEquals
+
 ## 0.11.0
 
 ### Minor Changes
