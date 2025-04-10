@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import { useSyncExternalStore } from 'use-sync-external-store/shim'
+import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector'
 import type {
   ResolveOptions,
   Dispatch,
@@ -12,6 +12,8 @@ import type {
 import type { StateResolve } from './types'
 
 interface GraphOptions extends ResolveOptions, SubscribeOptions {}
+
+const defaultSelector = (data: any) => data
 
 export const useGraph = <TState extends GraphState, const TEntity extends Entity>(
   graphState: TState,
@@ -57,5 +59,5 @@ export const useGraph = <TState extends GraphState, const TEntity extends Entity
 
   const get = () => nextValue.current
 
-  return [useSyncExternalStore(subscribe, get, get), updateState]
+  return [useSyncExternalStoreWithSelector(subscribe, get, get, defaultSelector), updateState]
 }

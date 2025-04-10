@@ -1,6 +1,8 @@
 import { useCallback, useRef } from 'react'
-import { useSyncExternalStore } from 'use-sync-external-store/shim'
+import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector'
 import type { Graph, GraphState, SubscribeOptions } from '@graph-state/core'
+
+const defaultSelector = (data: any) => data
 
 export const useGraphFields = (graphState: GraphState, type: Graph['_type'], options?: SubscribeOptions): string[] => {
   const nextValue = useRef<string[]>(graphState.inspectFields(type))
@@ -28,5 +30,5 @@ export const useGraphFields = (graphState: GraphState, type: Graph['_type'], opt
 
   const get = () => nextValue.current
 
-  return useSyncExternalStore(subscribe, get, get)
+  return useSyncExternalStoreWithSelector(subscribe, get, get, defaultSelector)
 }

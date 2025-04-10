@@ -20,8 +20,6 @@ const graphState = createState({
       _type: 'Circle',
       _id: 1,
       params: {
-        _type: 'Params',
-        _id: 1,
         width: 20,
         height: 20,
         border: 1,
@@ -42,9 +40,11 @@ window.graphState = graphState;
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [params] = useGraph(graphState, 'Params:1', {
-    selector: graph => ({ width: graph.width }),
+  const [params] = useGraph(graphState, 'Circle:1', {
+    selector: graph => ({ params: graph.params }),
   });
+
+  console.log(params)
 
   // const [key, setKey] = useState('User:1');
   // const allSkills = useGraphStack(graphState, ['Skill:js']);
@@ -64,6 +64,11 @@ function App() {
   return (
     <>
       <h1>Hello world</h1>
+
+      <button onClick={() => graphState.use((state) => {
+        console.log(state)
+        state.registered = '1.1'
+      })}>Register plugin</button>
       {/*<GraphValue*/}
       {/*  graphState={graphState}*/}
       {/*  field={undefined}*/}
@@ -77,10 +82,7 @@ function App() {
       {/*<button onClick={() => setKey('User:2')}>Change key</button>*/}
       <button
         onClick={() => {
-          graphState.mutate('Params:1', prev => ({
-            ...prev,
-            width: Math.random(),
-          }));
+          graphState.mutate('Circle:1', { params: {width: Math.random() * 100}});
         }}
       >
         Set age

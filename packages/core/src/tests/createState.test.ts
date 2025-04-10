@@ -1153,6 +1153,32 @@ describe('createState', () => {
 
         expect(spy).toBeCalledTimes(1)
       })
+
+      it('should be notify if change nested fields', () => {
+        const state = createState({
+          initialState: {
+            user: {
+              _type: 'User',
+              _id: 1,
+              params: {
+                weight: 80
+              }
+            }
+          }
+        })
+
+        const spy = vi.fn()
+        state.subscribe('User:1', spy)
+
+        state.mutate('User:1', {
+          params: {
+            weight: 90
+          }
+        })
+
+        expect(spy).toBeCalledTimes(1)
+        expect(spy).toBeCalledWith(expect.objectContaining({ params: expect.objectContaining({weight: 90}) }), expect.objectContaining({}))
+      })
     })
 
     it('should skip nested tree notify', () => {
@@ -1604,6 +1630,23 @@ describe('createState', () => {
       expect(() => graphState.method()).not.toThrow()
       expect(pluginMethod).toReturnWith('first')
       expect(graphState).toBeInstanceOf(Object)
+    })
+
+    it('should register differed plugin', () => {
+      const state = createState({
+        _type: 'Test',
+        plugins: [(state) => {
+          state.initialPlugin = 1
+        }]
+      })
+      state.use((state) => {
+        state.version = '1.1'
+
+        expect(state._type).toBe('Test')
+        expect(state.initialPlugin).toBe(1)
+      })
+
+      expect(state.version).toBe('1.1')
     })
   })
 

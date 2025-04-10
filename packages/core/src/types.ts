@@ -168,6 +168,8 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
   resolveParents(field: Entity): unknown[]
   keyOfEntity(entity: Entity): LinkKey | null
   entityOfKey(key: LinkKey): Graph | null
+  use(plugin: Plugin): void
+  addSkip(predictor: SkipGraphPredictor): void
   getArgumentsForMutate(
     field: string | Graph,
     args: Parameters<GraphState<TEntity>['mutate']>

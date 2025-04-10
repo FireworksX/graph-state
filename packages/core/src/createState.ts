@@ -12,6 +12,7 @@ import type {
   SubscribeCallback,
   SubscribeOptions,
   AnyObject,
+  Plugin, SkipGraphPredictor
 } from 'src'
 import { isGraphOrKey } from 'src'
 import { getGraphLink } from 'src'
@@ -431,6 +432,15 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     }
   }
 
+  function use(this: GraphState, plugin: Plugin) {
+    pluginsStore.use(plugin)
+    plugin(this)
+  }
+
+  const addSkip = (predictor: SkipGraphPredictor) => {
+    skipPredictors.push(predictor)
+  }
+
   if (options?.initialState) {
     mutate(options.initialState as any, { replace: true })
   }
@@ -451,6 +461,8 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     getArgumentsForMutate,
     types: cache.types,
     cache,
+    use,
+    addSkip,
     subscribers: isDev ? subscribers : undefined,
     onDebugEvent: debugState.onDebugEvent,
   }
