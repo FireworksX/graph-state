@@ -12,7 +12,8 @@ import type {
   SubscribeCallback,
   SubscribeOptions,
   AnyObject,
-  Plugin, SkipGraphPredictor
+  Plugin,
+  SkipGraphPredictor,
 } from 'src'
 import { isGraphOrKey } from 'src'
 import { getGraphLink } from 'src'

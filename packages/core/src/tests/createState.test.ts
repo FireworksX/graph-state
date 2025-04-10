@@ -1161,10 +1161,10 @@ describe('createState', () => {
               _type: 'User',
               _id: 1,
               params: {
-                weight: 80
-              }
-            }
-          }
+                weight: 80,
+              },
+            },
+          },
         })
 
         const spy = vi.fn()
@@ -1172,12 +1172,15 @@ describe('createState', () => {
 
         state.mutate('User:1', {
           params: {
-            weight: 90
-          }
+            weight: 90,
+          },
         })
 
         expect(spy).toBeCalledTimes(1)
-        expect(spy).toBeCalledWith(expect.objectContaining({ params: expect.objectContaining({weight: 90}) }), expect.objectContaining({}))
+        expect(spy).toBeCalledWith(
+          expect.objectContaining({ params: expect.objectContaining({ weight: 90 }) }),
+          expect.objectContaining({})
+        )
       })
     })
 
@@ -1635,11 +1638,13 @@ describe('createState', () => {
     it('should register differed plugin', () => {
       const state = createState({
         _type: 'Test',
-        plugins: [(state) => {
-          state.initialPlugin = 1
-        }]
+        plugins: [
+          state => {
+            state.initialPlugin = 1
+          },
+        ],
       })
-      state.use((state) => {
+      state.use(state => {
         state.version = '1.1'
 
         expect(state._type).toBe('Test')

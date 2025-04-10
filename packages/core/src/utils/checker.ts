@@ -3,7 +3,8 @@ import {
   isLinkKey as isLinkKeyChecker,
   isGraphOrKey as isGraphOrKeyChecker,
   isGraph as isGraphChecker,
-  isObject as isObjectChecker, isPrimitive
+  isObject as isObjectChecker,
+  isPrimitive,
 } from '@graph-state/checkers'
 
 export const isLinkKey = (input: unknown): input is LinkKey => isLinkKeyChecker(input)
@@ -28,7 +29,7 @@ export const shallowEqual = (a: DataField, b: DataField) => {
     if (!keysB.includes(key)) return false
     const aValue = a[key]
     const bValue = b[key]
-    if (isPrimitive(a) && isPrimitive(b) && aValue !== bValue) return false
+    if (isPrimitive(aValue) && isPrimitive(bValue) && aValue !== bValue) return false
   }
 
   return true
