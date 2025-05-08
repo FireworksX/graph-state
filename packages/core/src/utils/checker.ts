@@ -34,3 +34,25 @@ export const shallowEqual = (a: DataField, b: DataField) => {
 
   return true
 }
+
+export const deepEqual = (a: DataField, b: DataField): boolean => {
+  if (a === b) return true
+
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length && a.every((val, i) => deepEqual(val, b[i]))
+  }
+
+  if (!isObject(b) || !isObject(a)) return a === b
+
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+
+  if (keysA.length !== keysB.length) return false
+
+  for (const key of keysA) {
+    if (!keysB.includes(key)) return false
+    if (!deepEqual(a[key] as DataField, b[key] as DataField)) return false
+  }
+
+  return true
+}

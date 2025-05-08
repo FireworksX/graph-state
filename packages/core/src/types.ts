@@ -67,7 +67,6 @@ export interface MutateInternal {
   unlinks?: Map<LinkKey, LinkKey[]>
   visitors: Map<LinkKey, LinkKey[]>
   isPartialGraph?: boolean
-  updatedFields?: string[]
 }
 
 export interface MutateOptions {

@@ -4,12 +4,10 @@ import {
   useGraph,
   useGraphFields,
   useGraphStack,
-  useGraphEffect,
 } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import profilerPlugin from '@graph-state/plugin-profiler';
-import { SpringValue, animated } from '@react-spring/web';
-import { useState } from 'react';
+import { animated } from '@react-spring/web';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -66,15 +64,24 @@ const graphState = createState({
 
 window.graphState = graphState;
 
+function omit<T extends AnyObject, P extends string[]>(
+  obj: T,
+  ...props: P
+): Omit<T, P[number]> {
+  const result = { ...obj };
+  props.forEach(prop => {
+    delete result[prop];
+  });
+  return result;
+}
+
 // console.log(graphState.resolve(graphState));
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [params] = useGraph(graphState, 'Circle:1', {
+  const [params, setParams] = useGraph(graphState, 'Circle:1', {
     selector: graph => ({ params: graph.params }),
   });
-
-  console.log(params);
 
   // const [key, setKey] = useState('User:1');
   // const allSkills = useGraphStack(graphState, ['Skill:js']);
@@ -98,7 +105,6 @@ function App() {
       <button
         onClick={() =>
           graphState.use(state => {
-            console.log(state);
             state.registered = '1.1';
           })
         }
@@ -116,15 +122,6 @@ function App() {
       {/*</GraphValue>*/}
       <pre>{JSON.stringify(params, null, 2)}</pre>
       {/*<button onClick={() => setKey('User:2')}>Change key</button>*/}
-      <button
-        onClick={() => {
-          graphState.mutate('Circle:1', {
-            params: { width: Math.random() * 100 },
-          });
-        }}
-      >
-        Set age
-      </button>
       <button
         onClick={() => {
           graphState.mutate(

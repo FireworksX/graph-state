@@ -1176,7 +1176,6 @@ describe('createState', () => {
             ...updatedTraits,
           },
         }))
-
         expect(spy).toBeCalledTimes(1)
       })
 
@@ -1468,11 +1467,13 @@ describe('createState', () => {
       graphState.mutate('Header:20', {
         padding: 30,
       })
+
       expect(spy).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({ width: 20, height: 30 }),
         expect.objectContaining({ width: 20, height: 20 })
       )
+
       expect(results[1]).toEqual({ ...initialState.header, height: 20 })
       expect(results[0]).toEqual({ ...initialState.header, height: 30 })
 
@@ -1487,6 +1488,52 @@ describe('createState', () => {
       })
 
       expect(spy).toBeCalledTimes(3)
+    })
+
+    it('should notify when value fully deleted', () => {
+      const initialState = {
+        _type: 'Root',
+        _id: '10',
+        header: {
+          _type: 'Header',
+          _id: '20',
+          width: 20,
+          height: 20,
+          field: true,
+        },
+      }
+
+      const graphState = createState({
+        initialState,
+      })
+      const results = []
+      const spy = vi.fn()
+
+      graphState.subscribe('Root:10', spy, {
+        selector: graph => {
+          results.push(graph)
+          return { header: graph.header }
+        },
+      })
+
+      graphState.mutate(
+        'Root:10',
+        prev => {
+          const prevCopy = { ...prev }
+          delete prevCopy.header
+          return prevCopy
+        },
+        { replace: true }
+      )
+
+      expect(spy).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ header: undefined }),
+        expect.objectContaining({ header: 'Header:20' })
+      )
+
+      expect(results[0]).toEqual({ _type: 'Root', _id: '10' })
+      expect(results[1]).toEqual({ _type: 'Root', _id: '10', header: 'Header:20' })
     })
 
     it('should notify after invalidate and selector should return only graph', () => {

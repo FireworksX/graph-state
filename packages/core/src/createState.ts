@@ -20,7 +20,7 @@ import { getGraphLink } from 'src'
 import { isPartialKey } from 'src'
 import { isObject } from 'src'
 import { isLinkKey, isGraph } from 'src'
-import { shallowEqual } from './utils/checker'
+import { shallowEqual, deepEqual } from './utils/checker'
 import { createCache } from './cache'
 import { joinKeys } from './utils/joinKeys'
 import { isPartOfGraph } from './utils/isPartOfGraph'
@@ -165,7 +165,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const partialKey = isPartialKey?.(graphKey)
     const parentKey = options?.parent
     const prevGraph: any = resolve(graphKey ?? '')
-    const internal = options?.internal || { hasChange: false, visitors: new Map([]), updatedFields: [] }
+    const internal = options?.internal || { hasChange: false, visitors: new Map([]) }
     let graphData: Graph = {
       ...data,
       ...entityOfKey(graphKey),
@@ -228,10 +228,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
       internal.hasChange = internal.hasChange || !isEqual
 
-      if ((!parentKey || partialKey) && !isEqual) {
-        internal.updatedFields.push(key)
-      }
-
       if (!isReplace && isLinkKey(prevValue) && prevValue !== fieldValue) {
         cache.removeRefs(graphKey, prevValue)
         //         debug(
@@ -248,7 +244,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
       return acc
     }, {} as Graph)
-
     cache.writeLink(graphKey, nextGraph, parentKey)
 
     /**
@@ -261,8 +256,8 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     /**
      * Notify after remove garbage
      */
-    if (internal.hasChange) {
-      notify(graphKey, prevGraph, internal.updatedFields)
+    if (internal.hasChange || isReplace) {
+      notify(graphKey, prevGraph)
     }
 
     debugState.debug({
@@ -295,7 +290,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     }
   }
 
-  const notify = (entity: Entity, prevState: Graph | null | undefined, updatedFields: string[] = []) => {
+  const notify = (entity: Entity, prevState: Graph | null | undefined) => {
     if (deepIndex > DEEP_LIMIT) {
       throw new Error('Too deep notify.')
     }
@@ -305,26 +300,16 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
     if (key) {
       deepIndex++
-      const subs = subscribers.get(key) || []
+      const subs = [...(subscribers.get(key) || []), ...(subscribers.get(EACH_UPDATED) || [])]
       const deps = cache.getChildren(key) || []
       const nextResult = resolve(key) as Graph
 
       const getSelectedValues = (selector: SubscribeOptions['selector']) => {
         const next = nextResult && selector?.(nextResult)
         const prev = prevState && selector?.(prevState)
-        const hasChange = !!next !== !!prev || updatedFields.some(key => key in next)
 
-        return { next, prev, hasChange }
+        return { next, prev, hasChange: !deepEqual(next, prev) }
       }
-
-      subscribers.get(EACH_UPDATED)?.forEach(({ callback, selector }) => {
-        if (selector) {
-          const { next, prev, hasChange } = getSelectedValues(selector)
-          if (hasChange) callback(next, prev)
-        } else {
-          callback(nextResult, prevState)
-        }
-      })
 
       subs.forEach(({ callback, selector }) => {
         if (selector) {
