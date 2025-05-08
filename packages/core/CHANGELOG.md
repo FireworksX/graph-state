@@ -1,5 +1,12 @@
 # @graph-state/core
 
+## 0.11.2
+
+### Patch Changes
+
+- aa5d5e6: Fix dublicates in array
+- 9403852: fixed notify when deleting the value fully
+
 ## 0.11.1
 
 ### Patch Changes
