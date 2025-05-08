@@ -585,10 +585,36 @@ describe('createState', () => {
     })
 
     describe('array merge', () => {
+      it('should merge arrays', () => {
+        const state = createState({
+          initialState: {
+            count: 1,
+            list: ['value'],
+            links: ['Link:1'],
+          },
+        })
+
+        state.mutate(state.key, {
+          list: ['value2'],
+        })
+
+        expect(state.resolve(state.key).list.length).toBe(2)
+        expect(state.resolve(state.key).links.length).toBe(1)
+
+        /**
+         * Когда изменяем state массив не должен дублироваться
+         */
+        state.mutate(state.key, { count: 2 })
+
+        expect(state.resolve(state.key).list.length).toBe(2)
+        expect(state.resolve(state.key).links.length).toBe(1)
+      })
+
       it('should skip duplicate links in array by default', () => {
         const graphState = createState()
         graphState.mutate({
           ...headerLayer,
+          count: 1,
           children: [],
         })
 

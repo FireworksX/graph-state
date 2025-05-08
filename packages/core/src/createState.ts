@@ -199,6 +199,12 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       const fieldKey = joinKeys(graphKey, key)
       let fieldValue = value
       const prevValue = prevGraph?.[key]
+      /**
+       * Проверяем был ли данный ключ в данных, которые пришли в mutate.
+       * Это нужно для того, чтобы дублировать значения в массив если
+       * сам массив не изменялся.
+       */
+      const isUpdateField = isObject(data) && key in data
 
       if (!isSkipped(fieldValue)) {
         if (isObject(fieldValue) || Array.isArray(fieldValue) || isLinkKey(fieldValue)) {
@@ -209,7 +215,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
           })
         }
 
-        if (!isReplace && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
+        if (!isReplace && isUpdateField && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
           fieldValue = [...prevValue, ...fieldValue]
         }
 

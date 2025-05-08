@@ -13,9 +13,39 @@ import { useState } from 'react';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
+const layer = {
+  _id: '8cb2e27f5a5c9',
+  _type: 'Frame',
+  solidFill: 'rgba(72,44,196,1)',
+  fillType: 'Solid',
+  position: 'relative',
+  width: 39,
+  height: 37,
+  parent: '$Frame:36131fa1d98248',
+  visible: true,
+  borderRadius: '50px',
+  minWidth: 28,
+  interactions: [
+    {
+      on: 'click',
+      event: 'Variable:da5fafd8d679d8',
+      _type: 'Frame',
+      _id: '8cb2e27f5a5c9.interactions.0',
+    },
+    {
+      on: 'click',
+      event: 'Variable:da5fafd8d679d8',
+      _type: 'Frame',
+      _id: '8cb2e27f5a5c9.interactions.0',
+    },
+  ],
+  opacity: 1,
+};
+
 const graphState = createState({
   type: 'State',
   initialState: {
+    layer,
     shape: {
       _type: 'Circle',
       _id: 1,
@@ -44,7 +74,7 @@ function App() {
     selector: graph => ({ params: graph.params }),
   });
 
-  console.log(params)
+  console.log(params);
 
   // const [key, setKey] = useState('User:1');
   // const allSkills = useGraphStack(graphState, ['Skill:js']);
@@ -65,10 +95,16 @@ function App() {
     <>
       <h1>Hello world</h1>
 
-      <button onClick={() => graphState.use((state) => {
-        console.log(state)
-        state.registered = '1.1'
-      })}>Register plugin</button>
+      <button
+        onClick={() =>
+          graphState.use(state => {
+            console.log(state);
+            state.registered = '1.1';
+          })
+        }
+      >
+        Register plugin
+      </button>
       {/*<GraphValue*/}
       {/*  graphState={graphState}*/}
       {/*  field={undefined}*/}
@@ -82,7 +118,9 @@ function App() {
       {/*<button onClick={() => setKey('User:2')}>Change key</button>*/}
       <button
         onClick={() => {
-          graphState.mutate('Circle:1', { params: {width: Math.random() * 100}});
+          graphState.mutate('Circle:1', {
+            params: { width: Math.random() * 100 },
+          });
         }}
       >
         Set age
