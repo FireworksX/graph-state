@@ -1,5 +1,11 @@
 # @graph-state/react
 
+## 0.6.4
+
+### Patch Changes
+
+- 676ec3b: Add passing options
+
 ## 0.6.3
 
 ### Patch Changes
