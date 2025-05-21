@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.11.3
+
+### Patch Changes
+
+- e9246f1: Fixed mutation array processing and modified subGraph id generation
+
 ## 0.11.2
 
 ### Patch Changes
