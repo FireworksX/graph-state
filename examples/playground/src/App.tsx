@@ -1,3 +1,4 @@
+import type { AnyObject } from '@graph-state/core';
 import { createState } from '@graph-state/core';
 import {
   GraphValue,
@@ -14,29 +15,7 @@ export const generateId = () => Math.random().toString(16).slice(2);
 const layer = {
   _id: '8cb2e27f5a5c9',
   _type: 'Frame',
-  solidFill: 'rgba(72,44,196,1)',
-  fillType: 'Solid',
-  position: 'relative',
-  width: 39,
-  height: 37,
-  parent: '$Frame:36131fa1d98248',
-  visible: true,
-  borderRadius: '50px',
-  minWidth: 28,
-  interactions: [
-    {
-      on: 'click',
-      event: 'Variable:da5fafd8d679d8',
-      _type: 'Frame',
-      _id: '8cb2e27f5a5c9.interactions.0',
-    },
-    {
-      on: 'click',
-      event: 'Variable:da5fafd8d679d8',
-      _type: 'Frame',
-      _id: '8cb2e27f5a5c9.interactions.0',
-    },
-  ],
+  interactions: [],
   opacity: 1,
 };
 
@@ -44,16 +23,6 @@ const graphState = createState({
   type: 'State',
   initialState: {
     layer,
-    shape: {
-      _type: 'Circle',
-      _id: 1,
-      params: {
-        width: 20,
-        height: 20,
-        border: 1,
-        radius: 10,
-      },
-    },
   },
   plugins: [loggerPlugin()],
 });
@@ -79,24 +48,13 @@ function omit<T extends AnyObject, P extends string[]>(
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [params, setParams] = useGraph(graphState, 'Circle:1', {
-    selector: graph => ({ params: graph.params }),
-  });
-
-  // const [key, setKey] = useState('User:1');
-  // const allSkills = useGraphStack(graphState, ['Skill:js']);
-
-  // useGraphEffect(graphState, key, (prevValue, nextValue) => {
-  //   console.log(prevValue, nextValue);
-  //   // if (nextValue) {
-  //   //   graphState.mutate({
-  //   //     _type: 'Layer',
-  //   //     _id: 'header',
-  //   //     user: 'Layer:header',
-  //   //     field: '123',
-  //   //   });
-  //   // }
-  // });
+  const [{ interactions }, setInteractions] = useGraph(
+    graphState,
+    'Frame:8cb2e27f5a5c9',
+    {
+      selector: graph => ({ interactions: graph.interactions }),
+    }
+  );
 
   return (
     <>
@@ -104,12 +62,14 @@ function App() {
 
       <button
         onClick={() =>
-          graphState.use(state => {
-            state.registered = '1.1';
+          setInteractions({
+            interactions: [
+              { on: interactions.length % 2 ? 'click' : 'mouseover' },
+            ],
           })
         }
       >
-        Register plugin
+        Mutate interactions
       </button>
       {/*<GraphValue*/}
       {/*  graphState={graphState}*/}
@@ -120,7 +80,7 @@ function App() {
       {/*    return <>{console.log(value)}</>;*/}
       {/*  }}*/}
       {/*</GraphValue>*/}
-      <pre>{JSON.stringify(params, null, 2)}</pre>
+      <pre>{JSON.stringify(interactions, null, 2)}</pre>
       {/*<button onClick={() => setKey('User:2')}>Change key</button>*/}
       <button
         onClick={() => {

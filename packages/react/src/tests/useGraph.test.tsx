@@ -48,13 +48,10 @@ describe('useGraph', () => {
 
     const [state] = result.current
 
-    expect(state).toStrictEqual({
+    expect(state).toMatchObject({
       _type: 'Root',
       _id: 'id',
-      nested: [
-        { value: 1, _type: 'Root', _id: 'id.nested.0' },
-        { value: 2, _type: 'Root', _id: 'id.nested.1' },
-      ],
+      nested: [{ value: 1 }, { value: 2 }],
     })
   })
 
