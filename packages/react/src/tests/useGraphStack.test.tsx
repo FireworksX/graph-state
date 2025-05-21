@@ -20,7 +20,8 @@ describe('useGraphStack', () => {
 
     expect(result?.current).toHaveLength(2)
     ;['Root:id.fieldOld', 'Root:id.fieldNew'].forEach((field, index) => {
-      expect(graphState.resolve(field)).toStrictEqual(result.current[+index])
+      const resultObject = result.current[+index] as any
+      expect(graphState.resolve(field)).toMatchObject(resultObject)
     })
   })
 
@@ -56,13 +57,10 @@ describe('useGraphStack', () => {
     })
     const { result } = renderHook(() => useGraphStack(graphState, ['Root:id']))
 
-    expect(result.current[0]).toStrictEqual({
+    expect(result.current[0]).toMatchObject({
       _type: 'Root',
       _id: 'id',
-      nested: [
-        { value: 1, _type: 'Root', _id: 'id.nested.0' },
-        { value: 2, _type: 'Root', _id: 'id.nested.1' },
-      ],
+      nested: [{ value: 1 }, { value: 2 }],
     })
   })
 

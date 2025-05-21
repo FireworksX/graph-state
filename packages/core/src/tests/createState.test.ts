@@ -657,6 +657,27 @@ describe('createState', () => {
 
         expect(graphState.resolve(headerLayer).children).toHaveLength(1)
       })
+
+      it('should update array and invalidate correctly', () => {
+        const state = createState({
+          initialState: {
+            count: 1,
+            list: [{ value: 1 }],
+          },
+        })
+
+        state.mutate(state.key, {
+          list: [{ value: 2 }],
+        })
+
+        expect(state.resolve(state.key).list.length).toBe(2)
+        state.invalidate(state.resolve(state.key).list[1])
+        expect(state.resolve(state.key).list.length).toBe(1)
+        state.mutate(state.key, {
+          list: [{ value: 2 }],
+        })
+        expect(state.resolve(state.key).list.length).toBe(2)
+      })
     })
 
     it('should set value as link', () => {
@@ -1796,10 +1817,10 @@ describe('createState', () => {
         },
       })
 
-      expect(graphState.resolve('Root:id')).toStrictEqual({
+      expect(graphState.resolve('Root:id')).toMatchObject({
         _type: 'Root',
         _id: 'id',
-        nested: [{ value: 1, _type: 'Root', _id: 'id.nested.0' }, 'Layer:header'],
+        nested: [{ value: 1 }, 'Layer:header'],
         graph: 'Layer:header',
       })
     })

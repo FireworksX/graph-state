@@ -31,6 +31,7 @@ import { createPluginsState } from './plugins'
 // import { debug as debugMessage } from './helpers/help'
 import { isGraphState } from './utils/isGraphState'
 import { createDebugState } from './debug'
+import { generateId } from './utils/generateId'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -143,8 +144,8 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     }
 
     if (Array.isArray(input)) {
-      return input.map((item, index) => {
-        const indexKey = parentFieldKey ? joinKeys(parentFieldKey, `${index}`) : undefined
+      return input.map(item => {
+        const indexKey = parentFieldKey ? joinKeys(parentFieldKey, `${generateId()}`) : undefined
         return mutateField(item, indexKey, options)
       })
     }
@@ -207,16 +208,16 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       const isUpdateField = isObject(data) && key in data
 
       if (!isSkipped(fieldValue)) {
+        if (!isReplace && isUpdateField && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
+          fieldValue = [...prevValue, ...fieldValue]
+        }
+
         if (isObject(fieldValue) || Array.isArray(fieldValue) || isLinkKey(fieldValue)) {
           fieldValue = mutateField(fieldValue, fieldKey, {
             ...options,
             parent: graphKey,
             internal,
           })
-        }
-
-        if (!isReplace && isUpdateField && Array.isArray(fieldValue) && Array.isArray(prevValue)) {
-          fieldValue = [...prevValue, ...fieldValue]
         }
 
         if (Array.isArray(fieldValue) && options?.dedup !== false) {
@@ -283,7 +284,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       parents.forEach(parentKey => {
         const prevParent = cache.readLink(parentKey)
         const freshParent = resolve(parentKey, { safe: false })
-
         cache.writeLink(parentKey, freshParent)
         notify(parentKey, prevParent)
       })
