@@ -62,6 +62,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   ): TSelector extends AnyObject ? TSelector : ResolveEntityByType<TEntity, TInput> | null => {
     const isDeep = options?.deep ?? false
     const isSafe = options?.safe ?? false
+    const keepLinks = options?.keepLinks ?? false
     const { selector, ...coreOptions } = options || {}
     const inputKey = isValue(input) ? keyOfEntity(input) : null
     debugState.debug({ type: 'resolve', entity: input, options })
@@ -82,7 +83,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
                 return null
               }
 
-              return isPartOfGraph(v, inputKey) || isDeep ? safeResolve(v, coreOptions) : v
+              return (isPartOfGraph(v, inputKey) && !keepLinks) || isDeep ? safeResolve(v, coreOptions) : v
             })
 
             if (!isSafe) {
@@ -91,7 +92,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
           } else {
             if (isLinkKey(value) && !isSafe && !cache.hasLink(value)) {
               resultValue = null
-            } else if (isPartOfGraph(keyOfEntity(value as any), inputKey) || isDeep) {
+            } else if ((isPartOfGraph(keyOfEntity(value as any), inputKey) && !keepLinks) || isDeep) {
               resultValue = safeResolve(value, coreOptions)
             }
           }
@@ -283,7 +284,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
       parents.forEach(parentKey => {
         const prevParent = cache.readLink(parentKey)
-        const freshParent = resolve(parentKey, { safe: false })
+        const freshParent = resolve(parentKey, { safe: false, keepLinks: true })
         cache.writeLink(parentKey, freshParent)
         notify(parentKey, prevParent)
       })

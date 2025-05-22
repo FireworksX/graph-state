@@ -102,6 +102,7 @@ export interface CreateStateOptions<TEntity extends SystemFields = SystemFields,
 export interface ResolveOptions<TEntity extends SystemFields = any, TInput extends Entity = any, TSelector = any> {
   deep?: boolean
   safe?: boolean
+  keepLinks?: boolean
   selector?: (graph: ResolveEntityByType<TEntity, TInput>) => TSelector
 }
 

@@ -80,7 +80,14 @@ function App() {
       {/*    return <>{console.log(value)}</>;*/}
       {/*  }}*/}
       {/*</GraphValue>*/}
-      <pre>{JSON.stringify(interactions, null, 2)}</pre>
+      <ul>
+        {interactions.map(el => (
+          <li key={el._id}>
+            <pre>{JSON.stringify(el)}</pre>
+            <button onClick={() => graphState.invalidate(el)}>remove</button>
+          </li>
+        ))}
+      </ul>
       {/*<button onClick={() => setKey('User:2')}>Change key</button>*/}
       <button
         onClick={() => {

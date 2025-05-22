@@ -305,6 +305,22 @@ describe('createState', () => {
       expect(spy).toHaveBeenCalledWith(null, expect.objectContaining(avatarLayer))
     })
 
+    it('should invalidate subGraph', () => {
+      const graphState = createState({
+        initialState: {
+          interactions: [{ on: 'click' }, { on: 'hover' }, { on: 'mouseover' }],
+        },
+      })
+
+      const interactions = graphState.resolve(graphState.key)?.interactions
+      graphState.invalidate(interactions[0])
+      graphState.invalidate(interactions[1])
+
+      const nextInteractions = graphState.resolve(graphState.key)?.interactions
+      expect(nextInteractions.length).toBe(1)
+      expect(nextInteractions[0]).toMatchObject({ on: 'mouseover' })
+    })
+
     it('should notify after invalidating and recreating', () => {
       const spy = vi.fn()
       const graphState = createState()
