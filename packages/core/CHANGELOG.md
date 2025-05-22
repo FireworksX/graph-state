@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.11.4
+
+### Patch Changes
+
+- c5d6256: Fix invalidate subGraphs
+
 ## 0.11.3
 
 ### Patch Changes
