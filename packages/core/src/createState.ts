@@ -31,6 +31,9 @@ import { createPluginsState } from './plugins'
 // import { debug as debugMessage } from './helpers/help'
 import { isGraphState } from './utils/isGraphState'
 import { createDebugState } from './debug'
+import { warn } from './helpers/help'
+import { entityOfKey as staticEntityOfKey } from './helpers/entityOfKey'
+import { keyOfEntity as staticKeyOfEntity } from './helpers/keyOfEntity'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -42,7 +45,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 ): GraphState<TEntity, TRootType> => {
   const id = options?._id ?? `${ID++}`
   const type = options?._type ?? (STATE_TYPE as TRootType)
-  const keys = options?.keys ?? {}
   const stateKey = `${type}:${id}` as const
   const skipPredictors = [isGraphState, ...(options?.skip ?? [])]
   const cache = createCache()
@@ -376,37 +378,13 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   }
 
   const keyOfEntity = (entity: Entity) => {
-    if (typeof entity === 'string') {
-      return entityOfKey(entity) ? (entity as LinkKey) : null
-    }
-    if (!entity?._type) {
-      return null
-    }
-
-    let entityId: LinkKey | null = null
-
-    if (entity._type in keys) {
-      entityId = keys[entity._type]?.(entity) ?? null
-    } else if (isValue(entity.id) || isValue(entity._id)) {
-      entityId = `${entity.id ?? entity._id}`
-    }
-
-    return !entityId ? entityId : (`${entity._type}:${entityId}` as LinkKey)
+    warn('Instance keyOfEntity is deprecated. Use static method keyOfEntity.')
+    return staticKeyOfEntity(entity)
   }
 
   const entityOfKey = (entity?: Entity) => {
-    if (isObject(entity) && (entity as any)?._type && keyOfEntity(entity)) {
-      return entity as any as Graph
-    }
-    if (!entity || typeof entity !== 'string') return null
-
-    const [typeName, ...restTypes] = entity.split(':')
-    if (!typeName || restTypes.length < 1) return null
-
-    return {
-      _type: typeName,
-      _id: restTypes.join(':'),
-    }
+    warn('Instance entityOfKey is deprecated. Use static method entityOfKey.')
+    return staticEntityOfKey(entity)
   }
 
   const getArgumentsForMutate = (entity: string | Entity, ...args: any[]) => {
