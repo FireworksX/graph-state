@@ -31,7 +31,6 @@ import { createPluginsState } from './plugins'
 // import { debug as debugMessage } from './helpers/help'
 import { isGraphState } from './utils/isGraphState'
 import { createDebugState } from './debug'
-import { generateId } from './utils/generateId'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -146,7 +145,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
     if (Array.isArray(input)) {
       return input.map(item => {
-        const indexKey = parentFieldKey ? joinKeys(parentFieldKey, `${generateId()}`) : undefined
+        const indexKey = parentFieldKey ? joinKeys(parentFieldKey, `${ID++}`) : undefined
         return mutateField(item, indexKey, options)
       })
     }

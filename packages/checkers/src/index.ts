@@ -1,3 +1,5 @@
+import type { Graph } from '@graph-state/core'
+
 export const isEmptyValue = (value: unknown): value is null | undefined =>
   !value && (value === null || value === undefined)
 
@@ -14,7 +16,7 @@ export const isHTMLNode = (o: any) => {
 
 export const isGraphOrKey = (x: any): boolean => typeof x === 'string' || isGraph(x)
 
-export const isGraph = (x: unknown): boolean => typeof x === 'object' && typeof (x as any)._type === 'string'
+export const isGraph = (x: unknown): x is Graph => typeof x === 'object' && typeof (x as any)._type === 'string'
 
 export const isLinkKey = (x: unknown): boolean => typeof x === 'string' && x.split(':').length >= 2
 
@@ -40,8 +42,22 @@ export const isHtmlContent = (input: unknown): boolean =>
   typeof input === 'string' ? /<\/?[a-z][\s\S]*>/i.test(input) : false
 
 export const isGraphOfType = (type: string) => (input: unknown) => {
-  if (isLinkKey(input)) return type === (input as string).split(':').at(0)
+  if (isLinkKey(input)) return type === (input as string).split(':')?.[0]
   if (isGraph(input)) return (input as any)._type === type
 
   return false
+}
+
+export const allowTypes = (types: string[]) => (input: unknown) => {
+  if (!input) return false
+  let type: string | null = null
+  if (isLinkKey(input)) {
+    type = (input as string).split(':')?.[0]
+  }
+
+  if (isGraph(input)) {
+    type = input._type
+  }
+
+  return type ? !types.includes(type) : false
 }

@@ -17,12 +17,23 @@ const layer = {
   _type: 'Frame',
   interactions: [],
   opacity: 1,
+  goal: {
+    id: 4,
+    value: 'click-header',
+  },
 };
 
 const graphState = createState({
   type: 'State',
   initialState: {
     layer,
+  },
+  resolvers: {
+    Frame: {
+      opacity: (parent, state, info) => {
+        return 1;
+      },
+    },
   },
   plugins: [loggerPlugin()],
 });
