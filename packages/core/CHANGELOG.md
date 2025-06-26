@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.11.6
+
+### Patch Changes
+
+- ba68224: Set utils methods as static
+
 ## 0.11.5
 
 ### Patch Changes
