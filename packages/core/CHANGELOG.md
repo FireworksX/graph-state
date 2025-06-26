@@ -1,5 +1,13 @@
 # @graph-state/core
 
+## 0.11.5
+
+### Patch Changes
+
+- 745932f: Add new checker. Remove generateId from core.
+- Updated dependencies [745932f]
+  - @graph-state/checkers@0.1.3
+
 ## 0.11.4
 
 ### Patch Changes
