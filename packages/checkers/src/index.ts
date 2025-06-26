@@ -1,5 +1,3 @@
-import type { Graph } from '@graph-state/core'
-
 export const isEmptyValue = (value: unknown): value is null | undefined =>
   !value && (value === null || value === undefined)
 
@@ -16,7 +14,7 @@ export const isHTMLNode = (o: any) => {
 
 export const isGraphOrKey = (x: any): boolean => typeof x === 'string' || isGraph(x)
 
-export const isGraph = (x: unknown): x is Graph => typeof x === 'object' && typeof (x as any)._type === 'string'
+export const isGraph = (x: unknown) => typeof x === 'object' && typeof (x as any)._type === 'string'
 
 export const isLinkKey = (x: unknown): boolean => typeof x === 'string' && x.split(':').length >= 2
 
@@ -56,7 +54,7 @@ export const allowTypes = (types: string[]) => (input: unknown) => {
   }
 
   if (isGraph(input)) {
-    type = input._type
+    type = (input as any)._type
   }
 
   return type ? !types.includes(type) : false
