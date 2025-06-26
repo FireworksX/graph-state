@@ -19,7 +19,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "check": "echo 'skip cheking'",
+    "check": "tsc --noEmit --project .",
     "test": "echo 'skip testins'",
     "lint": "eslint --ext=js,jsx,ts,tsx . --fix",
     "release": "npm publish"

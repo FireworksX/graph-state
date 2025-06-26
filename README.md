@@ -1,4 +1,4 @@
-<div align="center">
+<div>
 
 [![npm](https://img.shields.io/npm/v/@graph-state/core?style=flat-square)](https://www.npmjs.com/package/@graph-state/core)
 ![npm type definitions](https://img.shields.io/npm/types/@graph-state/core?style=flat-square)
