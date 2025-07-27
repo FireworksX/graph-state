@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.11.7
+
+### Patch Changes
+
+- 4160586: Add exports for util methods
+
 ## 0.11.6
 
 ### Patch Changes
