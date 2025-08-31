@@ -14,6 +14,7 @@ import type {
   AnyObject,
   Plugin,
   SkipGraphPredictor,
+  NotifyInternal,
 } from 'src'
 import { isGraphOrKey } from 'src'
 import { getGraphLink } from 'src'
@@ -247,6 +248,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
       return acc
     }, {} as Graph)
+
     cache.writeLink(graphKey, nextGraph, parentKey)
 
     /**
@@ -259,7 +261,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     /**
      * Notify after remove garbage
      */
-    if (internal.hasChange || isReplace) {
+    if ((internal.hasChange || isReplace) && !parentKey) {
       notify(graphKey, prevGraph)
     }
 
@@ -292,11 +294,12 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     }
   }
 
-  const notify = (entity: Entity, prevState: Graph | null | undefined) => {
+  const notify = (entity: Entity, prevState: Graph | null | undefined, _internal?: NotifyInternal) => {
     if (deepIndex > DEEP_LIMIT) {
       throw new Error('Too deep notify.')
     }
 
+    const depth = _internal?.depth ?? 0
     const key = keyOfEntity(entity)
     debugState.debug({ type: 'notify', entity: key })
 
@@ -313,7 +316,13 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
         return { next, prev, hasChange: !deepEqual(next, prev) }
       }
 
-      subs.forEach(({ callback, selector }) => {
+      subs.forEach(({ callback, options }) => {
+        const selector = options?.selector
+        const directChangesOnly = options?.directChangesOnly ?? false
+
+        if (directChangesOnly && depth > 0) {
+          return
+        }
         if (selector) {
           const { next, prev, hasChange } = getSelectedValues(selector)
           if (hasChange) callback(next, prev)
@@ -322,7 +331,11 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
         }
       })
 
-      deps.forEach(dep => notify(dep, prevState))
+      deps.forEach(dep =>
+        notify(dep, prevState, {
+          depth: depth + 1,
+        })
+      )
     }
 
     deepIndex = 0
@@ -333,13 +346,12 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const callback = typeof args[0] === 'function' ? args[0] : args[1]
     const options: SubscribeOptions | undefined = typeof args[0] === 'function' ? args[1] : args[2]
     const key = keyOfEntity(input)
-    const selector = options?.selector
 
     if (key) {
       if (subscribers.has(key)) {
-        subscribers.set(key, [...Array.from(subscribers.get(key) || []), { callback, selector }])
+        subscribers.set(key, [...Array.from(subscribers.get(key) || []), { callback, options }])
       } else {
-        subscribers.set(key, [{ callback, selector }])
+        subscribers.set(key, [{ callback, options }])
       }
 
       cache.onRemoveLink((link, prevValue) => {

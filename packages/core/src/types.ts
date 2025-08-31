@@ -61,6 +61,10 @@ export type MutateField = (
   options?: MutateOptions
 ) => (LinkKey | LinkKey[] | null | null[])[] | LinkKey
 
+export interface NotifyInternal {
+  depth?: number
+}
+
 export interface MutateInternal {
   hasChange?: boolean
   path: string[]
@@ -81,6 +85,7 @@ export interface MutateOptions {
 export interface SubscribeOptions<TEntity extends SystemFields = any, TInput extends Entity = any, TSelector = any> {
   signal?: AbortSignal
   selector?: (graph: ResolveEntityByType<TEntity, TInput>) => TSelector
+  directChangesOnly?: boolean
 }
 
 export type Plugin = <TState extends GraphState>(state: TState) => TState | void
@@ -135,9 +140,12 @@ export type StateDataSetter<TEntity extends SystemFields, TInput extends Entity>
 
 export type SubscribeCallback = {
   callback: (nextValue: Graph | null, prevValue?: Graph | null) => void
-  selector?: <TEntity extends SystemFields = any, TInput extends Entity = any, TSelector = any>(
-    graph: ResolveEntityByType<TEntity, TInput>
-  ) => TSelector
+  options?: {
+    selector?: <TEntity extends SystemFields = any, TInput extends Entity = any, TSelector = any>(
+      graph: ResolveEntityByType<TEntity, TInput>
+    ) => TSelector
+    directChangesOnly?: boolean
+  }
 }
 
 export interface GraphState<TEntity extends SystemFields = SystemFields, TRootType extends LinkKey = LinkKey>

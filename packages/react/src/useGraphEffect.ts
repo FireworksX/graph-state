@@ -1,5 +1,5 @@
-import type { Entity, GraphState, SubscribeOptions } from '@graph-state/core'
 import { useEffect } from 'react'
+import type { Entity, GraphState, SubscribeOptions } from '@graph-state/core'
 import type { StateResolve } from './types'
 
 export function useGraphEffect<TState extends GraphState, const TEntity extends Entity>(

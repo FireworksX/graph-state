@@ -9,8 +9,8 @@ const profilerPlugin: (options?: PluginOptions) => Plugin = () => {
     let events: (DebugEvent & WithTimestamp)[] = [];
 
     const printResult = () => {
-      const startEvent = events.at(0);
-      const endEvent = events.at(-1);
+      const startEvent = events[0];
+      const endEvent = events[events.length - 1];
       const duration =
         (endEvent?.timestamp ?? 0) - (startEvent?.timestamp ?? 0);
 

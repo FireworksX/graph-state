@@ -18,8 +18,9 @@ const layer = {
   interactions: [],
   opacity: 1,
   goal: {
-    id: 4,
-    value: 'click-header',
+    _type: 'Goal',
+    _id: 10,
+    value: 33,
   },
 };
 
@@ -27,13 +28,6 @@ const graphState = createState({
   type: 'State',
   initialState: {
     layer,
-  },
-  resolvers: {
-    Frame: {
-      opacity: (parent, state, info) => {
-        return 1;
-      },
-    },
   },
   plugins: [loggerPlugin()],
 });
@@ -44,43 +38,45 @@ const graphState = createState({
 
 window.graphState = graphState;
 
-function omit<T extends AnyObject, P extends string[]>(
-  obj: T,
-  ...props: P
-): Omit<T, P[number]> {
-  const result = { ...obj };
-  props.forEach(prop => {
-    delete result[prop];
-  });
-  return result;
-}
+graphState.subscribe(
+  v => {
+    console.log(v);
+  },
+  {
+    directChangesOnly: true,
+  }
+);
 
 // console.log(graphState.resolve(graphState));
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  const [{ interactions }, setInteractions] = useGraph(
-    graphState,
-    'Frame:8cb2e27f5a5c9',
-    {
-      selector: graph => ({ interactions: graph.interactions }),
-    }
-  );
+  const [frame, setFrame] = useGraph(graphState, 'Frame:8cb2e27f5a5c9');
+  const [goal, setGoal] = useGraph(graphState, 'Goal:10');
 
   return (
     <>
-      <h1>Hello world</h1>
+      <h1>Goal value: {goal?.value}</h1>
+      <h1>Frame value: {frame?.opacity}</h1>
 
       <button
         onClick={() =>
-          setInteractions({
-            interactions: [
-              { on: interactions.length % 2 ? 'click' : 'mouseover' },
-            ],
+          setFrame({
+            opacity: Math.round(Math.random() * 100),
           })
         }
       >
-        Mutate interactions
+        Mutate
+      </button>
+
+      <button
+        onClick={() =>
+          setGoal({
+            value: Math.round(Math.random() * 100),
+          })
+        }
+      >
+        Mutate GOAL
       </button>
       {/*<GraphValue*/}
       {/*  graphState={graphState}*/}
@@ -91,14 +87,14 @@ function App() {
       {/*    return <>{console.log(value)}</>;*/}
       {/*  }}*/}
       {/*</GraphValue>*/}
-      <ul>
-        {interactions.map(el => (
-          <li key={el._id}>
-            <pre>{JSON.stringify(el)}</pre>
-            <button onClick={() => graphState.invalidate(el)}>remove</button>
-          </li>
-        ))}
-      </ul>
+      {/*<ul>*/}
+      {/*  {interactions.map(el => (*/}
+      {/*    <li key={el._id}>*/}
+      {/*      <pre>{JSON.stringify(el)}</pre>*/}
+      {/*      <button onClick={() => graphState.invalidate(el)}>remove</button>*/}
+      {/*    </li>*/}
+      {/*  ))}*/}
+      {/*</ul>*/}
       {/*<button onClick={() => setKey('User:2')}>Change key</button>*/}
       <button
         onClick={() => {

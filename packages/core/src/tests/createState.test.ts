@@ -1293,6 +1293,7 @@ describe('createState', () => {
         initialState: {
           _type: 'Root',
           _id: 10,
+          value: 1,
           header: { _type: 'Header', _id: 20, children: [{ _type: 'Avatar', _id: 30 }] },
         },
       })
@@ -1303,11 +1304,49 @@ describe('createState', () => {
       graphState.subscribe('Header:20', headerSpy)
       graphState.subscribe('Avatar:30', avatarSpy)
       graphState.mutate('Root:10', {
-        visible: false,
+        value: 2,
       })
 
       expect(headerSpy).toBeCalledTimes(1)
       expect(avatarSpy).toBeCalledTimes(1)
+    })
+
+    /**
+     * При подписке можем переть опцию directChangesOnly,
+     * которая будет игнорировать оповещения от родителя
+     * и оставлять только прямое изменение графа
+     */
+    it('should skip notify with directChangesOnly', () => {
+      const graphState = createState({
+        initialState: {
+          _type: 'Root',
+          _id: 10,
+          value: 1,
+          header: { _type: 'Header', _id: 20, children: [{ _type: 'Avatar', _id: 30 }] },
+        },
+      })
+
+      const headerSpy = vi.fn()
+      const avatarSpy = vi.fn()
+
+      const directHeaderSpy = vi.fn()
+      const directAvatarSpy = vi.fn()
+
+      graphState.subscribe('Header:20', headerSpy)
+      graphState.subscribe('Avatar:30', avatarSpy)
+
+      graphState.subscribe('Header:20', directHeaderSpy, { directChangesOnly: true })
+      graphState.subscribe('Avatar:30', directAvatarSpy, { directChangesOnly: true })
+
+      graphState.mutate('Header:20', {
+        value: 'a',
+      })
+      graphState.mutate('Avatar:30', {
+        value: 'b',
+      })
+
+      expect(directHeaderSpy).toBeCalledTimes(1)
+      expect(directAvatarSpy).toBeCalledTimes(1)
     })
 
     it('should subscribe before create entity', () => {
@@ -1444,23 +1483,37 @@ describe('createState', () => {
       const graphState = createState()
       const spy = vi.fn()
 
-      let updateIndex = 0
-      graphState.subscribe(data => {
-        updateIndex++
-        spy()
-        switch (updateIndex) {
-          case 1:
-            return expect(data).toStrictEqual(avatarLayer)
-          case 2:
-            return expect(data).toStrictEqual(avatarLayer)
-          case 4:
-            return expect(data).toStrictEqual(avatarLayer)
-          case 5:
-            return expect(data).toMatchObject(avatarLayer)
-          case 6:
-            return expect(data).toMatchObject(graphState.resolve(graphState.keyOfEntity(rootLayer)))
-        }
+      graphState.subscribe(spy)
+
+      graphState.mutate({
+        ...rootLayer,
+        value: 1,
+        children: [avatarLayer],
+        user: {
+          avatarLayer,
+        },
+        header: avatarLayer,
       })
+
+      expect(spy).toBeCalledTimes(4)
+
+      const updateSpy = vi.fn()
+      graphState.subscribe(updateSpy)
+
+      graphState.mutate({
+        ...rootLayer,
+        value: 2,
+      })
+
+      expect(updateSpy).toBeCalledTimes(4)
+    })
+
+    it('should notify self store with each state with directChangesOnly option', () => {
+      const graphState = createState()
+      const spy = vi.fn()
+
+      graphState.subscribe(spy)
+
       graphState.mutate({
         ...rootLayer,
         children: [avatarLayer],
@@ -1470,7 +1523,17 @@ describe('createState', () => {
         header: avatarLayer,
       })
 
-      expect(spy).toBeCalledTimes(9)
+      expect(spy).toBeCalledTimes(4)
+
+      const updateSpy = vi.fn()
+      graphState.subscribe(updateSpy, { directChangesOnly: true })
+
+      graphState.mutate({
+        ...rootLayer,
+        value: 2,
+      })
+
+      expect(updateSpy).toBeCalledTimes(1)
     })
 
     it('should notify only when selected values change', () => {
