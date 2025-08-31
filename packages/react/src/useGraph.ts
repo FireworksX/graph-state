@@ -11,6 +11,7 @@ import type {
   MutateOptions,
 } from '@graph-state/core'
 import type { StateResolve } from './types'
+import { keyOfEntity } from '@graph-state/core'
 
 interface GraphOptions extends ResolveOptions, SubscribeOptions {}
 
@@ -49,7 +50,7 @@ export const useGraph = <TState extends GraphState, const TEntity extends Entity
 
   const updateState = useCallback(
     (value, mutateOptions?: MutateOptions) => {
-      const key: any = typeof field === 'string' ? field : graphState.keyOfEntity(field)
+      const key: any = typeof field === 'string' ? field : keyOfEntity(field)
 
       if (field && key) {
         graphState.mutate(key, value, mutateOptions)

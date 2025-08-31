@@ -48,6 +48,33 @@ describe('useGraphEffect', () => {
     expect(renderCount).toEqual(1)
   })
 
+  it('should notify whole store', () => {
+    let renderCount = 0
+    const initial = {
+      _type: 'User',
+      _id: '1',
+      age: 16,
+    }
+
+    const graphState = createState({
+      initialState: initial,
+    })
+
+    const cb = vi.fn()
+    renderHook(() => {
+      renderCount++
+      return useGraphEffect(graphState, cb)
+    })
+
+    graphState.mutate('User:1', {
+      age: 20,
+    })
+    graphState.mutate('User:1', {
+      age: 22,
+    })
+    expect(renderCount).toEqual(1)
+  })
+
   it('Should call the callback with updated state when the key changes and track the correct data', () => {
     let callCount = 0
     const userOne = 'User:1'
@@ -70,8 +97,10 @@ describe('useGraphEffect', () => {
       },
       { initialProps: { key: userOne } }
     )
+
     graphState.mutate(userOne, { age: 18 })
     expect(cb).toHaveBeenCalledWith({ ...initial, age: 18 }, initial, undefined)
+
     render.rerender({ key: userTwo })
     graphState.mutate(userOne, { age: 19 })
     expect(cb).toHaveBeenCalledTimes(1)

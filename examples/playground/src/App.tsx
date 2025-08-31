@@ -5,6 +5,7 @@ import {
   useGraph,
   useGraphFields,
   useGraphStack,
+  useGraphEffect,
 } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import profilerPlugin from '@graph-state/plugin-profiler';
@@ -38,21 +39,20 @@ const graphState = createState({
 
 window.graphState = graphState;
 
-graphState.subscribe(
-  v => {
-    console.log(v);
-  },
-  {
-    directChangesOnly: true,
-  }
-);
-
 // console.log(graphState.resolve(graphState));
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [frame, setFrame] = useGraph(graphState, 'Frame:8cb2e27f5a5c9');
   const [goal, setGoal] = useGraph(graphState, 'Goal:10');
+
+  useGraphEffect(
+    graphState,
+    v => {
+      console.log(v);
+    },
+    { directChangesOnly: true }
+  );
 
   return (
     <>
