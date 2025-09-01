@@ -20,6 +20,7 @@
     "@graph-state/plugin-extend": "*",
     "@graph-state/plugin-logger": "*",
     "@graph-state/plugin-profiler": "*",
+    "@graph-state/plugin-history": "*",
     "@graph-state/react": "*",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",

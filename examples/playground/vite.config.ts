@@ -30,6 +30,10 @@ export default defineConfig({
         __dirname,
         '../../plugins/profiler/dist/index.js'
       ),
+      '@graph-state/plugin-history': path.resolve(
+        __dirname,
+        '../../plugins/history/dist/index.js'
+      ),
     },
   },
 });

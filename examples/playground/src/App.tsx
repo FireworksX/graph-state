@@ -9,6 +9,7 @@ import {
 } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import profilerPlugin from '@graph-state/plugin-profiler';
+import historyPlugin from '@graph-state/plugin-history';
 import { animated } from '@react-spring/web';
 
 export const generateId = () => Math.random().toString(16).slice(2);
@@ -30,7 +31,7 @@ const graphState = createState({
   initialState: {
     layer,
   },
-  plugins: [loggerPlugin()],
+  plugins: [loggerPlugin(), historyPlugin()],
 });
 
 // Object.values(fragmentData).forEach(node => {
@@ -46,18 +47,14 @@ function App() {
   const [frame, setFrame] = useGraph(graphState, 'Frame:8cb2e27f5a5c9');
   const [goal, setGoal] = useGraph(graphState, 'Goal:10');
 
-  useGraphEffect(
-    graphState,
-    v => {
-      console.log(v);
-    },
-    { directChangesOnly: true }
-  );
-
   return (
     <>
       <h1>Goal value: {goal?.value}</h1>
       <h1>Frame value: {frame?.opacity}</h1>
+
+      <button onClick={() => graphState?.$history?.undo()}>UNDO</button>
+
+      <button onClick={() => graphState?.$history?.redo()}>REDO</button>
 
       <button
         onClick={() =>
