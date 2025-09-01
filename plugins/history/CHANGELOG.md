@@ -1,5 +1,16 @@
 # @graph-state/plugin-logger
 
+## 0.2.0
+
+### Minor Changes
+
+- 0c61f51: Create history plugin
+
+### Patch Changes
+
+- Updated dependencies [c4e562e]
+  - @graph-state/core@0.12.0
+
 ## 0.1.0
 
 ### Minor Changes
