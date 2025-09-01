@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.12.0
+
+### Minor Changes
+
+- c4e562e: Add directChangesOnly option for subscribe
+
 ## 0.11.7
 
 ### Patch Changes
@@ -234,12 +240,10 @@
 - 05f88d0: Add types for inspectFields
 - 4abe615: Skip not changing mutation (primitives only)
 - 2b8e8c7: useGraph:
-
   - Changed the structure of the useGraph hook, now it returns a tuple of `[value, setter]`.
   - Vitest configure & added base tests.
 
   Core:
-
   - Added new types
 
 ## 0.2.0
