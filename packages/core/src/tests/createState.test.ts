@@ -482,6 +482,58 @@ describe('createState', () => {
     })
   })
 
+  describe('getReferences', () => {
+    it('should get graph bounds', () => {
+      const layer = {
+        _id: '8cb2e27f5a5c9',
+        _type: 'Frame',
+        interactions: [],
+        opacity: 1,
+        goal: {
+          _type: 'Goal',
+          _id: 10,
+          value: 33,
+          varsValue: 'Variables:adf13',
+          nextLayer: {
+            _id: 12,
+            _type: 'Frame',
+            varsValue: 'Variables:adf13',
+          },
+        },
+        varsValue: 'Variables:adf13',
+      }
+
+      const variable = {
+        _id: 'adf13',
+        _type: 'Variables',
+        value: 10,
+      }
+
+      const graphState = createState({
+        type: 'State',
+        _id: 6,
+        initialState: {
+          layer,
+          variable,
+        },
+      })
+
+      expect(graphState.getReferences('Variables:adf13')).toEqual([
+        'Goal:10',
+        'Frame:12',
+        'Frame:8cb2e27f5a5c9',
+        'State:6',
+      ])
+
+      expect(graphState.getReferences('Variables:adf13', { withPartialKeys: true })).toEqual([
+        'Goal:10',
+        'Frame:12',
+        'Frame:8cb2e27f5a5c9',
+        'State:6',
+      ])
+    })
+  })
+
   describe('mutate', () => {
     it('should mutate self State', () => {
       const graphState = createState()
