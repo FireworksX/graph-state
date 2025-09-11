@@ -35,6 +35,7 @@ import { createDebugState } from './debug'
 import { warn } from './helpers/help'
 import { entityOfKey as staticEntityOfKey } from './helpers/entityOfKey'
 import { keyOfEntity as staticKeyOfEntity } from './helpers/keyOfEntity'
+import type { GetReferencesOptions } from './types'
 
 let ID = 0
 const DEEP_LIMIT = 100
@@ -56,6 +57,19 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
   const isSkipped = (entity: DataField) => {
     return skipPredictors.some(predictor => predictor(entity))
+  }
+
+  const getReferences = <TInput extends Entity, TOptions extends GetReferencesOptions>(
+    entity: TInput,
+    options?: TOptions
+  ): string[] => {
+    const withPartialKeys = options?.withPartialKeys ?? false
+    const key = keyOfEntity(entity)
+    if (!key) return []
+
+    const values = cache.getParents(key) ?? []
+
+    return values.filter(v => (withPartialKeys ? !isPartialKey(v) : v))
   }
 
   const resolve = <TInput extends Entity, TSelector>(
@@ -431,6 +445,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     _type: type,
     _id: id,
     key: stateKey,
+    getReferences,
     mutate,
     subscribe,
     resolve,
