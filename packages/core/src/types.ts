@@ -111,6 +111,10 @@ export interface ResolveOptions<TEntity extends SystemFields = any, TInput exten
   selector?: (graph: ResolveEntityByType<TEntity, TInput>) => TSelector
 }
 
+export interface GetReferencesOptions {
+  withPartialKeys?: boolean
+}
+
 type NeverToUnknown<T> = [T] extends [never] ? unknown : T
 
 type ExtractByType<TEntity extends SystemFields, TType extends string> = TEntity extends { _type: TType }
@@ -152,6 +156,7 @@ export interface GraphState<TEntity extends SystemFields = SystemFields, TRootTy
   extends Graph {
   _type: TRootType
   key: `${TRootType}:${string}`
+  getReferences<const TInput extends Entity | null>(entity: TInput, options?: GetReferencesOptions): string[]
   resolve<const TInput extends Entity, TSelector>(
     input: TInput,
     options?: ResolveOptions<TEntity, TInput, TSelector>

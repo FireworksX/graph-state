@@ -6,6 +6,7 @@ import {
   useGraphFields,
   useGraphStack,
   useGraphEffect,
+  useGraphReferences,
 } from '@graph-state/react';
 import loggerPlugin from '@graph-state/plugin-logger';
 import profilerPlugin from '@graph-state/plugin-profiler';
@@ -23,13 +24,27 @@ const layer = {
     _type: 'Goal',
     _id: 10,
     value: 33,
+    varsValue: 'Variables:adf13',
+    nextLayer: {
+      _id: 12,
+      _type: 'Frame',
+      varsValue: 'Variables:adf13',
+    },
   },
+  varsValue: 'Variables:adf13',
+};
+
+const variable = {
+  _id: 'adf13',
+  _type: 'Variables',
+  value: 10,
 };
 
 const graphState = createState({
   type: 'State',
   initialState: {
     layer,
+    variable,
   },
   plugins: [loggerPlugin(), historyPlugin()],
 });
@@ -46,12 +61,50 @@ function App() {
   // const posts = useGraphFields(graphState, 'Post');
   const [frame, setFrame] = useGraph(graphState, 'Frame:8cb2e27f5a5c9');
   const [goal, setGoal] = useGraph(graphState, 'Goal:10');
+  const references = useGraphReferences(graphState, 'Variables:adf13', {
+    withPartialKeys: false,
+  });
+
+  console.log(references);
 
   return (
     <>
       <h1>Goal value: {goal?.value}</h1>
       <h1>Frame value: {frame?.opacity}</h1>
 
+      <button
+        onClick={() =>
+          setGoal(prev => ({
+            ...prev,
+            nextNextLayer: {
+              varsValue: 'Variables:adf13',
+            },
+          }))
+        }
+      >
+        UPDATE VARS
+      </button>
+
+      <button
+        onClick={() =>
+          setGoal(
+            {
+              _type: 'Goal',
+              _id: 10,
+              value: 33,
+              varsValue: 'Variables:adf13',
+              nextLayer: {
+                _id: 12,
+                _type: 'Frame',
+                varsValue: 'Variables:adf13',
+              },
+            },
+            { replace: true }
+          )
+        }
+      >
+        REMOVE VARS
+      </button>
       <button onClick={() => graphState?.$history?.undo()}>UNDO</button>
 
       <button onClick={() => graphState?.$history?.redo()}>REDO</button>

@@ -1,5 +1,16 @@
 # @graph-state/react
 
+## 0.7.0
+
+### Minor Changes
+
+- 0e55643: Add subscribe to whole store for useGraphEffect
+
+### Patch Changes
+
+- Updated dependencies [c4e562e]
+  - @graph-state/core@0.12.0
+
 ## 0.6.4
 
 ### Patch Changes
@@ -133,12 +144,10 @@
 ### Patch Changes
 
 - 2b8e8c7: useGraph:
-
   - Changed the structure of the useGraph hook, now it returns a tuple of `[value, setter]`.
   - Vitest configure & added base tests.
 
   Core:
-
   - Added new types
 
 - Updated dependencies [05f88d0]
