@@ -1,5 +1,15 @@
 # @graph-state/core
 
+## 0.13.0
+
+### Minor Changes
+
+- 9d9898d: Added getReferences func
+
+### Patch Changes
+
+- 11e6b52: Set "deep" replace for apply initial state
+
 ## 0.12.0
 
 ### Minor Changes
