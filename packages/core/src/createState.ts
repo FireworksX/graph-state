@@ -438,7 +438,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   }
 
   if (options?.initialState) {
-    mutate(options.initialState as any, { replace: true })
+    mutate(options.initialState as any, { replace: 'deep' })
   }
 
   const graphState: GraphState<TEntity, TRootType> = {
