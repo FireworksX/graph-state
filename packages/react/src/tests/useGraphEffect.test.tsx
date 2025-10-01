@@ -207,4 +207,29 @@ describe('useGraphEffect', () => {
     expect(cb).toBeCalledTimes(0)
     expect(renderCount).toEqual(1)
   })
+
+  it('should skip callbacks while paused and resume subscriptions', () => {
+    const authorKey = 'Author:20'
+    const graphState = createState()
+    graphState.mutate(mockAuthor)
+    const cb = vi.fn()
+
+    const { rerender } = renderHook(({ pause }) => useGraphEffect(graphState, authorKey, cb, { pause }), {
+      initialProps: { pause: true },
+    })
+
+    const pausedState = { ...mockAuthor, name: 'While paused' }
+    graphState.mutate(authorKey, pausedState)
+    expect(cb).not.toHaveBeenCalled()
+
+    rerender({ pause: false })
+
+    const resumedState = { ...pausedState, name: 'After resume' }
+    graphState.mutate(authorKey, resumedState)
+
+    expect(cb).toHaveBeenCalledTimes(1)
+    const [nextValue, prevValue] = cb.mock.calls[0]
+    expect(nextValue).toEqual(graphState.resolve(authorKey))
+    expect(prevValue).toMatchObject({ name: 'While paused' })
+  })
 })

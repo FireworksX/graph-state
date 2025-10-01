@@ -13,7 +13,9 @@ import type {
 import type { StateResolve } from './types'
 import { keyOfEntity } from '@graph-state/core'
 
-interface GraphOptions extends ResolveOptions, SubscribeOptions {}
+interface GraphOptions extends ResolveOptions, SubscribeOptions {
+  pause?: boolean
+}
 
 const defaultSelector = (data: any) => data
 
@@ -59,7 +61,7 @@ export const useGraph = <TState extends GraphState, const TEntity extends Entity
     [graphState, field]
   )
 
-  const get = () => nextValue.current
+  const get = () => (options?.pause ? null : nextValue.current)
 
   return [useSyncExternalStoreWithSelector(subscribe, get, get, defaultSelector), updateState]
 }
