@@ -4,7 +4,9 @@ import type { Entity, GraphState, ResolveOptions, SubscribeOptions } from '@grap
 
 const defaultSelector = (data: any) => data
 
-interface GraphStackOptions extends ResolveOptions, SubscribeOptions {}
+interface GraphStackOptions extends ResolveOptions, SubscribeOptions {
+  pause?: boolean
+}
 
 export const useGraphStack = <TState extends unknown[]>(
   graphState: GraphState,
@@ -18,6 +20,7 @@ export const useGraphStack = <TState extends unknown[]>(
 
   const fieldKey = useMemo(() => fields.map(field => graphState.keyOfEntity(field) || field).join(), [fields])
   const nextValues = useRef<TState>(getValues(fields) as any as TState)
+  const pausedSnapshot = useRef<TState>([] as any as TState)
 
   const subscribe = useCallback(
     (onChange: any) => {
@@ -44,7 +47,7 @@ export const useGraphStack = <TState extends unknown[]>(
     [graphState, fieldKey]
   )
 
-  const get = () => nextValues.current
+  const get = () => (options?.pause ? pausedSnapshot.current : nextValues.current)
 
   return useSyncExternalStoreWithSelector(subscribe, get, get, defaultSelector)
 }
