@@ -273,11 +273,12 @@ describe('createState', () => {
       expect(postSpy).toBeCalledTimes(0)
       /**
        * State - оповещяется 3 раза. Он реагирует на каждый notify.
-       * 1- List:1 оповестился после удаления
-       * 2- Sibling:1 оповестился т.к. потомок одного родителя.
-       * 3- Sibling:2 оповестился т.к. потомок потомка одного родителя.
+       * 1- Layer:avatar оповестился т.к это слой, который мы удалили
+       * 2- List:1 оповестился после удаления
+       * 3- Sibling:1 оповестился т.к. потомок одного родителя.
+       * 4- Sibling:2 оповестился т.к. потомок потомка одного родителя.
        */
-      expect(stateSpy).toBeCalledTimes(3)
+      expect(stateSpy).toBeCalledTimes(4)
 
       /**
        * Оповещается т.к. один родилеь.
@@ -1433,6 +1434,28 @@ describe('createState', () => {
 
       expect(spy).toBeCalledTimes(1)
       expect(spy2).toBeCalledTimes(0)
+    })
+
+    /**
+     * Когда подписываемся на граф, а потом его удаляем через invalidate
+     * оповещение происходит через onRemoveLink.
+     *
+     * Если от него не отписываться, то будут накапливаться обновления.
+     */
+    it('should unsubscribe with onRemoveLink', () => {
+      const graphState = createState()
+      graphState.mutate(rootLayer)
+      const spy = vi.fn()
+
+      for (let i = 0; i < 300; i++) {
+        const unsubscribe = graphState.subscribe(rootLayer, () => {})
+        unsubscribe()
+      }
+
+      graphState.subscribe(spy)
+      graphState.invalidate(rootLayer)
+
+      expect(spy).toBeCalledTimes(1) // not 300
     })
 
     it('should unsubscribe with Abort Controller', () => {

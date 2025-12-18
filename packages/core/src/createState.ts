@@ -367,12 +367,6 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       } else {
         subscribers.set(key, [{ callback, options }])
       }
-
-      cache.onRemoveLink((link, prevValue) => {
-        if (link === key) {
-          notify(key, prevValue)
-        }
-      })
     }
 
     const unsubscribe = () => {
@@ -465,6 +459,8 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
   }
 
   cache.onRemoveLink((link, prevValue) => debugState.debug({ type: 'garbageRemove', entity: link, prevValue }))
+
+  cache.onRemoveLink(notify)
 
   return pluginsStore.runPlugins(graphState as any) as GraphState<TEntity, TRootType>
 }
