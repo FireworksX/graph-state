@@ -1,5 +1,23 @@
 # @graph-state/react
 
+## 0.8.1
+
+### Patch Changes
+
+- bb84b16: Add pause option
+
+## 0.8.0
+
+### Minor Changes
+
+- 9d9898d: Added getReferences func
+
+### Patch Changes
+
+- Updated dependencies [11e6b52]
+- Updated dependencies [9d9898d]
+  - @graph-state/core@0.13.0
+
 ## 0.7.0
 
 ### Minor Changes

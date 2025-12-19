@@ -138,4 +138,23 @@ describe('useGraph', () => {
     // rerender count
     expect(result.all).toHaveLength(3)
   })
+
+  it('should return null while paused and resume with latest value', () => {
+    const authorKey = 'Author:20'
+    const graphState = createState({
+      initialState: mockAuthor,
+    })
+
+    const { result, rerender } = renderHook(({ pause }) => useGraph(graphState, authorKey, { pause }), {
+      initialProps: { pause: true },
+    })
+
+    expect(result.current[0]).toBeNull()
+
+    graphState.mutate(authorKey, { name: 'Paused Update' })
+    expect(result.current[0]).toBeNull()
+
+    rerender({ pause: false })
+    expect(result.current[0]).toEqual(graphState.resolve(authorKey))
+  })
 })

@@ -3,11 +3,15 @@ import type { Entity, GraphState, SubscribeOptions } from '@graph-state/core'
 import type { StateResolve } from './types'
 import { keyOfEntity } from '@graph-state/core'
 
+interface GraphEffectOptions extends SubscribeOptions {
+  pause?: boolean
+}
+
 export function useGraphEffect<TState extends GraphState, const TEntity extends Entity>(
   graphState?: TState | null,
   field?: TEntity | null,
   cb?: ((nextValue: StateResolve<TState, TEntity>, prevValue: StateResolve<TState, TEntity>) => void) | null,
-  options?: SubscribeOptions
+  options?: GraphEffectOptions
 ): void
 
 export function useGraphEffect<TState extends GraphState, const TEntity extends Entity>(
@@ -16,13 +20,13 @@ export function useGraphEffect<TState extends GraphState, const TEntity extends 
   cb?:
     | ((nextValue: StateResolve<TState, TEntity>, prevValue: StateResolve<TState, TEntity>, index?: number) => void)
     | null,
-  options?: SubscribeOptions
+  options?: GraphEffectOptions
 ): void
 
 export function useGraphEffect<TState extends GraphState>(graphState?: TState | null, ...args: any[]) {
   const input = typeof args[0] === 'function' ? null : args[0]
-  const callback = typeof args[0] === 'function' ? args[0] : args[1]
-  const options: SubscribeOptions | undefined = typeof args[0] === 'function' ? args[1] : args[2]
+  const options: GraphEffectOptions | undefined = typeof args[0] === 'function' ? args[1] : args[2]
+  const callback = options?.pause ? null : typeof args[0] === 'function' ? args[0] : args[1]
 
   useEffect(() => {
     if (!callback || !graphState) return
