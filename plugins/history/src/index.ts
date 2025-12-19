@@ -1,8 +1,16 @@
-import type { Graph, Plugin } from '@graph-state/core';
+import type { Graph, LinkKey, Plugin } from '@graph-state/core';
+import { keyOfEntity } from '@graph-state/core';
 
-interface HistoryState<T = any> {
-  past: T[];
-  future: T[];
+interface HistoryEntry {
+  linkKey: LinkKey;
+  prev: Graph; // Состояние ДО изменения
+  next: Graph; // Состояние ПОСЛЕ изменения
+  timestamp: number;
+}
+
+interface HistoryState {
+  past: HistoryEntry[][];
+  future: HistoryEntry[][];
   limit: number;
   undo: () => void;
   redo: () => void;
@@ -16,22 +24,49 @@ declare module '@graph-state/core' {
 }
 
 const historyPlugin =
-  (limit: number = 50): Plugin =>
+  (
+    limit: number = 50,
+    predicate?: (next: Graph, prev: Graph) => boolean
+  ): Plugin =>
   state => {
     let isApply = false;
+    let currentBatch: HistoryEntry[] = [];
+    let batchTimeout: NodeJS.Timeout | null = null;
+    const BATCH_DELAY = 50; // ms
 
     (state as any).subscribe(
-      (_: any, prevGraph: Graph) => {
+      (next: Graph, prev: Graph) => {
+        const isAllow = predicate?.(next, prev) ?? true;
+        if (!isAllow) {
+          return;
+        }
+
         if (!isApply) {
-          state.$history.past.push(prevGraph);
+          currentBatch.push({
+            next,
+            prev,
+            timestamp: new Date().getTime(),
+            linkKey: keyOfEntity(next ?? prev) ?? '',
+          });
 
-          // ограничение длины истории
-          if (state.$history.past.length > limit) {
-            state.$history.past.shift();
-          }
+          if (batchTimeout) clearTimeout(batchTimeout);
 
-          // при любом новом действии сбрасываем redo
-          state.$history.future = [];
+          batchTimeout = setTimeout(() => {
+            if (currentBatch.length > 0) {
+              // Сохраняем всю группу как один элемент истории
+              state.$history.past.push(currentBatch);
+
+              // ограничение длины истории
+              if (state.$history.past.length > limit) {
+                state.$history.past.shift();
+              }
+
+              // сбрасываем redo
+              state.$history.future = [];
+
+              currentBatch = [];
+            }
+          }, BATCH_DELAY);
         }
       },
       {
@@ -43,26 +78,42 @@ const historyPlugin =
       const next = state.$history.future.pop();
       if (!next) return;
 
-      // текущее состояние кладем в past
-      state.$history.past.push(state.resolve(next));
-
-      // откатываемся на будущее
       isApply = true;
-      state.mutate(next);
+      [...next].forEach((entity: HistoryEntry) => {
+        if (!entity.next) {
+          state.invalidate(entity.linkKey);
+        } else {
+          state.mutate(entity.linkKey, entity.next, { replace: true });
+        }
+      });
       isApply = false;
+
+      state.$history.past.push(next);
+
+      if (state.$history.past.length > limit) {
+        state.$history.past.shift();
+      }
     };
 
     const undo = () => {
       const last = state.$history.past.pop();
       if (!last) return;
 
-      // текущее состояние кладем в future
-      state.$history.future.push(state.resolve(last));
-
-      // откатываемся на прошлое
       isApply = true;
-      state.mutate(last);
+      [...last].reverse().forEach((entity: HistoryEntry) => {
+        if (!entity.prev) {
+          state.invalidate(entity.linkKey);
+        } else {
+          state.mutate(entity.linkKey, entity.prev, { replace: true });
+        }
+      });
       isApply = false;
+
+      state.$history.future.push(last);
+
+      if (state.$history.future.length > limit) {
+        state.$history.future.shift();
+      }
     };
 
     state.$history = {

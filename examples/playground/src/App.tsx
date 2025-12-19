@@ -46,21 +46,15 @@ const variable = {
 const graphState = createState({
   type: 'State',
   initialState: {
-    ...rootLayer,
-    list: {
-      _type: 'List',
-      _id: 1,
-      values: [avatarLayer],
-      sibling: {
-        _type: 'Sibling',
-        _id: 1,
-        nested: { _type: 'Sibling', _id: 2 },
+    _type: 'Layer',
+    _id: 1,
+    children: [
+      {
+        _type: 'Layer',
+        _id: 2,
+        opacity: 1,
       },
-    },
-    post: {
-      _type: 'Post',
-      _id: 123,
-    },
+    ],
   },
   plugins: [loggerPlugin(), historyPlugin()],
 });
@@ -69,20 +63,15 @@ const graphState = createState({
 //   graphState.mutate(node);
 // });
 
-graphState.subscribe(
-  (next, prev) => {
-    console.log(next, prev);
-  },
-  { directChangesOnly: true }
-);
-
 window.graphState = graphState;
 
 // console.log(graphState.resolve(graphState));
 
 function App() {
   // const posts = useGraphFields(graphState, 'Post');
-  // const [frame, setFrame] = useGraph(graphState, 'Frame:8cb2e27f5a5c9');
+  const [root] = useGraph(graphState, 'Layer:1');
+  const [frame, setFrame] = useGraph(graphState, 'Layer:2');
+
   // const [goal, setGoal] = useGraph(graphState, 'Goal:10');
   // const references = useGraphReferences(graphState, 'Variables:adf13', {
   //   withPartialKeys: false,
@@ -90,12 +79,21 @@ function App() {
 
   return (
     <>
+      <ul>
+        {root.children?.map(child => (
+          <li>{child}</li>
+        ))}
+      </ul>
       {/*<h1>Goal value: {goal?.value}</h1>*/}
-      {/*<h1>Frame value: {frame?.opacity}</h1>*/}
+      <h1>Frame value: {frame?.opacity}</h1>
+
+      <button onClick={() => setFrame({ opacity: Math.random() })}>
+        Update
+      </button>
 
       <button
         onClick={() => {
-          graphState.invalidate(avatarLayer);
+          graphState.invalidate('Layer:2');
         }}
       >
         Remove
