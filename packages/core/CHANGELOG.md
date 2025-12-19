@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.13.1
+
+### Patch Changes
+
+- 3eac0e9: Fix unsubscribe onRemoveLink. Fix notify state while invalidate.
+
 ## 0.13.0
 
 ### Minor Changes
