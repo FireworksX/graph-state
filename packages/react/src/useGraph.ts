@@ -2,13 +2,13 @@ import { useCallback, useRef } from 'react'
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector'
 import type {
   ResolveOptions,
-  Dispatch,
   Entity,
   GraphState,
   GetStateEntity,
   StateDataSetter,
   SubscribeOptions,
   MutateOptions,
+  DispatchWithOptions,
 } from '@graph-state/core'
 import type { StateResolve } from './types'
 import { keyOfEntity } from '@graph-state/core'
@@ -23,7 +23,7 @@ export const useGraph = <TState extends GraphState, const TEntity extends Entity
   graphState: TState,
   field: TEntity,
   options?: GraphOptions
-): [StateResolve<TState, TEntity>, Dispatch<StateDataSetter<GetStateEntity<TState>, TEntity>>] => {
+): [StateResolve<TState, TEntity>, DispatchWithOptions<StateDataSetter<GetStateEntity<TState>, TEntity>>] => {
   const nextValue = useRef<StateResolve<TState, TEntity>>(
     graphState?.resolve?.(field, options) as any as StateResolve<TState, TEntity>
   )

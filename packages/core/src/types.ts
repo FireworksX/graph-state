@@ -54,6 +54,7 @@ export type AnyObject = Record<PropertyKey, unknown>
 export type DataSetter<T = any> = T | ((prev: T) => T)
 
 export type Dispatch<T> = (value: T) => void
+export type DispatchWithOptions<T> = (value: T, mutateOptions?: MutateOptions) => void
 
 export type MutateField = (
   graph: Graph | Graph[] | null,
