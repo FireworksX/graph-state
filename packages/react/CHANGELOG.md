@@ -1,5 +1,14 @@
 # @graph-state/react
 
+## 0.8.2
+
+### Patch Changes
+
+- af7cef4: Update types for mutate
+- 33a3fb4: Set use-sync-external-store as dep
+- Updated dependencies [af7cef4]
+  - @graph-state/core@0.13.2
+
 ## 0.8.1
 
 ### Patch Changes
