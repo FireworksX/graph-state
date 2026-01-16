@@ -1,5 +1,16 @@
 # @graph-state/plugin-logger
 
+## 0.3.0
+
+### Minor Changes
+
+- 340e23f: Add batch updates
+
+### Patch Changes
+
+- Updated dependencies [3eac0e9]
+  - @graph-state/core@0.13.1
+
 ## 0.2.0
 
 ### Minor Changes
