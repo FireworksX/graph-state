@@ -12,12 +12,11 @@ import type {
 } from '@graph-state/core'
 import type { StateResolve } from './types'
 import { keyOfEntity } from '@graph-state/core'
+import { defaultSelector } from './shared'
 
 interface GraphOptions extends ResolveOptions, SubscribeOptions {
   pause?: boolean
 }
-
-const defaultSelector = (data: any) => data
 
 export const useGraph = <TState extends GraphState, const TEntity extends Entity>(
   graphState: TState,
@@ -27,14 +26,17 @@ export const useGraph = <TState extends GraphState, const TEntity extends Entity
   const nextValue = useRef<StateResolve<TState, TEntity>>(
     graphState?.resolve?.(field, options) as any as StateResolve<TState, TEntity>
   )
-  const fieldKey = graphState?.keyOfEntity?.(field) ?? field
+  const fieldKey = keyOfEntity(field) ?? field
+
+  const prevFieldKey = useRef(fieldKey)
+  if (prevFieldKey.current !== fieldKey) {
+    prevFieldKey.current = fieldKey
+    nextValue.current = graphState?.resolve?.(field, options) as any as StateResolve<TState, TEntity>
+  }
 
   const subscribe = useCallback(
     (onChange: any) => {
       if (fieldKey) {
-        nextValue.current = graphState?.resolve?.(fieldKey, options) as any as StateResolve<TState, TEntity>
-        onChange()
-
         return graphState?.subscribe?.(
           fieldKey,
           () => {

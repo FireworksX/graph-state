@@ -1,19 +1,21 @@
 import { useCallback, useRef } from 'react'
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector'
 import type { Graph, GraphState, SubscribeOptions } from '@graph-state/core'
-
-const defaultSelector = (data: any) => data
+import { defaultSelector } from './shared'
 
 export const useGraphFields = (graphState: GraphState, type: Graph['_type'], options?: SubscribeOptions): string[] => {
   const nextValue = useRef<string[]>(graphState.inspectFields(type))
 
+  const prevType = useRef(type)
+  if (prevType.current !== type) {
+    prevType.current = type
+    nextValue.current = graphState.inspectFields(type)
+  }
+
   const subscribe = useCallback(
     (onChange: any) => {
       if (type) {
-        nextValue.current = graphState.inspectFields(type)
-        onChange()
-
-        graphState.subscribe(() => {
+        return graphState.subscribe(() => {
           const nextFields = graphState.inspectFields(type)
 
           if (nextFields !== nextValue.current) {
@@ -23,7 +25,7 @@ export const useGraphFields = (graphState: GraphState, type: Graph['_type'], opt
         }, options)
       }
 
-      return onChange()
+      return () => undefined
     },
     [graphState, type]
   )

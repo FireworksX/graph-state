@@ -28,6 +28,37 @@ describe('useGraphFields', () => {
     expect(fields.current).toHaveLength(0)
   })
 
+  it('should unsubscribe on unmount', () => {
+    const graphState = mockGraphState()
+    const { result, unmount } = renderHook(() => useGraphFields(graphState, 'Author'))
+
+    expect(result.current).toStrictEqual(['Author:20'])
+    unmount()
+
+    graphState.invalidate('Author:20')
+    expect(result.current).toStrictEqual(['Author:20'])
+  })
+
+  it('should update when type changes', () => {
+    const graphState = mockGraphState()
+    const { result, rerender } = renderHook(({ type }) => useGraphFields(graphState, type), {
+      initialProps: { type: 'Author' }
+    })
+
+    expect(result.current).toStrictEqual(['Author:20'])
+
+    rerender({ type: 'Post' })
+    expect(result.current).toStrictEqual(['Post:0'])
+  })
+
+  it('should render only once on initial mount', () => {
+    const graphState = mockGraphState()
+    const { result } = renderHook(() => useGraphFields(graphState, 'Author'))
+
+    expect(result.all).toHaveLength(1)
+    expect(result.current).toStrictEqual(['Author:20'])
+  })
+
   it('should not notify', () => {
     const graphState = mockGraphState()
 
@@ -35,11 +66,11 @@ describe('useGraphFields', () => {
       useGraphFields(graphState, 'Author', {
         selector: graph => {
           return { name: graph.name }
-        },
+        }
       })
     )
 
     graphState.mutate('Author:20', { age: 20 })
-    expect(result.all).toHaveLength(2)
+    expect(result.all).toHaveLength(1)
   })
 })

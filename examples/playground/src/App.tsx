@@ -12,6 +12,7 @@ import loggerPlugin from '@graph-state/plugin-logger';
 import profilerPlugin from '@graph-state/plugin-profiler';
 import historyPlugin from '@graph-state/plugin-history';
 import { animated } from '@react-spring/web';
+import { Author } from './Author.tsx';
 
 export const generateId = () => Math.random().toString(16).slice(2);
 
@@ -43,12 +44,13 @@ const variable = {
   value: 10,
 };
 
-const graphState = createState({
+export const graphState = createState({
   type: 'State',
   initialState: {
     _type: 'Layer',
     _id: 1,
     children: [
+      { _type: 'Author', _id: 'aa', name: 'John', age: 24 },
       {
         _type: 'Layer',
         _id: 2,
@@ -79,6 +81,7 @@ function App() {
 
   return (
     <>
+      <Author authorEntity="Author:aa" />
       <ul>
         {root.children?.map(child => (
           <li>{child}</li>

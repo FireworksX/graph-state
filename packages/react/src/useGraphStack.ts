@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector'
 import type { Entity, GraphState, ResolveOptions, SubscribeOptions } from '@graph-state/core'
-
-const defaultSelector = (data: any) => data
+import { keyOfEntity } from '@graph-state/core'
+import { defaultSelector } from './shared'
 
 interface GraphStackOptions extends ResolveOptions, SubscribeOptions {
   pause?: boolean
@@ -13,14 +13,17 @@ export const useGraphStack = <TState extends unknown[]>(
   fields: Entity[],
   options?: GraphStackOptions
 ): TState => {
-  const getValues = useCallback(
-    (fields: Entity[]) => fields.map(field => graphState.resolve(field, options)).filter(Boolean),
-    [graphState, options]
-  )
+  const getValues = (fields: Entity[]) => fields.map(field => graphState.resolve(field, options)).filter(Boolean)
 
-  const fieldKey = useMemo(() => fields.map(field => graphState.keyOfEntity(field) || field).join(), [fields])
+  const fieldKey = fields.map(field => keyOfEntity(field) || field).join()
   const nextValues = useRef<TState>(getValues(fields) as any as TState)
   const pausedSnapshot = useRef<TState>([] as any as TState)
+
+  const prevFieldKey = useRef(fieldKey)
+  if (prevFieldKey.current !== fieldKey) {
+    prevFieldKey.current = fieldKey
+    nextValues.current = getValues(fields) as any as TState
+  }
 
   const subscribe = useCallback(
     (onChange: any) => {
@@ -36,8 +39,6 @@ export const useGraphStack = <TState extends unknown[]>(
             graphState.subscribe(field!, notifyAll, { signal: unsubscribeController.signal, ...options })
           }
         })
-
-        notifyAll()
 
         return () => unsubscribeController.abort('unsubscribe')
       }
