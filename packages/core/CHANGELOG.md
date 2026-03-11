@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.13.2
+
+### Patch Changes
+
+- af7cef4: Update types for mutate
+
 ## 0.13.1
 
 ### Patch Changes
