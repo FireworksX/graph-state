@@ -1,5 +1,11 @@
 # @graph-state/react
 
+## 0.8.3
+
+### Patch Changes
+
+- fd797f0: Reduce re-render
+
 ## 0.8.2
 
 ### Patch Changes
