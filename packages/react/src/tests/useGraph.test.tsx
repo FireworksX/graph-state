@@ -20,10 +20,10 @@ describe('useGraph', () => {
 
   it('should initialize state and update on change', () => {
     const initial = {
-      version: '1.0'
+      version: '1.0',
     }
     const graphState = createState({
-      initialState: initial
+      initialState: initial,
     })
     const { result } = renderHook(() => useGraph(graphState, graphState.key))
     const [state, updateState] = result.current
@@ -31,7 +31,7 @@ describe('useGraph', () => {
     expect(state).toMatchObject(initial)
     updateState({ version: '2.1' })
     expect(result.current[0]).toMatchObject({
-      version: '2.1'
+      version: '2.1',
     })
   })
 
@@ -39,10 +39,10 @@ describe('useGraph', () => {
     const initial = {
       _type: 'Root',
       _id: 'id',
-      nested: [{ value: 1 }, { value: 2 }]
+      nested: [{ value: 1 }, { value: 2 }],
     }
     const graphState = createState({
-      initialState: initial
+      initialState: initial,
     })
     const { result } = renderHook(() => useGraph(graphState, 'Root:id', { deep: true }))
 
@@ -51,7 +51,7 @@ describe('useGraph', () => {
     expect(state).toMatchObject({
       _type: 'Root',
       _id: 'id',
-      nested: [{ value: 1 }, { value: 2 }]
+      nested: [{ value: 1 }, { value: 2 }],
     })
   })
 
@@ -67,7 +67,7 @@ describe('useGraph', () => {
       _type: 'Author',
       _id: '20',
       name: 'Elizabeth J. McKeon',
-      key: '100'
+      key: '100',
     })
   })
 
@@ -80,7 +80,7 @@ describe('useGraph', () => {
     expect(post).toEqual(graphState.resolve(postGraph))
     updatePost({ name: 'post test' })
     expect(result.current[0]).toMatchObject({
-      name: 'post test'
+      name: 'post test',
     })
   })
 
@@ -90,7 +90,7 @@ describe('useGraph', () => {
     const graphState = mockGraphState()
 
     const { result, rerender } = renderHook(({ field }) => useGraph(graphState, field), {
-      initialProps: { field: authorKey }
+      initialProps: { field: authorKey },
     })
 
     rerender({ field: postKey })
@@ -128,7 +128,7 @@ describe('useGraph', () => {
 
     const { result } = renderHook(() => {
       return useGraph(graphState, authorKey, {
-        selector: graph => ({ name: graph.name })
+        selector: graph => ({ name: graph.name }),
       })
     })
     const [author, updateAuthor] = result.current
@@ -153,11 +153,11 @@ describe('useGraph', () => {
   it('should return null while paused and resume with latest value', () => {
     const authorKey = 'Author:20'
     const graphState = createState({
-      initialState: mockAuthor
+      initialState: mockAuthor,
     })
 
     const { result, rerender } = renderHook(({ pause }) => useGraph(graphState, authorKey, { pause }), {
-      initialProps: { pause: true }
+      initialProps: { pause: true },
     })
 
     expect(result.current[0]).toBeNull()

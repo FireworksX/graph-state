@@ -9,11 +9,11 @@ describe('useGraphStack', () => {
       _type: 'Root',
       _id: 'id',
       fieldOld: { value: 1 },
-      fieldNew: { value: 2 }
+      fieldNew: { value: 2 },
     }
 
     const graphState = createState({
-      initialState: initial
+      initialState: initial,
     })
 
     const { result } = renderHook(() => useGraphStack(graphState, ['Root:id.fieldOld', 'Root:id.fieldNew']))
@@ -30,15 +30,15 @@ describe('useGraphStack', () => {
       _type: 'Root',
       _id: 'id',
       fieldOld: { value: 1 },
-      fieldNew: { value: 2 }
+      fieldNew: { value: 2 },
     }
 
     const graphState = createState({
-      initialState: initial
+      initialState: initial,
     })
 
     const { result, rerender } = renderHook(({ field }) => useGraphStack(graphState, field), {
-      initialProps: { field: ['Root:id.fieldOld'] }
+      initialProps: { field: ['Root:id.fieldOld'] },
     })
 
     rerender({ field: ['Root:id.fieldNew'] })
@@ -50,17 +50,17 @@ describe('useGraphStack', () => {
     const initial = {
       _type: 'Root',
       _id: 'id',
-      nested: [{ value: 1 }, { value: 2 }]
+      nested: [{ value: 1 }, { value: 2 }],
     }
     const graphState = createState({
-      initialState: initial
+      initialState: initial,
     })
     const { result } = renderHook(() => useGraphStack(graphState, ['Root:id']))
 
     expect(result.current[0]).toMatchObject({
       _type: 'Root',
       _id: 'id',
-      nested: [{ value: 1 }, { value: 2 }]
+      nested: [{ value: 1 }, { value: 2 }],
     })
   })
 
@@ -72,10 +72,10 @@ describe('useGraphStack', () => {
           {
             _type: 'User',
             _id: 0,
-            skill: { _type: 'Skill', _id: 'js' }
-          }
-        ]
-      }
+            skill: { _type: 'Skill', _id: 'js' },
+          },
+        ],
+      },
     })
     const { result: fields } = renderHook(() => useGraphStack(graphState, ['Skill:js']))
 
@@ -88,16 +88,16 @@ describe('useGraphStack', () => {
       _type: 'Root',
       _id: 'id',
       fieldOld: { value: 1 },
-      fieldNew: { value: 2 }
+      fieldNew: { value: 2 },
     }
 
     const graphState = createState({
-      initialState: initial
+      initialState: initial,
     })
 
     const { result } = renderHook(() =>
       useGraphStack(graphState, ['Root:id.fieldOld', 'Root:id.fieldNew'], {
-        selector: graph => ({ value: graph.value })
+        selector: graph => ({ value: graph.value }),
       })
     )
 
@@ -113,11 +113,11 @@ describe('useGraphStack', () => {
       _type: 'Root',
       _id: 'id',
       fieldOld: { value: 1 },
-      fieldNew: { value: 2 }
+      fieldNew: { value: 2 },
     }
 
     const graphState = createState({
-      initialState: initial
+      initialState: initial,
     })
 
     const { result, unmount } = renderHook(() => useGraphStack(graphState, ['Root:id.fieldOld', 'Root:id.fieldNew']))
@@ -134,11 +134,11 @@ describe('useGraphStack', () => {
       _type: 'Root',
       _id: 'id',
       fieldOld: { value: 1 },
-      fieldNew: { value: 2 }
+      fieldNew: { value: 2 },
     }
 
     const graphState = createState({
-      initialState: initial
+      initialState: initial,
     })
 
     const { result } = renderHook(() => useGraphStack(graphState, ['Root:id.fieldOld', 'Root:id.fieldNew']))
@@ -152,16 +152,16 @@ describe('useGraphStack', () => {
       _type: 'Root',
       _id: 'id',
       fieldOld: { value: 1 },
-      fieldNew: { value: 2 }
+      fieldNew: { value: 2 },
     }
 
     const graphState = createState({
-      initialState: initial
+      initialState: initial,
     })
 
     const fields = ['Root:id.fieldOld', 'Root:id.fieldNew']
     const { result, rerender } = renderHook(({ pause }) => useGraphStack(graphState, fields, { pause }), {
-      initialProps: { pause: true }
+      initialProps: { pause: true },
     })
 
     expect(result.current).toEqual([])

@@ -362,8 +362,11 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const key = keyOfEntity(input)
 
     if (key) {
-      if (subscribers.has(key)) {
-        subscribers.set(key, [...Array.from(subscribers.get(key) || []), { callback, options }])
+      // Мутируем существующий массив (push O(1)) вместо клонирования (O(N) на subscribe → O(N²) суммарно).
+      // Безопасно: notify читает свой снэпшот через spread, unsubscribe тоже мутирует через splice.
+      const list = subscribers.get(key)
+      if (list) {
+        list.push({ callback, options })
       } else {
         subscribers.set(key, [{ callback, options }])
       }

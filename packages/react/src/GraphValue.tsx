@@ -1,5 +1,12 @@
 import type { ReactElement } from 'react'
-import type { DispatchWithOptions, Entity, GraphState, ResolveOptions, StateDataSetter, GetStateEntity } from '@graph-state/core'
+import type {
+  DispatchWithOptions,
+  Entity,
+  GraphState,
+  ResolveOptions,
+  StateDataSetter,
+  GetStateEntity,
+} from '@graph-state/core'
 import { useGraph } from './useGraph'
 import type { StateResolve } from './types'
 

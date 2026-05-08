@@ -42,7 +42,7 @@ describe('useGraphFields', () => {
   it('should update when type changes', () => {
     const graphState = mockGraphState()
     const { result, rerender } = renderHook(({ type }) => useGraphFields(graphState, type), {
-      initialProps: { type: 'Author' }
+      initialProps: { type: 'Author' },
     })
 
     expect(result.current).toStrictEqual(['Author:20'])
@@ -66,7 +66,7 @@ describe('useGraphFields', () => {
       useGraphFields(graphState, 'Author', {
         selector: graph => {
           return { name: graph.name }
-        }
+        },
       })
     )
 
