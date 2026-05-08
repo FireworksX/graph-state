@@ -1,5 +1,11 @@
 # @graph-state/core
 
+## 0.13.3
+
+### Patch Changes
+
+- 52d282a: Fix subscribe performance
+
 ## 0.13.2
 
 ### Patch Changes
