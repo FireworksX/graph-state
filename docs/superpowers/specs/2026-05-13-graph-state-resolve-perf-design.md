@@ -50,11 +50,12 @@ Out of scope в этом spec (отложено в backlog):
 
 ### 4.3 Условие применения cache
 
-Кэш активен **только когда `selector === undefined` и `deep === false`**. Это:
+Кэш активен **когда `selector === undefined`** (независимо от `deep`). Это:
 
-- Покрывает все internal `safeResolve` (они вызываются без этих опций).
-- Упрощает корректность — cache хранит одну форму результата.
-- Selector path и deep path остаются без изменений.
+- Покрывает все internal `safeResolve` (они вызываются без selector — selector извлекается из `options` в `coreOptions`).
+- Срабатывает при `deep=true`, где реальные cross-refs (Text:shared, на который ссылаются несколько Frame'ов) разворачиваются повторно — именно тут основной выигрыш.
+- Безопасно: внутри одной resolve-сессии все вложенные `safeResolve` имеют одинаковый `deep`, одинаковый `safe`, одинаковый `keepLinks` (наследуется через `coreOptions`). Cache хранит одну форму результата.
+- Selector path не использует cache — selector меняет форму результата top-level вызова, его сложно кэшировать.
 
 ## 5. Детали реализации
 
@@ -92,7 +93,7 @@ export interface ResolveOptions<...> {
 **2. В начале `resolve()` — создаём/принимаем cache, делаем short-circuit:**
 
 ```ts
-const canUseCache = !selector && !isDeep
+const canUseCache = !selector
 const passCache = canUseCache
   ? (options?._resolveCache ?? new Map<string, unknown>())
   : undefined
