@@ -87,7 +87,12 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
 
     if (isSkipped(value)) return value
 
-    if (isObject(value) || Array.isArray(value)) {
+    // childrenRefs.has(K) — "когда-либо были дети". true для графов с link-полями;
+    // false для чистых leaf-узлов. После GC потомков has() остаётся true, что
+    // позволяет reduce'у вычистить мёртвые ссылки из field-значений.
+    const hasOrHadChildren = inputKey ? cache.childrenRefs.has(inputKey) : false
+
+    if ((hasOrHadChildren || isDeep) && (isObject(value) || Array.isArray(value))) {
       value = Object.entries(value).reduce((acc, [key, value]) => {
         let resultValue = value
 

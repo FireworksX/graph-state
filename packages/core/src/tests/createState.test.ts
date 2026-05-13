@@ -2380,4 +2380,23 @@ describe('resolve perf optimizations', () => {
 
     expect(result).toBe('hello')
   })
+
+  it('leaf-skip: leaf-граф без children-links пропускает reduce', () => {
+    const state = createState()
+    state.mutate({ _type: 'Text', _id: 'leaf', content: 'standalone' })
+
+    const entriesSpy = vi.spyOn(Object, 'entries')
+
+    state.resolve('Text:leaf')
+
+    // resolve должен прочитать value (cache.readLink), но не разворачивать поля reduce'ом.
+    // Object.entries вызывается ТОЛЬКО внутри reduce. Если фикс работает — 0 вызовов
+    // с самим graph-объектом в качестве аргумента.
+    const callsWithGraphValue = entriesSpy.mock.calls.filter(
+      ([arg]) => arg && typeof arg === 'object' && (arg as any)._type === 'Text'
+    )
+    expect(callsWithGraphValue.length).toBe(0)
+
+    entriesSpy.mockRestore()
+  })
 })
