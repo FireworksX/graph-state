@@ -110,6 +110,8 @@ export interface ResolveOptions<TEntity extends SystemFields = any, TInput exten
   safe?: boolean
   keepLinks?: boolean
   selector?: (graph: ResolveEntityByType<TEntity, TInput>) => TSelector
+  /** @internal — per-pass resolve cache, пробрасывается только рекурсивно */
+  _resolveCache?: Map<string, unknown>
 }
 
 export interface GetReferencesOptions {

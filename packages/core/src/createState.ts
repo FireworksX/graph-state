@@ -83,11 +83,32 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     const inputKey = isValue(input) ? keyOfEntity(input) : null
     debugState.debug({ type: 'resolve', entity: input, options })
 
+    // Per-pass cache: создаётся в top-level resolve, пробрасывается через coreOptions
+    // в рекурсивные safeResolve. Активен когда нет selector (selector меняет форму
+    // top-level результата и не кэшируется). Внутри одной synchronous resolve-сессии
+    // все вложенные вызовы имеют одинаковые опции (deep/safe/keepLinks наследуются
+    // через coreOptions), поэтому кэшированный результат корректен для любого hit'a.
+    const canUseCache = !selector
+    const passCache = canUseCache ? (options?._resolveCache ?? new Map<string, unknown>()) : undefined
+
+    if (inputKey && passCache?.has(inputKey)) {
+      return passCache.get(inputKey) as any
+    }
+
+    if (passCache) {
+      ;(coreOptions as any)._resolveCache = passCache
+    }
+
     let value = inputKey ? (cache.readLink(inputKey) as any) : null
 
     if (isSkipped(value)) return value
 
-    if (isObject(value) || Array.isArray(value)) {
+    // childrenRefs.has(K) — "когда-либо были дети". true для графов с link-полями;
+    // false для чистых leaf-узлов. После GC потомков has() остаётся true, что
+    // позволяет reduce'у вычистить мёртвые ссылки из field-значений.
+    const hasOrHadChildren = inputKey ? cache.childrenRefs.has(inputKey) : false
+
+    if ((hasOrHadChildren || isDeep) && (isObject(value) || Array.isArray(value))) {
       value = Object.entries(value).reduce((acc, [key, value]) => {
         let resultValue = value
 
@@ -119,7 +140,19 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
       }, {} as Graph)
     }
 
-    return value ? (selector ? (selector({ ...value }) as any) : { ...value }) : isSafe ? (input as any) : (null as any)
+    const finalValue = value
+      ? selector
+        ? (selector({ ...value }) as any)
+        : { ...value }
+      : isSafe
+        ? (input as any)
+        : (null as any)
+
+    if (canUseCache && inputKey && value) {
+      passCache!.set(inputKey, finalValue)
+    }
+
+    return finalValue
   }
 
   const safeResolve = <TInput extends Entity, TSelector>(
