@@ -29,7 +29,7 @@ Out of scope в этом spec (отложено в backlog):
 | Файл | Изменение |
 |---|---|
 | `packages/core/src/createState.ts` | Изменения внутри `resolve` (~l.75–123) и `safeResolve` (~l.125–128). Публичный API без изменений. |
-| `packages/core/src/types/*` (где определён `ResolveOptions`) | Расширить `ResolveOptions` приватным полем `_resolveCache?: Map<string, unknown>` с `@internal`. |
+| `packages/core/src/types.ts` (l.108, где определён `ResolveOptions`) | Расширить `ResolveOptions` приватным полем `_resolveCache?: Map<string, unknown>` с `@internal`. |
 | `packages/core/src/tests/createState.test.ts` | Добавить точечные тесты: регрессия output, per-pass cache hit, leaf-skip, изоляция top-level вызовов, selector path. |
 | `packages/core/src/tests/bench.test.ts` (новый) | `vitest bench()` — измерение resolve/mutate на репрезентативном графе. |
 
