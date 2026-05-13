@@ -2399,4 +2399,29 @@ describe('resolve perf optimizations', () => {
 
     entriesSpy.mockRestore()
   })
+
+  it('per-pass cache: cross-ref readLink вызывается ровно один раз', () => {
+    const state = createState()
+    state.mutate({ _type: 'Text', _id: 'shared', content: 'reused' })
+    state.mutate({
+      _type: 'Frame',
+      _id: 'parent',
+      childA: { _type: 'Text', _id: 'shared' },
+      childB: { _type: 'Text', _id: 'shared' },
+    })
+
+    let readCount = 0
+    const originalReadLink = state.cache.readLink
+    state.cache.readLink = (key: any) => {
+      if (key === 'Text:shared') readCount++
+      return originalReadLink.call(state.cache, key)
+    }
+
+    state.resolve('Frame:parent', { deep: true })
+
+    state.cache.readLink = originalReadLink
+
+    // С фиксом #3: ровно 1 раз. Без фикса: 2 раза (по разу на каждое поле childA/childB).
+    expect(readCount).toBe(1)
+  })
 })
