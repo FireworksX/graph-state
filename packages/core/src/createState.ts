@@ -89,9 +89,7 @@ export const createState = <TEntity extends SystemFields = SystemFields, TRootTy
     // все вложенные вызовы имеют одинаковые опции (deep/safe/keepLinks наследуются
     // через coreOptions), поэтому кэшированный результат корректен для любого hit'a.
     const canUseCache = !selector
-    const passCache = canUseCache
-      ? (options?._resolveCache ?? new Map<string, unknown>())
-      : undefined
+    const passCache = canUseCache ? (options?._resolveCache ?? new Map<string, unknown>()) : undefined
 
     if (inputKey && passCache?.has(inputKey)) {
       return passCache.get(inputKey) as any
