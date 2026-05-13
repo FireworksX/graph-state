@@ -2322,3 +2322,62 @@ describe('createState', () => {
     })
   })
 })
+
+describe('resolve perf optimizations', () => {
+  it('regression: resolve output остаётся структурно стабильным', () => {
+    const state = createState()
+    state.mutate({ _type: 'Style', _id: 's1', color: 'red' })
+    state.mutate({ _type: 'Text', _id: 't1', content: 'hello' })
+    state.mutate({
+      _type: 'Frame',
+      _id: 'f1',
+      children: [
+        { _type: 'Text', _id: 't1' },
+        { _type: 'Text', _id: 't1' },
+      ],
+      style: { _type: 'Style', _id: 's1' },
+    })
+
+    const result = state.resolve('Frame:f1', { deep: true })
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "_id": "f1",
+        "_type": "Frame",
+        "children": [
+          {
+            "_id": "t1",
+            "_type": "Text",
+            "content": "hello",
+          },
+        ],
+        "style": {
+          "_id": "s1",
+          "_type": "Style",
+          "color": "red",
+        },
+      }
+    `)
+  })
+
+  it('top-level isolation: два resolve(K) возвращают разные ссылки', () => {
+    const state = createState()
+    state.mutate({ _type: 'Text', _id: 't1', content: 'a' })
+
+    const r1 = state.resolve('Text:t1')
+    const r2 = state.resolve('Text:t1')
+
+    expect(r1).toEqual(r2)
+    expect(r1).not.toBe(r2)
+  })
+
+  it('selector path: возвращает выбранное значение', () => {
+    const state = createState()
+    state.mutate({ _type: 'Text', _id: 't1', content: 'hello', extra: 'world' })
+
+    const result = state.resolve('Text:t1', {
+      selector: (graph: any) => graph.content,
+    })
+
+    expect(result).toBe('hello')
+  })
+})
